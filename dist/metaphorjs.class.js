@@ -1,3 +1,149 @@
+(function(){
+"use strict"
+
+window.MetaphorJs = {
+    lib: {}
+};
+
+
+var slice = Array.prototype.slice;
+var isFunction = function(value) {
+    return typeof value === 'function';
+};(function(){
+
+    "use strict";
+
+    /**
+     * @namespace MetaphorJs
+     */
+
+    var root        = typeof window != "undefined" ? window : global,
+        cache       = {};
+
+    var parseNs     = function(ns) {
+
+        var tmp     = ns.split("."),
+            i,
+            last    = tmp.pop(),
+            parent  = tmp.join("."),
+            len     = tmp.length,
+            name,
+            current = root;
+
+        if (cache[parent]) {
+            return [cache[parent], last];
+        }
+
+        for (i = 0; i < len; i++) {
+
+            name    = tmp[i];
+
+            if (!current[name]) {
+                current[name]   = {};
+            }
+
+            current = current[name];
+        }
+
+        return [current, last];
+    };
+
+    /**
+     * Get namespace/cache object
+     * @function MetaphorJs.ns.get
+     * @param {string} ns
+     * @param {bool} cacheOnly
+     * @returns {object} constructor
+     */
+    var get       = function(ns, cacheOnly) {
+
+        if (cache[ns] || cacheOnly) {
+            return cache[ns];
+        }
+
+        var tmp     = ns.split("."),
+            i,
+            len     = tmp.length,
+            name,
+            current = root;
+
+        for (i = 0; i < len; i++) {
+
+            name    = tmp[i];
+
+            if (!current[name]) {
+                return null;
+            }
+
+            current = current[name];
+        }
+
+        if (current) {
+            cache[ns] = current;
+        }
+
+        return current;
+    };
+
+    /**
+     * Register class constructor
+     * @function MetaphorJs.ns.register
+     * @param {string} ns
+     * @param {*} fn
+     */
+    var register    = function(ns, fn) {
+
+        var parse   = parseNs(ns),
+            parent  = parse[0],
+            name    = parse[1];
+
+        parent[name]    = fn;
+        cache[ns]       = fn;
+
+        return fn;
+    };
+
+    /**
+     * Class exists
+     * @function MetaphorJs.ns.exists
+     * @param {string} ns
+     * @returns boolean
+     */
+    var exists      = function(ns) {
+        return cache[ns] ? true : false;
+    };
+
+    /**
+     * Add constructor to cache
+     * @function MetaphorJs.ns.add
+     * @param {string} ns
+     * @param {function} c
+     */
+    var add = function(ns, c) {
+        cache[ns] = c;
+        return c;
+    };
+
+    MetaphorJs.ns = {
+        register:   register,
+        exists:     exists,
+        get:        get,
+        add:        add,
+        /**
+         * Remove constructor from cache
+         * @function MetaphorJs.ns.remove
+         * @param {string} ns
+         */
+        remove:     function(ns) {
+            delete cache[ns];
+        }
+    };
+
+
+}());
+
+
+
 /*!
  * inspired by and based on klass
  */
@@ -6,32 +152,13 @@
 
     "use strict";
 
-    var namespace;
-
-    if (typeof global != "undefined") {
-        try {
-            namespace = require("metaphorjs-namespace");
-        }
-        catch (e) {
-            namespace = global.MetaphorJs.ns;
-        }
-    }
-    else {
-        namespace = window.MetaphorJs.ns;
-    }
+    var namespace   = namespace || MetaphorJs.ns;
 
     /**
      * @namespace MetaphorJs
      */
 
-    var undef   = {}.undefined,
-        proto   = "prototype",
-
-        isFn    = function(f) {
-            return typeof f === "function";
-        },
-
-        slice   = Array.prototype.slice,
+    var proto   = "prototype",
 
         create  = function(cls, constructor) {
             return extend(function(){}, cls, constructor);
@@ -40,7 +167,7 @@
         wrap    = function(parent, k, fn) {
 
             return function() {
-                var ret     = undef,
+                var ret     = undefined,
                     prev    = this.supr;
 
                 this.supr   = parent[proto][k] || function(){};
@@ -48,7 +175,7 @@
                 try {
                     ret     = fn.apply(this, arguments);
                 }
-                catch(e) {}
+                catch(thrownError) {}
 
                 this.supr   = prev;
                 return ret;
@@ -58,7 +185,7 @@
         process = function(what, o, parent) {
             for (var k in o) {
                 if (o.hasOwnProperty(k)) {
-                    what[k] = isFn(o[k]) && parent[proto] && isFn(parent[proto][k]) ?
+                    what[k] = isFunction(o[k]) && parent[proto] && isFunction(parent[proto][k]) ?
                               wrap(parent, k, o[k]) :
                               o[k];
                 }
@@ -318,7 +445,6 @@
             if (p.prototype.constructor.__class == parent) {
                 return true;
             }
-            //p = g(p);
             if (p) {
                 p = p.getParentClass ? g(p.getParentClass()) : p.__parent;
             }
@@ -327,24 +453,11 @@
         return false;
     };
 
-    if (typeof global != "undefined") {
-        module.exports = {
-            define: define,
-            d: define,
-            defineCache: defineCache,
-            dc: defineCache,
-            create: instantiate,
-            c: instantiate,
-            is: isInstanceOf,
-            isSubclass: isSubclassOf
-        };
-    }
-    else {
-        MetaphorJs.define = MetaphorJs.d = define;
-        MetaphorJs.defineCache = MetaphorJs.dc = defineCache;
-        MetaphorJs.create = MetaphorJs.c = instantiate;
-        MetaphorJs.is = isInstanceOf;
-        MetaphorJs.isSubclass = MetaphorJs.iss = isSubclassOf;
-    }
+    MetaphorJs.define = define;
+    MetaphorJs.defineCache = defineCache;
+    MetaphorJs.factory = instantiate;
+    MetaphorJs.isInstanceOf = isInstanceOf;
+    MetaphorJs.isSubclassOf = isSubclassOf;
 
+}());
 }());

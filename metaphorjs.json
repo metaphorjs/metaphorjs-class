@@ -1,0 +1,32 @@
+{
+    "standalone": {
+        "auto": true,
+        "wrap": true,
+        "target": "dist/metaphorjs.class.js",
+        "files": [
+            "../metaphorjs/src/MetaphorJs.js",
+            "src/metaphorjs.class.js"
+        ]
+    },
+
+    "module": {
+        "auto": true,
+        "wrap": true,
+        "target": "dist/metaphorjs.class.amd.js",
+        "files": [
+            "src/metaphorjs.class.js"
+        ],
+        "prepend": [
+            "../metaphorjs/src/amd/MetaphorJs.js",
+            "src/amd/prepend.js"
+        ],
+        "append": [
+            "src/amd/append.js"
+        ]
+    },
+
+    "compile-standalone": {
+        "target": "dist/metaphorjs.class.min.js",
+        "compile": "standalone"
+    }
+}
