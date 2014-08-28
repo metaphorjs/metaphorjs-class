@@ -5,23 +5,35 @@
         "target": "dist/metaphorjs.class.js",
         "files": [
             "../metaphorjs/src/MetaphorJs.js",
+            "../metaphorjs-namespace/src/metaphorjs.namespace.js",
             "src/metaphorjs.class.js"
         ]
     },
 
     "module": {
         "auto": true,
-        "wrap": true,
         "target": "dist/metaphorjs.class.amd.js",
         "files": [
+            "../metaphorjs/src/MetaphorJs.js",
             "src/metaphorjs.class.js"
         ],
         "prepend": [
-            "../metaphorjs/src/amd/MetaphorJs.js",
             "src/amd/prepend.js"
         ],
         "append": [
             "src/amd/append.js"
+        ]
+    },
+
+    "test": {
+        "target": "test/lib/metaphorjs.class.amd.js",
+        "files": [
+            "../metaphorjs/src/MetaphorJs.js",
+            "../metaphorjs-namespace/src/metaphorjs.namespace.js",
+            "src/metaphorjs.class.js"
+        ],
+        "append": [
+            "test/lib/append.js"
         ]
     },
 

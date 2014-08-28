@@ -1,24 +1,52 @@
 (function(){
-"use strict"
+"use strict";
 
-window.MetaphorJs = {
+var MetaphorJs = {
     lib: {}
 };
 
 
-var slice = Array.prototype.slice;
-var isFunction = function(value) {
-    return typeof value === 'function';
-};(function(){
 
-    "use strict";
+var strUndef = "undefined";
 
-    /**
-     * @namespace MetaphorJs
-     */
 
-    var root        = typeof window != "undefined" ? window : global,
-        cache       = {};
+var isUndefined = function(any) {
+    return typeof any == strUndef;
+};
+
+var isObject = function(value) {
+    return value != null && typeof value === 'object';
+};
+
+
+
+
+/**
+ * @param {Object} root optional; usually window or global
+ * @param {String} rootName optional. If you want custom object to be root and
+ * this object itself if the first level of namespace:<br>
+ * <pre><code class="language-javascript">
+ * var ns = MetaphorJs.lib.Namespace(window);
+ * ns.register("My.Test", something); // -> window.My.Test
+ * var privateNs = {};
+ * var ns = new MetaphorJs.lib.Namespace(privateNs, "privateNs");
+ * ns.register("privateNs.Test", something); // -> privateNs.Test
+ * </code></pre>
+ * @constructor
+ */
+var Namespace   = function(root, rootName) {
+
+    var cache   = {},
+        self    = this;
+
+    if (!root) {
+        if (!isUndefined(global)) {
+            root    = global;
+        }
+        else {
+            root    = window;
+        }
+    }
 
     var parseNs     = function(ns) {
 
@@ -31,21 +59,38 @@ var isFunction = function(value) {
             current = root;
 
         if (cache[parent]) {
-            return [cache[parent], last];
+            return [cache[parent], last, ns];
         }
 
-        for (i = 0; i < len; i++) {
+        if (len > 0) {
+            for (i = 0; i < len; i++) {
 
-            name    = tmp[i];
+                name    = tmp[i];
 
-            if (!current[name]) {
-                current[name]   = {};
+                if (rootName && i == 0) {
+                    if (name == rootName) {
+                        current = root;
+                        continue;
+                    }
+                    else {
+                        ns = rootName + "." + ns;
+                    }
+                }
+
+                if (isUndefined(current[name])) {
+                    current[name]   = {};
+                }
+
+                current = current[name];
             }
-
-            current = current[name];
+        }
+        else {
+            if (rootName) {
+                ns = rootName + "." + ns;
+            }
         }
 
-        return [current, last];
+        return [current, last, ns];
     };
 
     /**
@@ -57,8 +102,16 @@ var isFunction = function(value) {
      */
     var get       = function(ns, cacheOnly) {
 
-        if (cache[ns] || cacheOnly) {
+        if (!isUndefined(cache[ns])) {
             return cache[ns];
+        }
+
+        if (rootName && !isUndefined(cache[rootName + "." + ns])) {
+            return cache[rootName + "." + ns];
+        }
+
+        if (cacheOnly) {
+            return undefined;
         }
 
         var tmp     = ns.split("."),
@@ -71,8 +124,15 @@ var isFunction = function(value) {
 
             name    = tmp[i];
 
-            if (!current[name]) {
-                return null;
+            if (rootName && i == 0) {
+                if (name == rootName) {
+                    current = root;
+                    continue;
+                }
+            }
+
+            if (isUndefined(current[name])) {
+                return undefined;
             }
 
             current = current[name];
@@ -89,18 +149,22 @@ var isFunction = function(value) {
      * Register class constructor
      * @function MetaphorJs.ns.register
      * @param {string} ns
-     * @param {*} fn
+     * @param {*} value
      */
-    var register    = function(ns, fn) {
+    var register    = function(ns, value) {
 
         var parse   = parseNs(ns),
             parent  = parse[0],
             name    = parse[1];
 
-        parent[name]    = fn;
-        cache[ns]       = fn;
+        if (isObject(parent) &&
+            isUndefined(parent[name])) {
 
-        return fn;
+            parent[name]        = value;
+            cache[parse[2]]     = value;
+        }
+
+        return value;
     };
 
     /**
@@ -110,49 +174,66 @@ var isFunction = function(value) {
      * @returns boolean
      */
     var exists      = function(ns) {
-        return cache[ns] ? true : false;
+        return !isUndefined(cache[ns]);
     };
 
     /**
      * Add constructor to cache
      * @function MetaphorJs.ns.add
      * @param {string} ns
-     * @param {function} c
+     * @param {*} value
      */
-    var add = function(ns, c) {
-        cache[ns] = c;
-        return c;
-    };
-
-    MetaphorJs.ns = {
-        register:   register,
-        exists:     exists,
-        get:        get,
-        add:        add,
-        /**
-         * Remove constructor from cache
-         * @function MetaphorJs.ns.remove
-         * @param {string} ns
-         */
-        remove:     function(ns) {
-            delete cache[ns];
+    var add = function(ns, value) {
+        if (rootName && ns.indexOf(rootName) !== 0) {
+            ns = rootName + "." + ns;
         }
+        if (isUndefined(cache[ns])) {
+            cache[ns] = value;
+        }
+        return value;
     };
 
+    var remove = function(ns) {
+        delete cache[ns];
+    };
 
-}());
+    self.register   = register;
+    self.exists     = exists;
+    self.get        = get;
+    self.add        = add;
+    self.remove     = remove;
+};
 
+Namespace.prototype = {
+    register: null,
+    exists: null,
+    get: null,
+    add: null,
+    remove: null
+};
+
+MetaphorJs.lib.Namespace = Namespace;
+
+
+
+var isFunction = function(value) {
+    return typeof value === 'function';
+};
+var isString = function(value) {
+    return typeof value == "string";
+};
 
 
 /*!
  * inspired by and based on klass
  */
 
-(function(){
+var Class = function(ns){
 
-    "use strict";
+    if (!ns) {
+        ns = new Namespace;
+    }
 
-    var namespace   = namespace || MetaphorJs.ns;
 
     /**
      * @namespace MetaphorJs
@@ -227,7 +308,7 @@ var isFunction = function(value) {
                     // If an object has been returned then return it otherwise
                     // return the original instance.
                     // (consistent with behaviour of the new operator)
-                    return typeof ret == "object" ? ret : inst;
+                    return isObject(ret) ? ret : inst;
                 };
             }(fn);
 
@@ -238,7 +319,7 @@ var isFunction = function(value) {
     /**
      * Define class
      * @function MetaphorJs.define
-     * @param {string} ns
+     * @param {string} name
      * @param {function} constructor
      * @param {object} definition (optional)
      * @param {object} statics (optional)
@@ -261,7 +342,7 @@ var isFunction = function(value) {
     /**
      * Define class
      * @function MetaphorJs.define
-     * @param {string} ns
+     * @param {string} name
      * @param {object} definition
      * @param {object} statics (optional)
      * @param {bool} cacheOnly (optional)
@@ -282,7 +363,7 @@ var isFunction = function(value) {
     /**
      * Define class
      * @function MetaphorJs.define
-     * @param {string} ns
+     * @param {string} name
      * @param {string} parentClass
      * @param {function} constructor
      * @param {object} definition (optional)
@@ -291,55 +372,55 @@ var isFunction = function(value) {
      * @return function New class constructor
      * @alias MetaphorJs.d
      */
-    var define = function(ns, parentClass, constructor, definition, statics, cacheOnly) {
+    var define = function(name, parentClass, constructor, definition, statics, cacheOnly) {
 
-        if (ns === null) {
-            ns = "";
+        if (name === null) {
+            name = "";
         }
 
         // constructor as first argument
-        if (typeof ns == "function") {
+        if (isFunction(name)) {
 
             statics         = constructor;
 
-            if (typeof parentClass == "string") {
+            if (isString(parentClass)) {
                 statics     = definition;
                 definition  = constructor;
             }
             else {
                 definition      = parentClass;
-                constructor     = ns;
+                constructor     = name;
                 parentClass     = null;
             }
 
-            ns              = null;
+            name              = null;
         }
         // definition as first argument
-        else if (typeof ns != "string") {
+        else if (!isString(name)) {
             statics         = parentClass;
-            definition      = ns;
+            definition      = name;
             parentClass     = null;
             constructor     = null;
-            ns              = null;
+            name            = null;
         }
 
-        if (typeof parentClass != "string" && typeof parentClass != "function") {
+        if (!isString(parentClass) && !isFunction(parentClass)) {
             statics         = definition;
             definition      = constructor;
             constructor     = parentClass;
             parentClass     = null;
         }
 
-        if (typeof constructor != "function") {
+        if (!isFunction(constructor)) {
             statics         = definition;
             definition      = constructor;
             constructor     = null;
         }
 
         definition          = definition || {};
-        var pConstructor    = parentClass && typeof parentClass == "string" ?
-                              namespace.get(parentClass) :
-                              parentClass;
+        var pConstructor    = parentClass && isString(parentClass) ?
+                                ns.get(parentClass) :
+                                parentClass;
 
         if (parentClass && !pConstructor) {
             throw new Error(parentClass + " not found");
@@ -360,17 +441,17 @@ var isFunction = function(value) {
             }
         }
 
-        if (ns) {
+        if (name) {
             if (!cacheOnly) {
-                namespace.register(ns, c);
+                ns.register(name, c);
             }
             else {
-                namespace.add(ns, c);
+                ns.add(name, c);
             }
         }
 
         if (statics && statics.alias) {
-            namespace.add(statics.alias, c);
+            ns.add(statics.alias, c);
         }
 
         return c;
@@ -382,8 +463,8 @@ var isFunction = function(value) {
      * @function MetaphorJs.defineCache
      * Same as define() but this one only puts object to cache without registering namespace
      */
-    var defineCache = function(ns, parentClass, constructor, definition, statics) {
-        return define(ns, parentClass, constructor, definition, statics, true);
+    var defineCache = function(name, parentClass, constructor, definition, statics) {
+        return define(name, parentClass, constructor, definition, statics, true);
     };
 
 
@@ -391,15 +472,15 @@ var isFunction = function(value) {
     /**
      * Instantiate class
      * @function MetaphorJs.create
-     * @param {string} ns Full name of the class
+     * @param {string} name Full name of the class
      */
-    var instantiate = function(ns) {
+    var instantiate = function(name) {
 
-        var cls     = namespace.get(ns),
+        var cls     = ns.get(name),
             args    = slice.call(arguments, 1);
 
         if (!cls) {
-            throw new Error(ns + " not found");
+            throw new Error(name + " not found");
         }
 
         return cls.__instantiate.apply(this, args);
@@ -415,7 +496,7 @@ var isFunction = function(value) {
      * @returns boolean
      */
     var isInstanceOf = function(cmp, cls) {
-        var _cls    = typeof cls == "string" ? namespace.get(cls) : cls;
+        var _cls    = isString(cls) ? ns.get(cls) : cls;
         return _cls ? cmp instanceof _cls : false;
     };
 
@@ -432,12 +513,12 @@ var isFunction = function(value) {
     var isSubclassOf = function(child, parent) {
 
         var p   = child,
-            g   = namespace.get;
+            g   = ns.get;
 
-        if (typeof parent != "string") {
+        if (!isString(parent)) {
             parent  = parent.getClass ? parent.getClass() : parent.prototype.constructor.__class;
         }
-        if (typeof child == "string") {
+        if (isString(child)) {
             p   = g(child);
         }
 
@@ -453,11 +534,27 @@ var isFunction = function(value) {
         return false;
     };
 
-    MetaphorJs.define = define;
-    MetaphorJs.defineCache = defineCache;
-    MetaphorJs.factory = instantiate;
-    MetaphorJs.isInstanceOf = isInstanceOf;
-    MetaphorJs.isSubclassOf = isSubclassOf;
+    var self    = this;
 
-}());
+    self.factory = instantiate;
+    self.isSubclassOf = isSubclassOf;
+    self.isInstanceOf = isInstanceOf;
+    self.define = define;
+    self.defineCache = defineCache;
+
+};
+
+Class.prototype = {
+
+    factory: null,
+    isSubclassOf: null,
+    isInstanceOf: null,
+    define: null,
+    defineCache: null
+
+};
+
+MetaphorJs.lib.Class = Class;
+
+
 }());
