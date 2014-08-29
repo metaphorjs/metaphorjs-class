@@ -1,8 +1,8 @@
 {
   "name": "metaphorjs-class",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Class system inspired and based on klass",
-  "main": "dist/metaphorjs.class.amd.js",
+  "main": "dist/metaphorjs.class.npm.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
