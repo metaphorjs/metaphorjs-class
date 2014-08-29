@@ -2,11 +2,20 @@
 "use strict";
 
 var MetaphorJs = {
-    lib: {}
+    lib: {},
+    cmp: {},
+    view: {}
 };
 
-
-
+var isFunction = function(value) {
+    return typeof value === 'function';
+};
+var isString = function(value) {
+    return typeof value == "string";
+};
+var isObject = function(value) {
+    return value != null && typeof value === 'object';
+};
 var strUndef = "undefined";
 
 
@@ -14,9 +23,6 @@ var isUndefined = function(any) {
     return typeof any == strUndef;
 };
 
-var isObject = function(value) {
-    return value != null && typeof value === 'object';
-};
 
 
 
@@ -212,16 +218,9 @@ Namespace.prototype = {
     remove: null
 };
 
-MetaphorJs.lib.Namespace = Namespace;
 
 
 
-var isFunction = function(value) {
-    return typeof value === 'function';
-};
-var isString = function(value) {
-    return typeof value == "string";
-};
 
 
 /*!
@@ -279,8 +278,11 @@ var Class = function(ns){
             noop[proto]     = parent[proto];
             var prototype   = new noop;
 
-            var fn          = constructorFn || function() {
+            var fn          = function() {
                 var self = this;
+                if (constructorFn) {
+                    constructorFn.apply(self, arguments);
+                }
                 if (self.initialize) {
                     self.initialize.apply(self, arguments);
                 }
@@ -395,6 +397,7 @@ var Class = function(ns){
 
             name              = null;
         }
+
         // definition as first argument
         else if (!isString(name)) {
             statics         = parentClass;
@@ -404,6 +407,7 @@ var Class = function(ns){
             name            = null;
         }
 
+        // if object is second parameter (leads to next check)
         if (!isString(parentClass) && !isFunction(parentClass)) {
             statics         = definition;
             definition      = constructor;
@@ -411,6 +415,7 @@ var Class = function(ns){
             parentClass     = null;
         }
 
+        // if third parameter is not a function (definition instead of constructor)
         if (!isFunction(constructor)) {
             statics         = definition;
             definition      = constructor;
@@ -554,7 +559,11 @@ Class.prototype = {
 
 };
 
-MetaphorJs.lib.Class = Class;
 
+
+MetaphorJs.lib['Namespace'] = Namespace;
+MetaphorJs.lib['Class'] = Class;
+
+typeof global != "undefined" ? (global['MetaphorJs'] = MetaphorJs) : (window['MetaphorJs'] = MetaphorJs);
 
 }());

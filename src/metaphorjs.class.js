@@ -1,8 +1,8 @@
 
-var MetaphorJs  = require("../../metaphorjs/src/MetaphorJs.js"),
-    isFunction  = require("../../metaphorjs/src/func/isFunction.js"),
+var isFunction  = require("../../metaphorjs/src/func/isFunction.js"),
     isString    = require("../../metaphorjs/src/func/isString.js"),
-    isObject    = require("../../metaphorjs/src/func/isObject.js");
+    isObject    = require("../../metaphorjs/src/func/isObject.js"),
+    Namespace   = require("../../metaphorjs-namespace/src/metaphorjs.namespace.js");
 
 /*!
  * inspired by and based on klass
@@ -59,8 +59,11 @@ var Class = function(ns){
             noop[proto]     = parent[proto];
             var prototype   = new noop;
 
-            var fn          = constructorFn || function() {
+            var fn          = function() {
                 var self = this;
+                if (constructorFn) {
+                    constructorFn.apply(self, arguments);
+                }
                 if (self.initialize) {
                     self.initialize.apply(self, arguments);
                 }
@@ -175,6 +178,7 @@ var Class = function(ns){
 
             name              = null;
         }
+
         // definition as first argument
         else if (!isString(name)) {
             statics         = parentClass;
@@ -184,6 +188,7 @@ var Class = function(ns){
             name            = null;
         }
 
+        // if object is second parameter (leads to next check)
         if (!isString(parentClass) && !isFunction(parentClass)) {
             statics         = definition;
             definition      = constructor;
@@ -191,6 +196,7 @@ var Class = function(ns){
             parentClass     = null;
         }
 
+        // if third parameter is not a function (definition instead of constructor)
         if (!isFunction(constructor)) {
             statics         = definition;
             definition      = constructor;
@@ -334,6 +340,5 @@ Class.prototype = {
 
 };
 
-MetaphorJs.lib.Class = Class;
 
 module.exports = Class;

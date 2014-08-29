@@ -1,1 +1,0 @@
-var Namespace = require("metaphorjs-namespace");
