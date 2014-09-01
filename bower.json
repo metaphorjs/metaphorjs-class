@@ -1,27 +1,27 @@
 {
-  "name": "metaphorjs-class",
-  "version": "0.1.0",
-  "authors": [
-    "kuindji <kuindji@gmail.com>"
-  ],
-  "description": "MetaphorJs class system",
-  "main": "dist/metaphorjs.class.amd.min.js",
-  "moduleType": [
-    "amd"
-  ],
-  "keywords": [
-    "class",
-    "oop"
-  ],
-  "license": "MIT",
-  "homepage": "https://github.com/kuindji/metaphorjs-class",
-  "ignore": [
-    "node_modules",
-    "bower_components",
-    "test",
-    "tests"
-  ],
-  "dependencies": {
-    "metaphorjs-namespace": "*"
-  }
+    "name": "metaphorjs-class",
+    "version": "1.0.2",
+    "authors": [
+        "kuindji <kuindji@gmail.com>"
+    ],
+    "description": "MetaphorJs class system",
+    "main": "dist/metaphorjs.class.amd.min.js",
+    "moduleType": [
+        "amd"
+    ],
+    "keywords": [
+        "class",
+        "oop"
+    ],
+    "license": "MIT",
+    "homepage": "https://github.com/kuindji/metaphorjs-class",
+    "ignore": [
+        "node_modules",
+        "bower_components",
+        "test",
+        "tests"
+    ],
+    "dependencies": {
+        "metaphorjs-namespace": "*"
+    }
 }

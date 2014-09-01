@@ -10,6 +10,8 @@ var isObject = function(value) {
     return value != null && typeof value === 'object';
 };
 
+var slice = Array.prototype.slice;
+
 
 /*!
  * inspired by and based on klass
@@ -224,7 +226,7 @@ var Class = function(ns){
         c.__isMetaphorClass = true;
         c.__parent          = pConstructor;
         c.__parentClass     = pConstructor ? pConstructor.__class : null;
-        c.__class           = ns;
+        c.__class           = name;
 
         if (statics) {
             for (var k in statics) {

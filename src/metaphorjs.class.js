@@ -2,7 +2,8 @@
 var isFunction  = require("../../metaphorjs/src/func/isFunction.js"),
     isString    = require("../../metaphorjs/src/func/isString.js"),
     isObject    = require("../../metaphorjs/src/func/isObject.js"),
-    Namespace   = require("../../metaphorjs-namespace/src/metaphorjs.namespace.js");
+    Namespace   = require("../../metaphorjs-namespace/src/metaphorjs.namespace.js"),
+    slice       = require("../../metaphorjs/src/func/array/slice.js");
 
 /*!
  * inspired by and based on klass
@@ -217,7 +218,7 @@ var Class = function(ns){
         c.__isMetaphorClass = true;
         c.__parent          = pConstructor;
         c.__parentClass     = pConstructor ? pConstructor.__class : null;
-        c.__class           = ns;
+        c.__class           = name;
 
         if (statics) {
             for (var k in statics) {

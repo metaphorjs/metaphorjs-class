@@ -1,18 +1,18 @@
 {
-  "name": "metaphorjs-class",
-  "version": "1.0.1",
-  "description": "Class system inspired and based on klass",
-  "main": "dist/metaphorjs.class.npm.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://kuindji@bitbucket.org/kuindji/metaphorjs-class.git"
-  },
-  "author": "johann kuindji",
-  "license": "MIT",
-  "dependencies": {
-    "metaphorjs-namespace": "*"
-  }
+    "name": "metaphorjs-class",
+    "version": "1.0.2",
+    "description": "Class system inspired and based on klass",
+    "main": "dist/metaphorjs.class.npm.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://kuindji@bitbucket.org/kuindji/metaphorjs-class.git"
+    },
+    "author": "johann kuindji",
+    "license": "MIT",
+    "dependencies": {
+        "metaphorjs-namespace": "*"
+    }
 }
