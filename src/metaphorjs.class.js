@@ -3,8 +3,9 @@ var isFunction  = require("../../metaphorjs/src/func/isFunction.js"),
     isString    = require("../../metaphorjs/src/func/isString.js"),
     isObject    = require("../../metaphorjs/src/func/isObject.js"),
     Namespace   = require("../../metaphorjs-namespace/src/metaphorjs.namespace.js"),
-    slice       = require("../../metaphorjs/src/func/array/slice.js");
-
+    slice       = require("../../metaphorjs/src/func/array/slice.js"),
+    error       = require("../../metaphorjs/src/func/error.js"),
+    undf        = require("../../metaphorjs/src/var/undf.js");
 /*!
  * inspired by and based on klass
  */
@@ -29,15 +30,17 @@ var Class = function(ns){
         wrap    = function(parent, k, fn) {
 
             return function() {
-                var ret     = undefined,
+                var ret,
                     prev    = this.supr;
 
                 this.supr   = parent[proto][k] || function(){};
 
-                try {
+                //try {
                     ret     = fn.apply(this, arguments);
-                }
-                catch(thrownError) {}
+                //}
+                //catch(thrownError) {
+                //    error(thrownError);
+                //}
 
                 this.supr   = prev;
                 return ret;
@@ -71,13 +74,14 @@ var Class = function(ns){
             };
 
             process(prototype, cls, parent);
-            fn[proto]   = prototype;
-            fn[proto].constructor = fn;
+            prototype.constructor = fn;
+            fn[proto] = prototype;
+            //fn[proto].constructor = fn;
             fn[proto].getClass = function() {
-                return this.__proto__.constructor.__class;
+                return fn.__class;
             };
             fn[proto].getParentClass = function() {
-                return this.__proto__.constructor.__parentClass;
+                return fn.__parentClass;
             };
             fn.__instantiate = function(fn) {
 

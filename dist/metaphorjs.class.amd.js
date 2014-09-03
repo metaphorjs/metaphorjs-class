@@ -1,17 +1,106 @@
 define("metaphorjs-class", ['metaphorjs-namespace'], function(Namespace) {
 
 var isFunction = function(value) {
-    return typeof value === 'function';
+    return typeof value == 'function';
 };
+var toString = Object.prototype.toString;
+var undf = undefined;
+
+
+
+var varType = function(){
+
+    var types = {
+        '[object String]': 0,
+        '[object Number]': 1,
+        '[object Boolean]': 2,
+        '[object Object]': 3,
+        '[object Function]': 4,
+        '[object Array]': 5,
+        '[object RegExp]': 9,
+        '[object Date]': 10
+    };
+
+
+    /**
+        'string': 0,
+        'number': 1,
+        'boolean': 2,
+        'object': 3,
+        'function': 4,
+        'array': 5,
+        'null': 6,
+        'undefined': 7,
+        'NaN': 8,
+        'regexp': 9,
+        'date': 10
+    */
+
+    return function(val) {
+
+        if (!val) {
+            if (val === null) {
+                return 6;
+            }
+            if (val === undf) {
+                return 7;
+            }
+        }
+
+        var num = types[toString.call(val)];
+
+        if (num === undf) {
+            return -1;
+        }
+
+        if (num == 1 && isNaN(val)) {
+            num = 8;
+        }
+
+        return num;
+    };
+
+}();
+
+
 var isString = function(value) {
-    return typeof value == "string";
+    return varType(value) === 0;
 };
+
+
 var isObject = function(value) {
-    return value != null && typeof value === 'object';
+    return value !== null && typeof value == "object" && varType(value) > 2;
 };
 
-var slice = Array.prototype.slice;
+var slice = Array.prototype.slice;/**
+ * @param {Function} fn
+ * @param {Object} context
+ * @param {[]} args
+ */
+var async = function(fn, context, args) {
+    setTimeout(function(){
+        fn.apply(context, args || []);
+    }, 0);
+};
+var strUndef = "undefined";
 
+
+var error = function(e) {
+
+    var stack = e.stack || (new Error).stack;
+
+    if (typeof console != strUndef && console.log) {
+        async(function(){
+            console.log(e);
+            if (stack) {
+                console.log(stack);
+            }
+        });
+    }
+    else {
+        throw e;
+    }
+};
 
 /*!
  * inspired by and based on klass
@@ -37,15 +126,17 @@ var Class = function(ns){
         wrap    = function(parent, k, fn) {
 
             return function() {
-                var ret     = undefined,
+                var ret,
                     prev    = this.supr;
 
                 this.supr   = parent[proto][k] || function(){};
 
-                try {
+                //try {
                     ret     = fn.apply(this, arguments);
-                }
-                catch(thrownError) {}
+                //}
+                //catch(thrownError) {
+                //    error(thrownError);
+                //}
 
                 this.supr   = prev;
                 return ret;
@@ -79,13 +170,14 @@ var Class = function(ns){
             };
 
             process(prototype, cls, parent);
-            fn[proto]   = prototype;
-            fn[proto].constructor = fn;
+            prototype.constructor = fn;
+            fn[proto] = prototype;
+            //fn[proto].constructor = fn;
             fn[proto].getClass = function() {
-                return this.__proto__.constructor.__class;
+                return fn.__class;
             };
             fn[proto].getParentClass = function() {
-                return this.__proto__.constructor.__parentClass;
+                return fn.__parentClass;
             };
             fn.__instantiate = function(fn) {
 
