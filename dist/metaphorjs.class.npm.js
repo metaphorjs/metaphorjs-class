@@ -54,7 +54,7 @@ var varType = function(){
         }
 
         if (num == 1 && isNaN(val)) {
-            num = 8;
+            return 8;
         }
 
         return num;
@@ -64,12 +64,16 @@ var varType = function(){
 
 
 var isString = function(value) {
-    return varType(value) === 0;
+    return typeof value == "string" || varType(value) === 0;
 };
 
 
 var isObject = function(value) {
-    return value !== null && typeof value == "object" && varType(value) > 2;
+    if (value === null || typeof value != "object") {
+        return false;
+    }
+    var vt = varType(value);
+    return vt > 2 || vt == -1;
 };
 
 var slice = Array.prototype.slice;/**
@@ -119,6 +123,8 @@ var Class = function(ns){
 
     var proto   = "prototype",
 
+        constr  = "__construct",
+
         create  = function(cls, constructor) {
             return extend(function(){}, cls, constructor);
         },
@@ -127,28 +133,32 @@ var Class = function(ns){
 
             return function() {
                 var ret,
-                    prev    = this.supr;
+                    self    = this,
+                    prev    = self.supr;
 
-                this.supr   = parent[proto][k] || function(){};
+                if (k == constr) {
+                    self.supr   = parent[proto][k] || parent[proto].constructor;
+                }
+                else {
+                    self.supr   = parent[proto][k] || function(){};
+                }
+                ret         = fn.apply(self, arguments);
+                self.supr   = prev;
 
-                //try {
-                    ret     = fn.apply(this, arguments);
-                //}
-                //catch(thrownError) {
-                //    error(thrownError);
-                //}
-
-                this.supr   = prev;
                 return ret;
             };
         },
 
-        process = function(what, o, parent) {
-            for (var k in o) {
-                if (o.hasOwnProperty(k)) {
-                    what[k] = isFunction(o[k]) && parent[proto] && isFunction(parent[proto][k]) ?
-                              wrap(parent, k, o[k]) :
-                              o[k];
+        process = function(prototype, cls, parent) {
+            for (var k in cls) {
+                if (cls.hasOwnProperty(k)) {
+
+                    prototype[k] = isFunction(cls[k]) &&
+                              (isFunction(parent[proto][k]) || !parent[proto][k]) ?
+                                    wrap(parent, k, cls[k]) :
+                                    cls[k];
+
+
                 }
             }
         },
@@ -159,10 +169,14 @@ var Class = function(ns){
             noop[proto]     = parent[proto];
             var prototype   = new noop;
 
+            if (constructorFn) {
+                cls[constr] = constructorFn;
+            }
+
             var fn          = function() {
                 var self = this;
-                if (constructorFn) {
-                    constructorFn.apply(self, arguments);
+                if (self.__construct) {
+                    self.__construct.apply(self, arguments);
                 }
                 if (self.initialize) {
                     self.initialize.apply(self, arguments);
@@ -171,14 +185,15 @@ var Class = function(ns){
 
             process(prototype, cls, parent);
             prototype.constructor = fn;
+
             fn[proto] = prototype;
-            //fn[proto].constructor = fn;
             fn[proto].getClass = function() {
                 return fn.__class;
             };
             fn[proto].getParentClass = function() {
                 return fn.__parentClass;
             };
+
             fn.__instantiate = function(fn) {
 
                 return function() {
@@ -345,6 +360,10 @@ var Class = function(ns){
     };
 
 
+    var extendClass = function(parentClass, constructorFn, cls, statics) {
+        return define(null, parentClass, constructorFn, cls, statics);
+    };
+
 
     /**
      * @function MetaphorJs.defineCache
@@ -428,6 +447,7 @@ var Class = function(ns){
     self.isInstanceOf = isInstanceOf;
     self.define = define;
     self.defineCache = defineCache;
+    self.extend = extendClass;
 
 };
 
@@ -437,7 +457,8 @@ Class.prototype = {
     isSubclassOf: null,
     isInstanceOf: null,
     define: null,
-    defineCache: null
+    defineCache: null,
+    extend: null
 
 };
 
