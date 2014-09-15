@@ -71,7 +71,8 @@ var varType = function(){
 
 
 var isString = function(value) {
-    return typeof value == "string" || varType(value) === 0;
+    return typeof value == "string" || value === ""+value;
+    //return typeof value == "string" || varType(value) === 0;
 };
 
 
@@ -286,11 +287,12 @@ var slice = Array.prototype.slice;/**
  * @param {Function} fn
  * @param {Object} context
  * @param {[]} args
+ * @param {number} timeout
  */
-var async = function(fn, context, args) {
+var async = function(fn, context, args, timeout) {
     setTimeout(function(){
         fn.apply(context, args || []);
-    }, 0);
+    }, timeout || 0);
 };
 
 
@@ -311,6 +313,9 @@ var error = function(e) {
     }
 };
 
+var emptyFn = function(){};
+
+
 /*!
  * inspired by and based on klass
  */
@@ -330,6 +335,13 @@ var Class = function(ns){
 
         constr  = "__construct",
 
+        emptyConstructor    = function() {
+            var self = this;
+            if (self.supr && self.supr !== emptyFn) {
+                self.supr.apply(self, arguments);
+            }
+        },
+
         create  = function(cls, constructor) {
             return extend(function(){}, cls, constructor);
         },
@@ -341,12 +353,7 @@ var Class = function(ns){
                     self    = this,
                     prev    = self.supr;
 
-                if (k == constr) {
-                    self.supr   = parent[proto][k] || parent[proto].constructor;
-                }
-                else {
-                    self.supr   = parent[proto][k] || function(){};
-                }
+                self.supr   = parent[proto][k] || (k == constr ? parent : emptyFn) || emptyFn;
                 ret         = fn.apply(self, arguments);
                 self.supr   = prev;
 
@@ -374,15 +381,11 @@ var Class = function(ns){
             noop[proto]     = parent[proto];
             var prototype   = new noop;
 
-            if (constructorFn) {
-                cls[constr] = constructorFn;
-            }
+            cls[constr]     = constructorFn || emptyConstructor;
 
             var fn          = function() {
                 var self = this;
-                if (self.__construct) {
-                    self.__construct.apply(self, arguments);
-                }
+                self[constr].apply(self, arguments);
                 if (self.initialize) {
                     self.initialize.apply(self, arguments);
                 }

@@ -5,7 +5,9 @@ var isFunction  = require("../../metaphorjs/src/func/isFunction.js"),
     Namespace   = require("../../metaphorjs-namespace/src/metaphorjs.namespace.js"),
     slice       = require("../../metaphorjs/src/func/array/slice.js"),
     error       = require("../../metaphorjs/src/func/error.js"),
-    undf        = require("../../metaphorjs/src/var/undf.js");
+    undf        = require("../../metaphorjs/src/var/undf.js"),
+    emptyFn     = require("../../metaphorjs/src/func/emptyFn.js");
+
 /*!
  * inspired by and based on klass
  */
@@ -25,6 +27,13 @@ var Class = function(ns){
 
         constr  = "__construct",
 
+        emptyConstructor    = function() {
+            var self = this;
+            if (self.supr && self.supr !== emptyFn) {
+                self.supr.apply(self, arguments);
+            }
+        },
+
         create  = function(cls, constructor) {
             return extend(function(){}, cls, constructor);
         },
@@ -36,12 +45,7 @@ var Class = function(ns){
                     self    = this,
                     prev    = self.supr;
 
-                if (k == constr) {
-                    self.supr   = parent[proto][k] || parent[proto].constructor;
-                }
-                else {
-                    self.supr   = parent[proto][k] || function(){};
-                }
+                self.supr   = parent[proto][k] || (k == constr ? parent : emptyFn) || emptyFn;
                 ret         = fn.apply(self, arguments);
                 self.supr   = prev;
 
@@ -69,15 +73,11 @@ var Class = function(ns){
             noop[proto]     = parent[proto];
             var prototype   = new noop;
 
-            if (constructorFn) {
-                cls[constr] = constructorFn;
-            }
+            cls[constr]     = constructorFn || emptyConstructor;
 
             var fn          = function() {
                 var self = this;
-                if (self.__construct) {
-                    self.__construct.apply(self, arguments);
-                }
+                self[constr].apply(self, arguments);
                 if (self.initialize) {
                     self.initialize.apply(self, arguments);
                 }
