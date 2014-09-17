@@ -115,6 +115,13 @@ var Namespace   = function(root, rootName) {
         }
     }
 
+    var normalize   = function(ns) {
+        if (ns && rootName && ns.indexOf(rootName) !== 0) {
+            return rootName + "." + ns;
+        }
+        return ns;
+    };
+
     var parseNs     = function(ns) {
 
         var tmp     = ns.split("."),
@@ -269,6 +276,7 @@ var Namespace   = function(root, rootName) {
     self.get        = get;
     self.add        = add;
     self.remove     = remove;
+    self.normalize  = normalize;
 };
 
 Namespace.prototype = {
@@ -276,7 +284,8 @@ Namespace.prototype = {
     exists: null,
     get: null,
     add: null,
-    remove: null
+    remove: null,
+    normalize: null
 };
 
 
@@ -385,6 +394,11 @@ var Class = function(ns){
 
             var fn          = function() {
                 var self = this;
+
+                if (!(self instanceof fn)) {
+                    return fn.instantiate.apply(null, arguments);
+                }
+
                 self[constr].apply(self, arguments);
                 if (self.initialize) {
                     self.initialize.apply(self, arguments);
@@ -396,28 +410,30 @@ var Class = function(ns){
 
             fn[proto] = prototype;
             fn[proto].getClass = function() {
-                return fn.__class;
+                return fn.className;
             };
             fn[proto].getParentClass = function() {
-                return fn.__parentClass;
+                return fn.parentClass;
             };
 
-            fn.__instantiate = function(fn) {
+            fn.instantiate = function() {
+                var Temp = function(){},
+                    inst, ret;
 
-                return function() {
-                    var Temp = function(){},
-                        inst, ret;
+                Temp.prototype  = fn.prototype;
+                inst            = new Temp;
+                ret             = fn.prototype.constructor.apply(inst, arguments);
 
-                    Temp.prototype  = fn.prototype;
-                    inst            = new Temp;
-                    ret             = fn.prototype.constructor.apply(inst, arguments);
+                // If an object has been returned then return it otherwise
+                // return the original instance.
+                // (consistent with behaviour of the new operator)
+                return isObject(ret) ? ret : inst;
+            };
 
-                    // If an object has been returned then return it otherwise
-                    // return the original instance.
-                    // (consistent with behaviour of the new operator)
-                    return isObject(ret) ? ret : inst;
-                };
-            }(fn);
+            fn.extend = function(name, constructor, definition, statics) {
+                return define(name, fn, constructor, definition, statics);
+            };
+
 
             return fn;
         };
@@ -538,10 +554,10 @@ var Class = function(ns){
 
         var c   = pConstructor ? extend(pConstructor, definition, constructor) : create(definition, constructor);
 
-        c.__isMetaphorClass = true;
-        c.__parent          = pConstructor;
-        c.__parentClass     = pConstructor ? pConstructor.__class : null;
-        c.__class           = name;
+        c.isMetaphorClass = true;
+        c.parent          = pConstructor;
+        c.parentClass     = pConstructor ? pConstructor.className : null;
+        c.className       = ns.normalize(name);
 
         if (statics) {
             for (var k in statics) {
@@ -597,7 +613,7 @@ var Class = function(ns){
             throw new Error(name + " not found");
         }
 
-        return cls.__instantiate.apply(this, args);
+        return cls.instantiate.apply(this, args);
     };
 
 
@@ -619,30 +635,33 @@ var Class = function(ns){
     /**
      * Is one class subclass of another class
      * @function MetaphorJs.isSubclass
-     * @param {object} child
-     * @param {string|object} parent
+     * @param {string|object} childClass
+     * @param {string|object} parentClass
      * @return bool
      * @alias MetaphorJs.iss
      */
-    var isSubclassOf = function(child, parent) {
+    var isSubclassOf = function(childClass, parentClass) {
 
-        var p   = child,
+        var p   = childClass,
             g   = ns.get;
 
-        if (!isString(parent)) {
-            parent  = parent.getClass ? parent.getClass() : parent.prototype.constructor.__class;
+        if (!isString(parentClass)) {
+            parentClass  = parentClass.getClass ? parentClass.getClass() : parentClass.className;
         }
-        if (isString(child)) {
-            p   = g(child);
+        else {
+            parentClass = ns.normalize(parentClass);
+        }
+        if (isString(childClass)) {
+            p   = g(ns.normalize(childClass));
         }
 
         while (p) {
-            if (p.prototype.constructor.__class == parent) {
+
+            if (p.className == parentClass) {
                 return true;
             }
-            if (p) {
-                p = p.getParentClass ? g(p.getParentClass()) : p.__parent;
-            }
+
+            p = p.getParentClass ? g(p.getParentClass()) : p.parent;
         }
 
         return false;
