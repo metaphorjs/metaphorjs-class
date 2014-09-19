@@ -1,6 +1,6 @@
 {
     "name": "metaphorjs-class",
-    "version": "1.0.6",
+    "version": "1.0.7",
     "description": "Class system inspired and based on klass",
     "main": "dist/metaphorjs.class.npm.js",
     "scripts": {

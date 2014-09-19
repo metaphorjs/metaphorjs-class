@@ -13,7 +13,8 @@ describe("Class", function(){
 
         it("should define class", function(){
 
-            cs.define("My.Class", {
+            cs.define({
+                $class: "My.Class",
                 method: function(){
                     return 1;
                 }
@@ -39,7 +40,10 @@ describe("Class", function(){
 
         it("should extend classes", function(){
 
-            cs.define("My.SecondClass", "My.Class", {});
+            cs.define({
+                $class: "My.SecondClass",
+                $extends: "My.Class"
+            });
 
             var inst = cs.factory("My.SecondClass");
 
@@ -65,12 +69,34 @@ describe("Class", function(){
                 someFunc: function() {}
             };
 
-            cs.define("My.ThrirdClass", SomeNativeClass, {});
+            cs.define({
+                $class: "My.ThrirdClass",
+                $extends: SomeNativeClass
+            });
 
             var inst = cs.factory("My.ThrirdClass");
 
             assert.equal(true, inst instanceof local.My.ThrirdClass);
             assert.equal(true, inst instanceof SomeNativeClass);
+        });
+
+        it("should extend classes via $extend", function(){
+
+            var Cls1 = cs.BaseClass.$extend({
+                someMethod: function() {
+                    return 1;
+                }
+            });
+
+            var Cls2 = Cls1.$extend({
+                someMethod: function() {
+                    return this.supr();
+                }
+            });
+
+            var inst = new Cls2;
+
+            assert.equal(1, inst.someMethod());
         });
 
 

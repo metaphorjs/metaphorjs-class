@@ -7,7 +7,7 @@ var MetaphorJs = {
     view: {}
 };
 
-var isFunction = function(value) {
+function isFunction(value) {
     return typeof value == 'function';
 };
 var toString = Object.prototype.toString;
@@ -43,7 +43,7 @@ var varType = function(){
         'date': 10
     */
 
-    return function(val) {
+    return function varType(val) {
 
         if (!val) {
             if (val === null) {
@@ -70,13 +70,13 @@ var varType = function(){
 }();
 
 
-var isString = function(value) {
+function isString(value) {
     return typeof value == "string" || value === ""+value;
     //return typeof value == "string" || varType(value) === 0;
 };
 
 
-var isObject = function(value) {
+function isObject(value) {
     if (value === null || typeof value != "object") {
         return false;
     }
@@ -279,14 +279,12 @@ var Namespace   = function(root, rootName) {
     self.normalize  = normalize;
 };
 
-Namespace.prototype = {
-    register: null,
-    exists: null,
-    get: null,
-    add: null,
-    remove: null,
-    normalize: null
-};
+Namespace.prototype.register = null;
+Namespace.prototype.exists = null;
+Namespace.prototype.get = null;
+Namespace.prototype.add = null;
+Namespace.prototype.remove = null;
+Namespace.prototype.normalize = null;
 
 
 
@@ -298,14 +296,14 @@ var slice = Array.prototype.slice;/**
  * @param {[]} args
  * @param {number} timeout
  */
-var async = function(fn, context, args, timeout) {
+function async(fn, context, args, timeout) {
     setTimeout(function(){
         fn.apply(context, args || []);
     }, timeout || 0);
 };
 
 
-var error = function(e) {
+function error(e) {
 
     var stack = e.stack || (new Error).stack;
 
@@ -322,47 +320,55 @@ var error = function(e) {
     }
 };
 
-var emptyFn = function(){};
+function emptyFn(){};
+
+
+var instantiate = function(fn, args) {
+
+    var Temp = function(){},
+        inst, ret;
+
+    Temp.prototype  = fn.prototype;
+    inst            = new Temp;
+    ret             = fn.apply(inst, args);
+
+    // If an object has been returned then return it otherwise
+    // return the original instance.
+    // (consistent with behaviour of the new operator)
+    return isObject(ret) || ret === false ? ret : inst;
+
+};
 
 
 /*!
  * inspired by and based on klass
  */
 
-var Class = function(ns){
 
-    if (!ns) {
-        ns = new Namespace;
-    }
+var Class = function(){
 
-
-    /**
-     * @namespace MetaphorJs
-     */
 
     var proto   = "prototype",
 
-        constr  = "__construct",
+        constr  = "$construct",
 
-        emptyConstructor    = function() {
+        $constr = function $constr() {
             var self = this;
             if (self.supr && self.supr !== emptyFn) {
                 self.supr.apply(self, arguments);
             }
         },
 
-        create  = function(cls, constructor) {
-            return extend(function(){}, cls, constructor);
-        },
+        wrapPrototypeMethod = function wrapPrototypeMethod(parent, k, fn) {
 
-        wrap    = function(parent, k, fn) {
+            var supr = parent[proto][k] || (k == constr ? parent : emptyFn) || emptyFn;
 
             return function() {
                 var ret,
                     self    = this,
                     prev    = self.supr;
 
-                self.supr   = parent[proto][k] || (k == constr ? parent : emptyFn) || emptyFn;
+                self.supr   = supr;
                 ret         = fn.apply(self, arguments);
                 self.supr   = prev;
 
@@ -370,326 +376,329 @@ var Class = function(ns){
             };
         },
 
-        process = function(prototype, cls, parent) {
+        preparePrototype = function preparePrototype(prototype, cls, parent) {
             for (var k in cls) {
                 if (cls.hasOwnProperty(k)) {
 
                     prototype[k] = isFunction(cls[k]) &&
-                              (isFunction(parent[proto][k]) || !parent[proto][k]) ?
-                                    wrap(parent, k, cls[k]) :
-                                    cls[k];
+                                   (isFunction(parent[proto][k]) || !parent[proto][k]) ?
+                                   wrapPrototypeMethod(parent, k, cls[k]) :
+                                   cls[k];
 
 
                 }
             }
         },
 
-        extend  = function(parent, cls, constructorFn) {
 
-            var noop        = function(){};
-            noop[proto]     = parent[proto];
-            var prototype   = new noop;
+        createConstructor = function() {
 
-            cls[constr]     = constructorFn || emptyConstructor;
+            return function() {
 
-            var fn          = function() {
-                var self = this;
+                var self    = this,
+                    cls     = self ? self.$self : null;
 
-                if (!(self instanceof fn)) {
-                    return fn.instantiate.apply(null, arguments);
+                if (!self) {
+                    throw "Must instantiate via new";
                 }
 
                 self[constr].apply(self, arguments);
+
                 if (self.initialize) {
                     self.initialize.apply(self, arguments);
                 }
             };
-
-            process(prototype, cls, parent);
-            prototype.constructor = fn;
-
-            fn[proto] = prototype;
-            fn[proto].getClass = function() {
-                return fn.className;
-            };
-            fn[proto].getParentClass = function() {
-                return fn.parentClass;
-            };
-
-            fn.instantiate = function() {
-                var Temp = function(){},
-                    inst, ret;
-
-                Temp.prototype  = fn.prototype;
-                inst            = new Temp;
-                ret             = fn.prototype.constructor.apply(inst, arguments);
-
-                // If an object has been returned then return it otherwise
-                // return the original instance.
-                // (consistent with behaviour of the new operator)
-                return isObject(ret) ? ret : inst;
-            };
-
-            fn.extend = function(name, constructor, definition, statics) {
-                return define(name, fn, constructor, definition, statics);
-            };
-
-
-            return fn;
         };
 
 
-    /**
-     * Define class
-     * @function MetaphorJs.define
-     * @param {string} name
-     * @param {function} constructor
-     * @param {object} definition (optional)
-     * @param {object} statics (optional)
-     * @param {bool} cacheOnly (optional)
-     * @return function New class constructor
-     * @alias MetaphorJs.d
-     */
 
-    /**
-     * Define class
-     * @function MetaphorJs.define
-     * @param {function} constructor
-     * @param {object} definition (optional)
-     * @param {object} statics (optional)
-     * @param {bool} cacheOnly (optional)
-     * @return function New class constructor
-     * @alias MetaphorJs.d
-     */
 
-    /**
-     * Define class
-     * @function MetaphorJs.define
-     * @param {string} name
-     * @param {object} definition
-     * @param {object} statics (optional)
-     * @param {bool} cacheOnly (optional)
-     * @return function New class constructor
-     * @alias MetaphorJs.d
-     */
+    var Class = function(ns){
 
-    /**
-     * Define class
-     * @function MetaphorJs.define
-     * @param {object} definition
-     * @param {object} statics (optional)
-     * @param {bool} cacheOnly (optional)
-     * @return function New class constructor
-     * @alias MetaphorJs.d
-     */
-
-    /**
-     * Define class
-     * @function MetaphorJs.define
-     * @param {string} name
-     * @param {string} parentClass
-     * @param {function} constructor
-     * @param {object} definition (optional)
-     * @param {object} statics (optional)
-     * @param {bool} cacheOnly (optional)
-     * @return function New class constructor
-     * @alias MetaphorJs.d
-     */
-    var define = function(name, parentClass, constructor, definition, statics, cacheOnly) {
-
-        if (name === null) {
-            name = "";
+        if (!ns) {
+            ns = new Namespace;
         }
 
-        // constructor as first argument
-        if (isFunction(name)) {
 
-            statics         = constructor;
 
-            if (isString(parentClass)) {
-                statics     = definition;
-                definition  = constructor;
-            }
-            else {
-                definition      = parentClass;
-                constructor     = name;
-                parentClass     = null;
-            }
+        var BaseClass = function() {
 
-            name              = null;
-        }
+        };
 
-        // definition as first argument
-        else if (!isString(name)) {
-            statics         = parentClass;
-            definition      = name;
-            parentClass     = null;
-            constructor     = null;
-            name            = null;
-        }
+        BaseClass.prototype = {
 
-        // if object is second parameter (leads to next check)
-        if (!isString(parentClass) && !isFunction(parentClass)) {
-            statics         = definition;
-            definition      = constructor;
-            constructor     = parentClass;
-            parentClass     = null;
-        }
+            $class: null,
+            $extends: null,
 
-        // if third parameter is not a function (definition instead of constructor)
-        if (!isFunction(constructor)) {
-            statics         = definition;
-            definition      = constructor;
-            constructor     = null;
-        }
+            $construct: function(){},
 
-        definition          = definition || {};
-        var pConstructor    = parentClass && isString(parentClass) ?
-                                ns.get(parentClass) :
-                                parentClass;
+            $getClass: function() {
+                return this.$class;
+            },
 
-        if (parentClass && !pConstructor) {
-            throw new Error(parentClass + " not found");
-        }
+            $getParentClass: function() {
+                return this.$extends;
+            },
 
-        var c   = pConstructor ? extend(pConstructor, definition, constructor) : create(definition, constructor);
+            $override: function() {},
 
-        c.isMetaphorClass = true;
-        c.parent          = pConstructor;
-        c.parentClass     = pConstructor ? pConstructor.className : null;
-        c.className       = ns.normalize(name);
+            destroy: function() {
 
-        if (statics) {
-            for (var k in statics) {
-                if (statics.hasOwnProperty(k)) {
-                    c[k] = statics[k];
+                var self = this,
+                    i;
+
+                for (i in self) {
+                    if (self.hasOwnProperty(i)) {
+                        self[i] = null;
+                    }
                 }
             }
-        }
+        };
 
-        if (name) {
-            if (!cacheOnly) {
-                ns.register(name, c);
+        BaseClass.$self = BaseClass;
+
+        BaseClass.$instantiate = function() {
+
+            var cls = this,
+                args = arguments,
+                cnt = args.length;
+
+            // lets make it ugly, but without creating temprorary classes and leaks.
+            // and fallback to normal instantiation.
+
+            switch (cnt) {
+                case 0:
+                    return new cls;
+                case 1:
+                    return new cls(args[0]);
+                case 2:
+                    return new cls(args[0], args[1]);
+                case 3:
+                    return new cls(args[0], args[1], args[2]);
+                case 4:
+                    return new cls(args[0], args[1], args[2], args[3]);
+                default:
+                    return instantiate(cls, args);
+            }
+        };
+
+
+        BaseClass.$extend = function(constructor, definition, statics) {
+            return define(constructor, definition, statics, this);
+        };
+
+
+        /**
+         * @namespace MetaphorJs
+         */
+
+
+
+        /**
+         * Define class
+         * @function MetaphorJs.define
+         * @param {function} constructor
+         * @param {object} definition (optional)
+         * @param {object} statics (optional)
+         * @return function New class constructor
+         * @alias MetaphorJs.d
+         */
+
+        /**
+         * Define class
+         * @function MetaphorJs.define
+         * @param {object} definition
+         * @param {object} statics (optional)
+         * @return function New class constructor
+         * @alias MetaphorJs.d
+         */
+
+        /**
+         * Define class
+         * @function MetaphorJs.define
+         * @param {function} constructor
+         * @param {object} definition (optional)
+         * @param {object} statics (optional)
+         * @return function New class constructor
+         * @alias MetaphorJs.d
+         */
+        var define = function(constructor, definition, statics, $extends) {
+
+            // if third parameter is not a function (definition instead of constructor)
+            if (!isFunction(constructor)) {
+                statics         = definition;
+                definition      = constructor;
+                constructor     = null;
+            }
+
+            definition          = definition || {};
+            var name            = definition.$class,
+                parentClass     = $extends || definition.$extends,
+                pConstructor,
+                k, noop, prototype, c;
+
+            pConstructor = parentClass && isString(parentClass) ? ns.get(parentClass) : BaseClass;
+
+            if (parentClass) {
+                if (isString(parentClass)) {
+                    pConstructor = ns.get(parentClass);
+                }
+                else {
+                    pConstructor = parentClass;
+                    parentClass = pConstructor.$class || "";
+                }
             }
             else {
-                ns.add(name, c);
-            }
-        }
-
-        if (statics && statics.alias) {
-            ns.add(statics.alias, c);
-        }
-
-        return c;
-    };
-
-
-    var extendClass = function(parentClass, constructorFn, cls, statics) {
-        return define(null, parentClass, constructorFn, cls, statics);
-    };
-
-
-    /**
-     * @function MetaphorJs.defineCache
-     * Same as define() but this one only puts object to cache without registering namespace
-     */
-    var defineCache = function(name, parentClass, constructor, definition, statics) {
-        return define(name, parentClass, constructor, definition, statics, true);
-    };
-
-
-
-    /**
-     * Instantiate class
-     * @function MetaphorJs.create
-     * @param {string} name Full name of the class
-     */
-    var instantiate = function(name) {
-
-        var cls     = ns.get(name),
-            args    = slice.call(arguments, 1);
-
-        if (!cls) {
-            throw new Error(name + " not found");
-        }
-
-        return cls.instantiate.apply(this, args);
-    };
-
-
-
-    /**
-     * Is cmp instance of cls
-     * @function MetaphorJs.is
-     * @param {object} cmp
-     * @param {string|object} cls
-     * @returns boolean
-     */
-    var isInstanceOf = function(cmp, cls) {
-        var _cls    = isString(cls) ? ns.get(cls) : cls;
-        return _cls ? cmp instanceof _cls : false;
-    };
-
-
-
-    /**
-     * Is one class subclass of another class
-     * @function MetaphorJs.isSubclass
-     * @param {string|object} childClass
-     * @param {string|object} parentClass
-     * @return bool
-     * @alias MetaphorJs.iss
-     */
-    var isSubclassOf = function(childClass, parentClass) {
-
-        var p   = childClass,
-            g   = ns.get;
-
-        if (!isString(parentClass)) {
-            parentClass  = parentClass.getClass ? parentClass.getClass() : parentClass.className;
-        }
-        else {
-            parentClass = ns.normalize(parentClass);
-        }
-        if (isString(childClass)) {
-            p   = g(ns.normalize(childClass));
-        }
-
-        while (p) {
-
-            if (p.className == parentClass) {
-                return true;
+                pConstructor = BaseClass;
+                parentClass = "";
             }
 
-            p = p.getParentClass ? g(p.getParentClass()) : p.parent;
-        }
+            if (parentClass && !pConstructor) {
+                throw new Error(parentClass + " not found");
+            }
 
-        return false;
+            if (name) {
+                name = ns.normalize(name);
+            }
+
+            definition.$class   = name;
+            definition.$extends = parentClass;
+
+
+            noop                = function(){};
+            noop[proto]         = pConstructor[proto];
+            prototype           = new noop;
+            noop                = null;
+            definition[constr]  = constructor || $constr;
+
+            preparePrototype(prototype, definition, pConstructor);
+
+            c = createConstructor();
+            prototype.constructor = c;
+            c[proto] = prototype;
+
+            for (k in BaseClass) {
+                if (k != proto && BaseClass.hasOwnProperty(k)) {
+                    c[k] = BaseClass[k];
+                }
+            }
+
+            for (k in pConstructor) {
+                if (k != proto && pConstructor.hasOwnProperty(k)) {
+                    c[k] = pConstructor[k];
+                }
+            }
+
+            if (statics) {
+                for (k in statics) {
+                    if (k != proto && statics.hasOwnProperty(k)) {
+                        c[k] = statics[k];
+                    }
+                }
+            }
+
+            c.$parent   = pConstructor;
+            c.$self     = c;
+
+            if (name) {
+                ns.register(name, c);
+            }
+
+            return c;
+        };
+
+
+
+
+        /**
+         * Instantiate class
+         * @function MetaphorJs.create
+         * @param {string} name Full name of the class
+         */
+        var instantiate = function(name) {
+
+            var cls     = ns.get(name),
+                args    = slice.call(arguments, 1);
+
+            if (!cls) {
+                throw new Error(name + " not found");
+            }
+
+            return cls.$instantiate.apply(cls, args);
+        };
+
+
+
+        /**
+         * Is cmp instance of cls
+         * @function MetaphorJs.is
+         * @param {object} cmp
+         * @param {string|object} cls
+         * @returns boolean
+         */
+        var isInstanceOf = function(cmp, cls) {
+            var _cls    = isString(cls) ? ns.get(cls) : cls;
+            return _cls ? cmp instanceof _cls : false;
+        };
+
+
+
+        /**
+         * Is one class subclass of another class
+         * @function MetaphorJs.isSubclass
+         * @param {string|object} childClass
+         * @param {string|object} parentClass
+         * @return bool
+         * @alias MetaphorJs.iss
+         */
+        var isSubclassOf = function(childClass, parentClass) {
+
+            var p   = childClass,
+                g   = ns.get;
+
+            if (!isString(parentClass)) {
+                parentClass  = parentClass.prototype.$class;
+            }
+            else {
+                parentClass = ns.normalize(parentClass);
+            }
+            if (isString(childClass)) {
+                p   = g(ns.normalize(childClass));
+            }
+
+            while (p && p.prototype) {
+
+                if (p.prototype.$class == parentClass) {
+                    return true;
+                }
+
+                p = p.$parent;
+            }
+
+            return false;
+        };
+
+        var self    = this;
+
+        self.factory = instantiate;
+        self.isSubclassOf = isSubclassOf;
+        self.isInstanceOf = isInstanceOf;
+        self.define = define;
+        self.BaseClass = BaseClass;
+
     };
 
-    var self    = this;
+    Class.prototype = {
 
-    self.factory = instantiate;
-    self.isSubclassOf = isSubclassOf;
-    self.isInstanceOf = isInstanceOf;
-    self.define = define;
-    self.defineCache = defineCache;
-    self.extend = extendClass;
+        factory: null,
+        isSubclassOf: null,
+        isInstanceOf: null,
+        define: null
+    };
 
-};
+    return Class;
 
-Class.prototype = {
-
-    factory: null,
-    isSubclassOf: null,
-    isInstanceOf: null,
-    define: null,
-    defineCache: null,
-    extend: null
-
-};
-
-
+}();
 
 MetaphorJs.lib['Namespace'] = Namespace;
 MetaphorJs.lib['Class'] = Class;
