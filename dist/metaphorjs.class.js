@@ -320,6 +320,92 @@ function error(e) {
     }
 };
 
+
+function isPlainObject(value) {
+    // IE < 9 returns [object Object] from toString(htmlElement)
+    return typeof value == "object" &&
+           varType(value) === 3 &&
+            !value.nodeType &&
+            value.constructor === Object;
+
+};
+
+
+function isBool(value) {
+    return value === true || value === false;
+};
+function isNull(value) {
+    return value === null;
+};
+
+
+/**
+ * @param {Object} dst
+ * @param {Object} src
+ * @param {Object} src2 ... srcN
+ * @param {boolean} override = false
+ * @param {boolean} deep = false
+ * @returns {*}
+ */
+var extend = function(){
+
+    var extend = function extend() {
+
+
+        var override    = false,
+            deep        = false,
+            args        = slice.call(arguments),
+            dst         = args.shift(),
+            src,
+            k,
+            value;
+
+        if (isBool(args[args.length - 1])) {
+            override    = args.pop();
+        }
+        if (isBool(args[args.length - 1])) {
+            deep        = override;
+            override    = args.pop();
+        }
+
+        while (args.length) {
+            if (src = args.shift()) {
+                for (k in src) {
+
+                    if (src.hasOwnProperty(k) && (value = src[k]) !== undf) {
+
+                        if (deep) {
+                            if (dst[k] && isPlainObject(dst[k]) && isPlainObject(value)) {
+                                extend(dst[k], value, override, deep);
+                            }
+                            else {
+                                if (override === true || dst[k] == undf) { // == checks for null and undefined
+                                    if (isPlainObject(value)) {
+                                        dst[k] = {};
+                                        extend(dst[k], value, override, true);
+                                    }
+                                    else {
+                                        dst[k] = value;
+                                    }
+                                }
+                            }
+                        }
+                        else {
+                            if (override === true || dst[k] == undf) {
+                                dst[k] = value;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return dst;
+    };
+
+    return extend;
+}();
+
 function emptyFn(){};
 
 
@@ -377,37 +463,48 @@ var Class = function(){
         },
 
         preparePrototype = function preparePrototype(prototype, cls, parent) {
-            for (var k in cls) {
+            var k, ck, pk, pp = parent[proto];
+            
+            for (k in cls) {
                 if (cls.hasOwnProperty(k)) {
+                    
+                    pk = pp[k];
+                    ck = cls[k];
 
-                    prototype[k] = isFunction(cls[k]) &&
-                                   (isFunction(parent[proto][k]) || !parent[proto][k]) ?
-                                   wrapPrototypeMethod(parent, k, cls[k]) :
-                                   cls[k];
-
-
+                    prototype[k] = isFunction(ck) && (!pk || isFunction(pk)) ?
+                                    wrapPrototypeMethod(parent, k, ck) :
+                                    ck;
                 }
             }
+
+            prototype.$plugins = null;
+
+            if (pp.$beforeInit) {
+                prototype.$beforeInit = pp.$beforeInit.slice();
+                prototype.$afterInit = pp.$afterInit.slice();
+            }
+            else {
+                prototype.$beforeInit = [];
+                prototype.$afterInit = [];
+            }
         },
-
-
-        createConstructor = function() {
-
-            return function() {
-
-                var self    = this,
-                    cls     = self ? self.$self : null;
-
-                if (!self) {
-                    throw "Must instantiate via new";
+        
+        mixinToPrototype = function(prototype, mixin) {
+            
+            var k;
+            for (k in mixin) {
+                if (mixin.hasOwnProperty(k)) {
+                    if (k == "$beforeInit") {
+                        prototype.$beforeInit.push(mixin[k]);
+                    }
+                    else if (k == "$afterInit") {
+                        prototype.$afterInit.push(mixin[k]);
+                    }
+                    else if (!prototype[k]) {
+                        prototype[k] = mixin[k];
+                    }
                 }
-
-                self[constr].apply(self, arguments);
-
-                if (self.initialize) {
-                    self.initialize.apply(self, arguments);
-                }
-            };
+            }
         };
 
 
@@ -419,18 +516,79 @@ var Class = function(){
             ns = new Namespace;
         }
 
+        var createConstructor = function() {
+
+            return function() {
+
+                var self    = this,
+                    i, l, before = [], after = [], plugins, plugin,
+                    pluginInsts = [],
+                    args    = slice.call(arguments);
+
+                if (!self) {
+                    throw "Must instantiate via new";
+                }
+
+                self[constr].apply(self, arguments);
+
+                plugins = self.$plugins;
+                self.$plugins = null;
+
+
+                for (i = -1, l = self.$beforeInit.length; ++i < l;
+                     before.push([self.$beforeInit[i], self])) {}
+
+                for (i = -1, l = self.$afterInit.length; ++i < l;
+                     after.push([self.$afterInit[i], self])) {}
+
+                if (plugins) {
+                    for (i = 0, l = plugins.length; i < l; i++) {
+                        plugin = plugins[i];
+                        if (isString(plugin)) {
+                            plugin = ns.get(plugin, true);
+                        }
+                        pluginInsts[i] = plugin = new plugin(self, args);
+                        if (plugin.$beforeHostInit) {
+                            before.push([plugin.$beforeHostInit, plugin]);
+                        }
+                        if (plugin.$afterHostInit) {
+                            after.push([plugin.$afterHostInit, plugin]);
+                        }
+                        plugin = null;
+                    }
+                }
+                plugins = null;
+
+                for (i = -1, l = before.length; ++i < l;
+                     before[i][0].apply(before[i][1], arguments)){}
+
+                if (self.$init) {
+                    self.$init.apply(self, arguments);
+                }
+
+                for (i = -1, l = after.length; ++i < l;
+                     after[i][0].apply(after[i][1], arguments)){}
+
+                self.$plugins = pluginInsts;
+            };
+        };
 
 
         var BaseClass = function() {
 
         };
 
-        BaseClass.prototype = {
+        extend(BaseClass.prototype, {
 
             $class: null,
             $extends: null,
+            $plugins: null,
+            $mixins: null,
 
-            $construct: function(){},
+            $construct: emptyFn,
+            $init: emptyFn,
+            $beforeInit: [],
+            $afterInit: [],
 
             $getClass: function() {
                 return this.$class;
@@ -439,8 +597,6 @@ var Class = function(){
             $getParentClass: function() {
                 return this.$extends;
             },
-
-            $override: function() {},
 
             destroy: function() {
 
@@ -453,7 +609,7 @@ var Class = function(){
                     }
                 }
             }
-        };
+        });
 
         BaseClass.$self = BaseClass;
 
@@ -532,10 +688,12 @@ var Class = function(){
             }
 
             definition          = definition || {};
+            
             var name            = definition.$class,
                 parentClass     = $extends || definition.$extends,
+                mixins          = definition.$mixins,
                 pConstructor,
-                k, noop, prototype, c;
+                i, l, k, noop, prototype, c, mixin;
 
             pConstructor = parentClass && isString(parentClass) ? ns.get(parentClass) : BaseClass;
 
@@ -563,6 +721,7 @@ var Class = function(){
 
             definition.$class   = name;
             definition.$extends = parentClass;
+            definition.$mixins  = null;
 
 
             noop                = function(){};
@@ -572,6 +731,16 @@ var Class = function(){
             definition[constr]  = constructor || $constr;
 
             preparePrototype(prototype, definition, pConstructor);
+            
+            if (mixins) {
+                for (i = 0, l = mixins.length; i < l; i++) {
+                    mixin = mixins[i];
+                    if (isString(mixin)) {
+                        mixin = ns.get(mixin, true);
+                    }
+                    mixinToPrototype(prototype, mixin);
+                }
+            }
 
             c = createConstructor();
             prototype.constructor = c;

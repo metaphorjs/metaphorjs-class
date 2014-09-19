@@ -5,6 +5,7 @@ var isFunction  = require("../../metaphorjs/src/func/isFunction.js"),
     Namespace   = require("../../metaphorjs-namespace/src/metaphorjs.namespace.js"),
     slice       = require("../../metaphorjs/src/func/array/slice.js"),
     error       = require("../../metaphorjs/src/func/error.js"),
+    extend      = require("../../metaphorjs/src/func/extend.js"),
     undf        = require("../../metaphorjs/src/var/undf.js"),
     emptyFn     = require("../../metaphorjs/src/func/emptyFn.js"),
     instantiate = require("../../metaphorjs/src/func/instantiate.js");
@@ -46,37 +47,48 @@ module.exports = function(){
         },
 
         preparePrototype = function preparePrototype(prototype, cls, parent) {
-            for (var k in cls) {
+            var k, ck, pk, pp = parent[proto];
+            
+            for (k in cls) {
                 if (cls.hasOwnProperty(k)) {
+                    
+                    pk = pp[k];
+                    ck = cls[k];
 
-                    prototype[k] = isFunction(cls[k]) &&
-                                   (isFunction(parent[proto][k]) || !parent[proto][k]) ?
-                                   wrapPrototypeMethod(parent, k, cls[k]) :
-                                   cls[k];
-
-
+                    prototype[k] = isFunction(ck) && (!pk || isFunction(pk)) ?
+                                    wrapPrototypeMethod(parent, k, ck) :
+                                    ck;
                 }
             }
+
+            prototype.$plugins = null;
+
+            if (pp.$beforeInit) {
+                prototype.$beforeInit = pp.$beforeInit.slice();
+                prototype.$afterInit = pp.$afterInit.slice();
+            }
+            else {
+                prototype.$beforeInit = [];
+                prototype.$afterInit = [];
+            }
         },
-
-
-        createConstructor = function() {
-
-            return function() {
-
-                var self    = this,
-                    cls     = self ? self.$self : null;
-
-                if (!self) {
-                    throw "Must instantiate via new";
+        
+        mixinToPrototype = function(prototype, mixin) {
+            
+            var k;
+            for (k in mixin) {
+                if (mixin.hasOwnProperty(k)) {
+                    if (k == "$beforeInit") {
+                        prototype.$beforeInit.push(mixin[k]);
+                    }
+                    else if (k == "$afterInit") {
+                        prototype.$afterInit.push(mixin[k]);
+                    }
+                    else if (!prototype[k]) {
+                        prototype[k] = mixin[k];
+                    }
                 }
-
-                self[constr].apply(self, arguments);
-
-                if (self.initialize) {
-                    self.initialize.apply(self, arguments);
-                }
-            };
+            }
         };
 
 
@@ -88,18 +100,79 @@ module.exports = function(){
             ns = new Namespace;
         }
 
+        var createConstructor = function() {
+
+            return function() {
+
+                var self    = this,
+                    i, l, before = [], after = [], plugins, plugin,
+                    pluginInsts = [],
+                    args    = slice.call(arguments);
+
+                if (!self) {
+                    throw "Must instantiate via new";
+                }
+
+                self[constr].apply(self, arguments);
+
+                plugins = self.$plugins;
+                self.$plugins = null;
+
+
+                for (i = -1, l = self.$beforeInit.length; ++i < l;
+                     before.push([self.$beforeInit[i], self])) {}
+
+                for (i = -1, l = self.$afterInit.length; ++i < l;
+                     after.push([self.$afterInit[i], self])) {}
+
+                if (plugins) {
+                    for (i = 0, l = plugins.length; i < l; i++) {
+                        plugin = plugins[i];
+                        if (isString(plugin)) {
+                            plugin = ns.get(plugin, true);
+                        }
+                        pluginInsts[i] = plugin = new plugin(self, args);
+                        if (plugin.$beforeHostInit) {
+                            before.push([plugin.$beforeHostInit, plugin]);
+                        }
+                        if (plugin.$afterHostInit) {
+                            after.push([plugin.$afterHostInit, plugin]);
+                        }
+                        plugin = null;
+                    }
+                }
+                plugins = null;
+
+                for (i = -1, l = before.length; ++i < l;
+                     before[i][0].apply(before[i][1], arguments)){}
+
+                if (self.$init) {
+                    self.$init.apply(self, arguments);
+                }
+
+                for (i = -1, l = after.length; ++i < l;
+                     after[i][0].apply(after[i][1], arguments)){}
+
+                self.$plugins = pluginInsts;
+            };
+        };
 
 
         var BaseClass = function() {
 
         };
 
-        BaseClass.prototype = {
+        extend(BaseClass.prototype, {
 
             $class: null,
             $extends: null,
+            $plugins: null,
+            $mixins: null,
 
-            $construct: function(){},
+            $construct: emptyFn,
+            $init: emptyFn,
+            $beforeInit: [],
+            $afterInit: [],
 
             $getClass: function() {
                 return this.$class;
@@ -108,8 +181,6 @@ module.exports = function(){
             $getParentClass: function() {
                 return this.$extends;
             },
-
-            $override: function() {},
 
             destroy: function() {
 
@@ -122,7 +193,7 @@ module.exports = function(){
                     }
                 }
             }
-        };
+        });
 
         BaseClass.$self = BaseClass;
 
@@ -201,10 +272,12 @@ module.exports = function(){
             }
 
             definition          = definition || {};
+            
             var name            = definition.$class,
                 parentClass     = $extends || definition.$extends,
+                mixins          = definition.$mixins,
                 pConstructor,
-                k, noop, prototype, c;
+                i, l, k, noop, prototype, c, mixin;
 
             pConstructor = parentClass && isString(parentClass) ? ns.get(parentClass) : BaseClass;
 
@@ -232,6 +305,7 @@ module.exports = function(){
 
             definition.$class   = name;
             definition.$extends = parentClass;
+            definition.$mixins  = null;
 
 
             noop                = function(){};
@@ -241,6 +315,16 @@ module.exports = function(){
             definition[constr]  = constructor || $constr;
 
             preparePrototype(prototype, definition, pConstructor);
+            
+            if (mixins) {
+                for (i = 0, l = mixins.length; i < l; i++) {
+                    mixin = mixins[i];
+                    if (isString(mixin)) {
+                        mixin = ns.get(mixin, true);
+                    }
+                    mixinToPrototype(prototype, mixin);
+                }
+            }
 
             c = createConstructor();
             prototype.constructor = c;
