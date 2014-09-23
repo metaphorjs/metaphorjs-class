@@ -19,7 +19,7 @@ describe("Class", function(){
                 $class: "My.Class",
                 $init: function() {
                     initCalled++;
-                    this.supr();
+                    this.$super();
                 },
                 method: function(){
                     return 1;
@@ -52,28 +52,26 @@ describe("Class", function(){
                 parentInitCalled = 0,
                 childInitCalled = 0;
 
-            cs.define(
-                function(){
+            cs.define({
+                $class: "ParentClass",
+                $constructor: function(){
                     parentConstrCalled++;
                 },
-                {
-                $class: "ParentClass",
                 $init: function() {
                     parentInitCalled++;
                 }
             });
 
-            cs.define(
-                function(){
-                    childConstrCalled++;
-                    this.supr();
-                },
-                {
+            cs.define({
                 $class: "ChildClass",
                 $extends: "ParentClass",
+                $constructor: function(){
+                    childConstrCalled++;
+                    this.$super();
+                },
                 $init: function() {
                     childInitCalled++;
-                    this.supr();
+                    this.$super();
                 }
             });
 
@@ -127,7 +125,7 @@ describe("Class", function(){
 
             var Cls2 = Cls1.$extend({
                 someMethod: function() {
-                    return this.supr();
+                    return this.$super();
                 }
             });
 
@@ -198,7 +196,7 @@ describe("Class", function(){
                 $extends: "ParentClass1",
                 $mixins: [childMixin1, childMixin2],
                 $init: function() {
-                    this.supr();
+                    this.$super();
                 }
             });
 
@@ -233,18 +231,123 @@ describe("Class", function(){
                 }
             });
 
-            var PluginHost = cs.define(
-                function(){
-                    this.$plugins = [PluginClass];
-                },
-                {
-                    $class: "PluginHost"
+            var PluginHost = cs.define({
+                    $class: "PluginHost",
+                    $constructor: function(){
+                        this.$plugins = [PluginClass];
+                    }
                 });
 
             var inst = new PluginHost;
 
             assert.equal(1, beforeHostCalled);
             assert.equal(1, afterHostCalled);
+        });
+
+        it("should override methods", function(){
+
+            var parentCalled = 0;
+
+            var OverridableParent = cs.define({
+                method: function() {
+                    parentCalled++;
+                    return 1;
+                }
+            });
+
+            var overridenCalled = 0;
+
+            var OverridableChild = OverridableParent.$extend({
+                method: function() {
+                    overridenCalled++;
+                    return 2;
+                }
+            });
+
+            var newMethodCalled = 0;
+
+            OverridableChild.$override({
+                method: function() {
+                    newMethodCalled++;
+                    return this.$super();
+                }
+            });
+
+            var inst = new OverridableChild;
+            inst.method();
+
+            assert.equal(1, parentCalled);
+            assert.equal(1, newMethodCalled);
+            assert.equal(0, overridenCalled);
+        });
+
+
+        it("should intercept methods", function(){
+
+            var InterceptedClass = cs.define({
+                method: function() {
+                    return 1;
+                }
+            });
+
+            var inst = new InterceptedClass;
+
+            var interceptorCalled = 0;
+
+            inst.$intercept("method", function(){
+                interceptorCalled++;
+            });
+
+            var res = inst.method();
+
+            assert.equal(1, res);
+            assert.equal(1, interceptorCalled);
+        });
+
+        it("should implement methods", function(){
+
+            var parentMethodCalled = 0;
+
+            var ParentClass = cs.define({
+                method: function() {
+                    parentMethodCalled++;
+                    return 1;
+                }
+            });
+
+            var ImplementableClass = ParentClass.$extend({});
+
+            var inst = new ImplementableClass;
+
+            var implementedCalled = 0;
+
+            inst.$implement({
+                method: function() {
+                    implementedCalled++;
+                    this.$super();
+                    return 2;
+                }
+            });
+
+            var anotherChildCalled = 0;
+
+            var AnotherChild = ImplementableClass.$extend({
+                method: function() {
+                    anotherChildCalled++;
+                    return this.$super();
+                }
+            });
+
+            inst.method();
+
+            var another = new AnotherChild;
+
+            var res = another.method();
+
+            assert.equal(1, implementedCalled);
+            assert.equal(2, parentMethodCalled);
+            assert.equal(1, anotherChildCalled);
+            assert.equal(1, res);
         });
 
     });

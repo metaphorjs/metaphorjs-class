@@ -213,10 +213,30 @@ var instantiate = function(fn, args) {
 
 };
 
+var intercept = function(origFn, interceptor, context, origContext, when, replaceValue) {
 
-/*!
- * inspired by and based on klass
- */
+    when = when || "before";
+
+    return function() {
+
+        var intrRes,
+            origRes;
+
+        if (when == "instead") {
+            return interceptor.apply(context || origContext, arguments);
+        }
+        else if (when == "before") {
+            intrRes = interceptor.apply(context || origContext, arguments);
+            origRes = intrRes !== false ? origFn.apply(origContext || context, arguments) : null;
+        }
+        else {
+            origRes = origFn.apply(origContext || context, arguments);
+            intrRes = interceptor.apply(context || origContext, arguments);
+        }
+
+        return replaceValue ? intrRes : origRes;
+    };
+};
 
 
 var Class = function(){
@@ -224,35 +244,35 @@ var Class = function(){
 
     var proto   = "prototype",
 
-        constr  = "$construct",
+        constr  = "$constructor",
 
         $constr = function $constr() {
             var self = this;
-            if (self.supr && self.supr !== emptyFn) {
-                self.supr.apply(self, arguments);
+            if (self.$super && self.$super !== emptyFn) {
+                self.$super.apply(self, arguments);
             }
         },
 
         wrapPrototypeMethod = function wrapPrototypeMethod(parent, k, fn) {
 
-            var supr = parent[proto][k] || (k == constr ? parent : emptyFn) || emptyFn;
+            var $super = parent[proto][k] || (k == constr ? parent : emptyFn) || emptyFn;
 
             return function() {
                 var ret,
                     self    = this,
-                    prev    = self.supr;
+                    prev    = self.$super;
 
-                self.supr   = supr;
-                ret         = fn.apply(self, arguments);
-                self.supr   = prev;
+                self.$super     = $super;
+                ret             = fn.apply(self, arguments);
+                self.$super     = prev;
 
                 return ret;
             };
         },
 
-        preparePrototype = function preparePrototype(prototype, cls, parent) {
+        preparePrototype = function preparePrototype(prototype, cls, parent, onlyWrap) {
             var k, ck, pk, pp = parent[proto];
-            
+
             for (k in cls) {
                 if (cls.hasOwnProperty(k)) {
                     
@@ -265,15 +285,23 @@ var Class = function(){
                 }
             }
 
+            if (onlyWrap) {
+                return;
+            }
+
             prototype.$plugins = null;
 
             if (pp.$beforeInit) {
                 prototype.$beforeInit = pp.$beforeInit.slice();
                 prototype.$afterInit = pp.$afterInit.slice();
+                prototype.$beforeDestroy = pp.$beforeDestroy.slice();
+                prototype.$afterDestroy = pp.$afterDestroy.slice();
             }
             else {
                 prototype.$beforeInit = [];
                 prototype.$afterInit = [];
+                prototype.$beforeDestroy = [];
+                prototype.$afterDestroy = [];
             }
         },
         
@@ -287,6 +315,12 @@ var Class = function(){
                     }
                     else if (k == "$afterInit") {
                         prototype.$afterInit.push(mixin[k]);
+                    }
+                    else if (k == "$beforeDestroy") {
+                        prototype.$beforeDestroy.push(mixin[k]);
+                    }
+                    else if (k == "$afterDestroy") {
+                        prototype.$afterDestroy.push(mixin[k]);
                     }
                     else if (!prototype[k]) {
                         prototype[k] = mixin[k];
@@ -309,19 +343,21 @@ var Class = function(){
             return function() {
 
                 var self    = this,
-                    i, l, before = [], after = [], plugins, plugin,
-                    pluginInsts = [],
-                    args    = slice.call(arguments);
+                    before  = [],
+                    after   = [],
+                    i, l,
+                    plugins, plugin,
+                    plCls;
 
                 if (!self) {
                     throw "Must instantiate via new";
                 }
 
+                self.$plugins = [];
+
                 self[constr].apply(self, arguments);
 
                 plugins = self.$plugins;
-                self.$plugins = null;
-
 
                 for (i = -1, l = self.$beforeInit.length; ++i < l;
                      before.push([self.$beforeInit[i], self])) {}
@@ -329,23 +365,32 @@ var Class = function(){
                 for (i = -1, l = self.$afterInit.length; ++i < l;
                      after.push([self.$afterInit[i], self])) {}
 
-                if (plugins) {
+                if (plugins.length) {
+
                     for (i = 0, l = plugins.length; i < l; i++) {
+
                         plugin = plugins[i];
+
                         if (isString(plugin)) {
-                            plugin = ns.get(plugin, true);
+                            plCls = plugin;
+                            plugin = ns.get("plugin." + plugin, true);
+                            if (!plugin) {
+                                throw plCls + " not found";
+                            }
                         }
-                        pluginInsts[i] = plugin = new plugin(self, args);
+
+                        plugin = new plugin(self, arguments);
+
                         if (plugin.$beforeHostInit) {
                             before.push([plugin.$beforeHostInit, plugin]);
                         }
                         if (plugin.$afterHostInit) {
                             after.push([plugin.$afterHostInit, plugin]);
                         }
-                        plugin = null;
+
+                        plugins[i] = plugin;
                     }
                 }
-                plugins = null;
 
                 for (i = -1, l = before.length; ++i < l;
                      before[i][0].apply(before[i][1], arguments)){}
@@ -357,7 +402,6 @@ var Class = function(){
                 for (i = -1, l = after.length; ++i < l;
                      after[i][0].apply(after[i][1], arguments)){}
 
-                self.$plugins = pluginInsts;
             };
         };
 
@@ -373,10 +417,14 @@ var Class = function(){
             $plugins: null,
             $mixins: null,
 
-            $construct: emptyFn,
+            $destroyed: false,
+
+            $constructor: emptyFn,
             $init: emptyFn,
             $beforeInit: [],
             $afterInit: [],
+            $beforeDestroy: [],
+            $afterDestroy: [],
 
             $getClass: function() {
                 return this.$class;
@@ -386,17 +434,62 @@ var Class = function(){
                 return this.$extends;
             },
 
-            destroy: function() {
+            $intercept: function(method, fn, newContext, when, replaceValue) {
+                var self = this;
+                self[method] = intercept(self[method], fn, newContext || self, self, when, replaceValue);
+            },
 
-                var self = this,
-                    i;
+            $implement: function(methods) {
+                var $self = this.constructor;
+                if ($self && $self.$parent) {
+                    preparePrototype(this, methods, $self.$parent);
+                }
+            },
 
-                for (i in self) {
-                    if (self.hasOwnProperty(i)) {
-                        self[i] = null;
+            $destroy: function() {
+
+                var self    = this,
+                    before  = self.$beforeDestroy,
+                    after   = self.$afterDestroy,
+                    plugins = self.$plugins,
+                    i, l, res;
+
+                if (self.$destroyed) {
+                    return;
+                }
+
+                self.$destroyed = true;
+
+                for (i = -1, l = before.length; ++i < l;
+                     before[i].apply(self, arguments)){}
+
+                for (i = 0, l = plugins.length; i < l; i++) {
+                    if (plugins[i].$beforeHostDestroy) {
+                        plugins[i].$beforeHostDestroy();
                     }
                 }
-            }
+
+                res = self.destroy();
+
+                for (i = -1, l = before.length; ++i < l;
+                     after[i].apply(self, arguments)){}
+
+                for (i = 0, l = plugins.length; i < l; i++) {
+                    plugins[i].$destroy();
+                }
+
+                if (res !== false) {
+                    for (i in self) {
+                        if (self.hasOwnProperty(i)) {
+                            self[i] = null;
+                        }
+                    }
+                }
+
+                self.$destroyed = true;
+            },
+
+            destroy: function(){}
         });
 
         BaseClass.$self = BaseClass;
@@ -426,9 +519,17 @@ var Class = function(){
             }
         };
 
+        BaseClass.$override = function(methods) {
+            var $self = this.$self,
+                $parent = this.$parent;
 
-        BaseClass.$extend = function(constructor, definition, statics) {
-            return define(constructor, definition, statics, this);
+            if ($self && $parent) {
+                preparePrototype($self.prototype, methods, $parent);
+            }
+        };
+
+        BaseClass.$extend = function(definition, statics) {
+            return define(definition, statics, this);
         };
 
 
@@ -437,43 +538,14 @@ var Class = function(){
          */
 
 
-
-        /**
-         * Define class
-         * @function MetaphorJs.define
-         * @param {function} constructor
-         * @param {object} definition (optional)
-         * @param {object} statics (optional)
-         * @return function New class constructor
-         * @alias MetaphorJs.d
-         */
-
         /**
          * Define class
          * @function MetaphorJs.define
          * @param {object} definition
          * @param {object} statics (optional)
          * @return function New class constructor
-         * @alias MetaphorJs.d
          */
-
-        /**
-         * Define class
-         * @function MetaphorJs.define
-         * @param {function} constructor
-         * @param {object} definition (optional)
-         * @param {object} statics (optional)
-         * @return function New class constructor
-         * @alias MetaphorJs.d
-         */
-        var define = function(constructor, definition, statics, $extends) {
-
-            // if third parameter is not a function (definition instead of constructor)
-            if (!isFunction(constructor)) {
-                statics         = definition;
-                definition      = constructor;
-                constructor     = null;
-            }
+        var define = function(definition, statics, $extends) {
 
             definition          = definition || {};
             
@@ -482,8 +554,6 @@ var Class = function(){
                 mixins          = definition.$mixins,
                 pConstructor,
                 i, l, k, noop, prototype, c, mixin;
-
-            pConstructor = parentClass && isString(parentClass) ? ns.get(parentClass) : BaseClass;
 
             if (parentClass) {
                 if (isString(parentClass)) {
@@ -516,7 +586,7 @@ var Class = function(){
             noop[proto]         = pConstructor[proto];
             prototype           = new noop;
             noop                = null;
-            definition[constr]  = constructor || $constr;
+            definition[constr]  = definition[constr] || $constr;
 
             preparePrototype(prototype, definition, pConstructor);
             
@@ -524,7 +594,7 @@ var Class = function(){
                 for (i = 0, l = mixins.length; i < l; i++) {
                     mixin = mixins[i];
                     if (isString(mixin)) {
-                        mixin = ns.get(mixin, true);
+                        mixin = ns.get("mixin." + mixin, true);
                     }
                     mixinToPrototype(prototype, mixin);
                 }
