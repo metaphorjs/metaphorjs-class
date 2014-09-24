@@ -5,11 +5,15 @@ var MetaphorJs = {
 
 };
 
+
 function isFunction(value) {
     return typeof value == 'function';
 };
+
 var toString = Object.prototype.toString;
+
 var undf = undefined;
+
 
 
 
@@ -68,10 +72,14 @@ var varType = function(){
 }();
 
 
+
 function isString(value) {
     return typeof value == "string" || value === ""+value;
     //return typeof value == "string" || varType(value) === 0;
 };
+
+var strUndef = "undefined";
+
 
 
 function isObject(value) {
@@ -81,7 +89,7 @@ function isObject(value) {
     var vt = varType(value);
     return vt > 2 || vt == -1;
 };
-var strUndef = "undefined";
+
 
 
 
@@ -288,35 +296,9 @@ Namespace.prototype.normalize = null;
 
 
 
-var slice = Array.prototype.slice;/**
- * @param {Function} fn
- * @param {Object} context
- * @param {[]} args
- * @param {number} timeout
- */
-function async(fn, context, args, timeout) {
-    setTimeout(function(){
-        fn.apply(context, args || []);
-    }, timeout || 0);
-};
 
+var slice = Array.prototype.slice;
 
-function error(e) {
-
-    var stack = e.stack || (new Error).stack;
-
-    if (typeof console != strUndef && console.log) {
-        async(function(){
-            console.log(e);
-            if (stack) {
-                console.log(stack);
-            }
-        });
-    }
-    else {
-        throw e;
-    }
-};
 
 
 function isPlainObject(value) {
@@ -328,13 +310,10 @@ function isPlainObject(value) {
 
 };
 
-
 function isBool(value) {
     return value === true || value === false;
 };
-function isNull(value) {
-    return value === null;
-};
+
 
 
 /**
@@ -404,7 +383,9 @@ var extend = function(){
     return extend;
 }();
 
+
 function emptyFn(){};
+
 
 
 var instantiate = function(fn, args) {
@@ -422,6 +403,7 @@ var instantiate = function(fn, args) {
     return isObject(ret) || ret === false ? ret : inst;
 
 };
+
 
 var intercept = function(origFn, interceptor, context, origContext, when, replaceValue) {
 
@@ -447,6 +429,7 @@ var intercept = function(origFn, interceptor, context, origContext, when, replac
         return replaceValue ? intrRes : origRes;
     };
 };
+
 
 
 var Class = function(){
@@ -780,7 +763,7 @@ var Class = function(){
             }
 
             if (parentClass && !pConstructor) {
-                throw new Error(parentClass + " not found");
+                throw parentClass + " not found";
             }
 
             if (name) {
@@ -858,7 +841,7 @@ var Class = function(){
                 args    = slice.call(arguments, 1);
 
             if (!cls) {
-                throw new Error(name + " not found");
+                throw name + " not found";
             }
 
             return cls.$instantiate.apply(cls, args);
@@ -937,9 +920,8 @@ var Class = function(){
 
 }();
 
-MetaphorJs.lib['Namespace'] = Namespace;
-MetaphorJs.lib['Class'] = Class;
-
+MetaphorJs['Namespace'] = Namespace;
+MetaphorJs['Class'] = Class;
 typeof global != "undefined" ? (global['MetaphorJs'] = MetaphorJs) : (window['MetaphorJs'] = MetaphorJs);
 
 }());

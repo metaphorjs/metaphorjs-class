@@ -1,5 +1,5 @@
 {
-    "version": "1.0.9",
+    "version": "1.0.10",
     "push": [
         "github"
     ],
@@ -16,14 +16,8 @@
                 "src/metaphorjs.class.js"
             ],
             "expose": [
-                [
-                    "MetaphorJs.lib",
-                    "Namespace"
-                ],
-                [
-                    "MetaphorJs.lib",
-                    "Class"
-                ]
+                "Namespace",
+                "Class"
             ]
         },
         "npm": {

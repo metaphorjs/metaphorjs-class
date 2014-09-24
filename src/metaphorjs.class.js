@@ -1,12 +1,9 @@
 
 var isFunction  = require("../../metaphorjs/src/func/isFunction.js"),
     isString    = require("../../metaphorjs/src/func/isString.js"),
-    isObject    = require("../../metaphorjs/src/func/isObject.js"),
     Namespace   = require("../../metaphorjs-namespace/src/metaphorjs.namespace.js"),
     slice       = require("../../metaphorjs/src/func/array/slice.js"),
-    error       = require("../../metaphorjs/src/func/error.js"),
     extend      = require("../../metaphorjs/src/func/extend.js"),
-    undf        = require("../../metaphorjs/src/var/undf.js"),
     emptyFn     = require("../../metaphorjs/src/func/emptyFn.js"),
     instantiate = require("../../metaphorjs/src/func/instantiate.js"),
     intercept   = require("../../metaphorjs/src/func/intercept.js");
@@ -342,7 +339,7 @@ module.exports = function(){
             }
 
             if (parentClass && !pConstructor) {
-                throw new Error(parentClass + " not found");
+                throw parentClass + " not found";
             }
 
             if (name) {
@@ -420,7 +417,7 @@ module.exports = function(){
                 args    = slice.call(arguments, 1);
 
             if (!cls) {
-                throw new Error(name + " not found");
+                throw name + " not found";
             }
 
             return cls.$instantiate.apply(cls, args);
