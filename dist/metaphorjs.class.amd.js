@@ -73,6 +73,16 @@ function isString(value) {
 };
 
 
+
+/**
+ * @param {*} value
+ * @returns {boolean}
+ */
+function isArray(value) {
+    return typeof value == "object" && varType(value) === 5;
+};
+
+
 var slice = Array.prototype.slice;
 
 
@@ -92,16 +102,17 @@ function isBool(value) {
 
 
 
-/**
- * @param {Object} dst
- * @param {Object} src
- * @param {Object} src2 ... srcN
- * @param {boolean} override = false
- * @param {boolean} deep = false
- * @returns {*}
- */
+
 var extend = function(){
 
+    /**
+     * @param {Object} dst
+     * @param {Object} src
+     * @param {Object} src2 ... srcN
+     * @param {boolean} override = false
+     * @param {boolean} deep = false
+     * @returns {object}
+     */
     var extend = function extend() {
 
 
@@ -324,6 +335,8 @@ var Class = function(){
                 var self    = this,
                     before  = [],
                     after   = [],
+                    args    = arguments,
+                    newArgs,
                     i, l,
                     plugins, plugin,
                     plCls;
@@ -334,7 +347,11 @@ var Class = function(){
 
                 self.$plugins = [];
 
-                self[constr].apply(self, arguments);
+                newArgs = self[constr].apply(self, arguments);
+
+                if (newArgs && isArray(newArgs)) {
+                    args = newArgs;
+                }
 
                 plugins = self.$plugins;
 
@@ -344,7 +361,7 @@ var Class = function(){
                 for (i = -1, l = self.$afterInit.length; ++i < l;
                      after.push([self.$afterInit[i], self])) {}
 
-                if (plugins.length) {
+                if (plugins && plugins.length) {
 
                     for (i = 0, l = plugins.length; i < l; i++) {
 
@@ -358,7 +375,7 @@ var Class = function(){
                             }
                         }
 
-                        plugin = new plugin(self, arguments);
+                        plugin = new plugin(self, args);
 
                         if (plugin.$beforeHostInit) {
                             before.push([plugin.$beforeHostInit, plugin]);
@@ -372,14 +389,14 @@ var Class = function(){
                 }
 
                 for (i = -1, l = before.length; ++i < l;
-                     before[i][0].apply(before[i][1], arguments)){}
+                     before[i][0].apply(before[i][1], args)){}
 
                 if (self.$init) {
-                    self.$init.apply(self, arguments);
+                    self.$init.apply(self, args);
                 }
 
                 for (i = -1, l = after.length; ++i < l;
-                     after[i][0].apply(after[i][1], arguments)){}
+                     after[i][0].apply(after[i][1], args)){}
 
             };
         };
@@ -568,7 +585,7 @@ var Class = function(){
             definition[constr]  = definition[constr] || $constr;
 
             preparePrototype(prototype, definition, pConstructor);
-            
+
             if (mixins) {
                 for (i = 0, l = mixins.length; i < l; i++) {
                     mixin = mixins[i];
@@ -700,6 +717,15 @@ var Class = function(){
         isSubclassOf: null,
         isInstanceOf: null,
         define: null
+    };
+
+    var globalCs;
+
+    Class.global = function() {
+        if (!globalCs) {
+            globalCs = new Class(Namespace.global());
+        }
+        return globalCs;
     };
 
     return Class;

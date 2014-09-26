@@ -350,6 +350,7 @@ describe("Class", function(){
             assert.equal(1, res);
         });
 
+
     });
 
 });

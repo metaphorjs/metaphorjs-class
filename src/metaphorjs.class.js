@@ -1,6 +1,7 @@
 
 var isFunction  = require("../../metaphorjs/src/func/isFunction.js"),
     isString    = require("../../metaphorjs/src/func/isString.js"),
+    isArray     = require("../../metaphorjs/src/func/isArray.js"),
     Namespace   = require("../../metaphorjs-namespace/src/metaphorjs.namespace.js"),
     slice       = require("../../metaphorjs/src/func/array/slice.js"),
     extend      = require("../../metaphorjs/src/func/extend.js"),
@@ -114,6 +115,8 @@ module.exports = function(){
                 var self    = this,
                     before  = [],
                     after   = [],
+                    args    = arguments,
+                    newArgs,
                     i, l,
                     plugins, plugin,
                     plCls;
@@ -124,7 +127,11 @@ module.exports = function(){
 
                 self.$plugins = [];
 
-                self[constr].apply(self, arguments);
+                newArgs = self[constr].apply(self, arguments);
+
+                if (newArgs && isArray(newArgs)) {
+                    args = newArgs;
+                }
 
                 plugins = self.$plugins;
 
@@ -134,7 +141,7 @@ module.exports = function(){
                 for (i = -1, l = self.$afterInit.length; ++i < l;
                      after.push([self.$afterInit[i], self])) {}
 
-                if (plugins.length) {
+                if (plugins && plugins.length) {
 
                     for (i = 0, l = plugins.length; i < l; i++) {
 
@@ -148,7 +155,7 @@ module.exports = function(){
                             }
                         }
 
-                        plugin = new plugin(self, arguments);
+                        plugin = new plugin(self, args);
 
                         if (plugin.$beforeHostInit) {
                             before.push([plugin.$beforeHostInit, plugin]);
@@ -162,14 +169,14 @@ module.exports = function(){
                 }
 
                 for (i = -1, l = before.length; ++i < l;
-                     before[i][0].apply(before[i][1], arguments)){}
+                     before[i][0].apply(before[i][1], args)){}
 
                 if (self.$init) {
-                    self.$init.apply(self, arguments);
+                    self.$init.apply(self, args);
                 }
 
                 for (i = -1, l = after.length; ++i < l;
-                     after[i][0].apply(after[i][1], arguments)){}
+                     after[i][0].apply(after[i][1], args)){}
 
             };
         };
@@ -358,7 +365,7 @@ module.exports = function(){
             definition[constr]  = definition[constr] || $constr;
 
             preparePrototype(prototype, definition, pConstructor);
-            
+
             if (mixins) {
                 for (i = 0, l = mixins.length; i < l; i++) {
                     mixin = mixins[i];
@@ -490,6 +497,15 @@ module.exports = function(){
         isSubclassOf: null,
         isInstanceOf: null,
         define: null
+    };
+
+    var globalCs;
+
+    Class.global = function() {
+        if (!globalCs) {
+            globalCs = new Class(Namespace.global());
+        }
+        return globalCs;
     };
 
     return Class;
