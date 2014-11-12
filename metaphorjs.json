@@ -1,11 +1,31 @@
 {
     "version": "1.0.10",
+    "description": "MetaphorJs class system",
+
     "push": [
         "github"
     ],
     "test": {
         "cmd": "mocha"
     },
+
+
+    "docs": {
+        "": {
+            "out": "docs",
+            "renderer": "default",
+            "hooks": "hooks",
+            "src": [
+                "src/**"
+            ],
+            "includeExternal": false,
+            "data": {
+                "title": "MetaphorJs.Class",
+                "version": "v@{version}"
+            }
+        }
+    },
+
     "build": {
         "standalone": {
             "wrap": true,
@@ -13,7 +33,7 @@
             "target": "dist/metaphorjs.class.js",
             "files": [
                 "../metaphorjs/src/MetaphorJs.js",
-                "src/metaphorjs.class.js"
+                ["src/metaphorjs.class.js", {"as": "Class"}]
             ],
             "expose": [
                 "Namespace",
@@ -41,7 +61,7 @@
         "amd": {
             "target": "dist/metaphorjs.class.amd.js",
             "files": [
-                "src/metaphorjs.class.js"
+                ["src/metaphorjs.class.js", {"as": "Class"}]
             ],
             "omit": [
                 "../metaphorjs-namespace/src/metaphorjs.namespace.js"

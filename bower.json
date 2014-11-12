@@ -14,7 +14,7 @@
         "oop"
     ],
     "license": "MIT",
-    "homepage": "https://github.com/kuindji/metaphorjs-class",
+    "homepage": "https://github.com/metaphorjs/metaphorjs-class",
     "ignore": [
         "node_modules",
         "bower_components",

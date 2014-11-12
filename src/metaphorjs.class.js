@@ -182,6 +182,9 @@ module.exports = function(){
 
         /**
          * @class BaseClass
+         * @description All classes defined with MetaphorJs.Class extend this class.
+         * You can access it via <code>cs.BaseClass</code>. Basically,
+         * <code>cs.define({});</code> is the same as <code>cs.BaseClass.$extend({})</code>.
          * @constructor
          */
         var BaseClass = function() {
@@ -216,7 +219,7 @@ module.exports = function(){
             /**
              * Get parent class name
              * @method
-             * @returns {null}
+             * @returns {string | null}
              */
             $getParentClass: function() {
                 return this.$extends;
@@ -248,6 +251,7 @@ module.exports = function(){
             },
 
             /**
+             * Destroy instance
              * @method
              */
             $destroy: function() {
@@ -273,13 +277,13 @@ module.exports = function(){
                     }
                 }
 
-                res = self.destroy();
+                res = self.destroy.apply(self, arguments);
 
                 for (i = -1, l = before.length; ++i < l;
                      after[i].apply(self, arguments)){}
 
                 for (i = 0, l = plugins.length; i < l; i++) {
-                    plugins[i].$destroy();
+                    plugins[i].$destroy.apply(plugins[i], arguments);
                 }
 
                 if (res !== false) {
@@ -293,19 +297,16 @@ module.exports = function(){
                 self.$destroyed = true;
             },
 
-            /**
-             * Implement your destroy actions here
-             * @method
-             */
             destroy: function(){}
         });
 
         BaseClass.$self = BaseClass;
 
         /**
-         * Create an instance of current class.
+         * Create an instance of current class. Same as cs.factory(name)
          * @method
          * @static
+         * @code var myObj = My.Class.$instantiate(arg1, arg2, ...);
          * @returns {object} class instance
          */
         BaseClass.$instantiate = function() {
@@ -334,7 +335,7 @@ module.exports = function(){
         };
 
         /**
-         * Override class methods
+         * Override class methods (on prototype level, not on instance level)
          * @method
          * @static
          * @param {object} methods
@@ -360,6 +361,7 @@ module.exports = function(){
 
         /**
          * Destroy class
+         * @method
          */
         BaseClass.$destroy = function() {
             var self = this,
@@ -370,13 +372,43 @@ module.exports = function(){
             }
         };
 
-
         /**
          * @class Class
+         * @code ../examples/main.js
+         */
+
+        /**
+         * @method Class
+         * @constructor
+         * @param {Namespace} ns optional namespace. See metaphorjs-namespace repository
+         */
+
+        /**
          * @method
-         * @param {object} definition
-         * @param {object} statics
-         * @param {string|function} $extends
+         * @param {object} definition {
+         *  @description Class properties and methods (all optional). Try not to use
+         *  objects and arrays as properties for instance property will modify prototype property.
+         *  @description All $beforeInit and $afterInit and $init functions receive same
+         *  arguments as passed to the constructor.
+         *  @description All $beforeDestroy, $afterDestroy and destroy() function receive
+         *  same arguments as $destroy().
+         *  @type {string} $class optional
+         *  @type {string} $extends optional
+         *  @type {array} $mixins optional
+         *  @type {function} $constructor optional
+         *  @type {function} $init optional
+         *  @type {function} $beforeInit if this is a mixin
+         *  @type {function} $afterInit if this is a mixin
+         *  @type {function} $beforeHostInit if this is a plugin
+         *  @type {function} $afterHostInit if this is a plugin
+         *  @type {function} $beforeDestroy if this is a mixin
+         *  @type {function} $afterDestroy if this is a mixin
+         *  @type {function} $beforeHostDestroy if this is a plugin
+         *  @type {function} destroy your own destroy function
+         * }
+         * @param {object} statics any statis properties or methods
+         * @param {string|function} $extends this is a private parameter; use definition.$extends
+         * @code var cls = cs.define({$class: "Name"});
          */
         var define = function(definition, statics, $extends) {
 
@@ -473,6 +505,7 @@ module.exports = function(){
         /**
          * Instantiate class. Pass constructor parameters after "name"
          * @method
+         * @code cs.factory("My.Class.Name", arg1, arg2, ...);
          * @param {string} name Full name of the class
          * @returns {object} class instance
          */
@@ -493,6 +526,8 @@ module.exports = function(){
         /**
          * Is cmp instance of cls
          * @method
+         * @code cs.instanceOf(myObj, "My.Class");
+         * @code cs.instanceOf(myObj, My.Class);
          * @param {object} cmp
          * @param {string|object} cls
          * @returns {boolean}
@@ -507,6 +542,10 @@ module.exports = function(){
         /**
          * Is one class subclass of another class
          * @method
+         * @code cs.isSubclassOf("My.Subclass", "My.Class");
+         * @code cs.isSubclassOf(myObj, "My.Class");
+         * @code cs.isSubclassOf("My.Subclass", My.Class);
+         * @code cs.isSubclassOf(myObj, My.Class);
          * @param {string|object} childClass
          * @param {string|object} parentClass
          * @return {bool}
@@ -562,7 +601,7 @@ module.exports = function(){
         };
 
         /**
-         * @type {function} BaseClass reference to the BaseClass class
+         * @type {BaseClass} BaseClass reference to the BaseClass class
          */
         self.BaseClass = BaseClass;
 

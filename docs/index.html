@@ -1,0 +1,2090 @@
+<!DOCTYPE html><html><head lang="en">
+    <meta charset="UTF-8">
+    <title>MetaphorJs.Class</title>
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="bower_components/prism/themes/prism.css">
+    <link rel="stylesheet" href="assets/style.css">
+    <script src="bower_components/jquery/dist/jquery.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="bower_components/prism/prism.js"></script>
+</head>
+<body>
+
+
+<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">MetaphorJs.Class</a>
+        </div>
+
+
+        <div class="navbar-collapse collapse">
+
+            
+                <ul class="nav navbar-nav">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            Classes
+                            <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li>
+                                <a href="#">Class</a>
+                            </li><li>
+                                <a href="#">BaseClass</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            
+
+            
+        </div><!--/.nav-collapse -->
+
+    </div>
+</div>
+
+<div class="jumbotron">
+    <div class="container">
+        <h1>MetaphorJs.Class</h1>
+        <p></p>
+        <p>v1.0.10</p>
+    </div>
+</div>
+
+<div class="container source-container">
+    <div class="row item-group level-0">
+        
+        <div class="col-md-12 item-group-items item-group-type-class level-0">
+            <div class="item-header" id="Class">
+    
+        
+    
+    <h3>
+        
+        <span class="item-name">Class</span>
+        
+    </h3>
+</div>
+
+
+    <div class="item-description">
+        
+        
+            <pre><code class="language-javascript">// initialization cycle:
+// 1. $constructor (call parent constructor with this.$super())
+// 2. mixin's $beforeInit (mixins are not classes, they don't have $super(); '$beforeInit's
+//    are called in order mixins are specified)
+// 3. plugin's $beforeHostInit (plugins are classes, they have their own $super())
+// 4. $init (call parent $init with this.$super())
+// 5. mixin's $afterInit
+// 6. plugin's $afterHostInit
+
+// destroy cycle (call instance.$destroy())
+// 1. mixin's $beforeDestroy method
+// 2. plugin's $beforeHostDestroy method
+// 3. instance's destroy() method
+// 4. mixin's $afterDestroy method
+// 5. plugin's $destroy method
+// the $destroy method will nullify all instance properties and methods.
+// if you want to prevent this, return false from your destroy() method.
+
+var cs = new MetaphorJs.Class;
+
+// define(methodsAndProperties, statics)
+cs.define({
+    $class: "My.Person",
+    firstName: null,
+    lastName: null,
+
+    $constructor: function(firstName, lastName){
+        // if you want to use plugins, this function must set them up
+        // (probably take them from config)
+        // you can't define plugins in class's definition; this is "run-time" only.
+
+        //this.$plugins = [...];
+
+        // call parent constructor
+        this.$super();
+    },
+
+    // the class itself can't have $beforeInit and $afterInit methods
+    // they come from mixins
+    $init: function(firstName, lastName) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.$super();
+    },
+    getName: function() {
+        return this.firstName + " " + this.lastName;
+    }
+});
+// define() returns newly created classes,
+// so you can create anonimous classes by omitting $class: "...".
+
+var mixin = {
+    $beforeInit: function() {
+        // will be called before host class initialized
+    },
+    $afterInit: function() {
+        // will be called after host class initialized
+    },
+    mixinFunc: function() {
+    }
+};
+
+cs.define({
+    $class: "My.ExtendedPerson",
+    $extends: "My.Person",
+    $mixins: [mixin], // or ["MixinName"] where it was added to namespace as mixin.MixinName
+    age: null,
+    $init: function(firstName, lastName, age) {
+        this.$super(firstName, lastName);
+        this.age = age;
+    },
+    getAge: function() {
+        return this.age;
+    }
+});
+
+cs.define({
+    $class: "PluginClass",
+    $init: function(hostObject, hostObjectArguments) {
+        // plugin's $init and $constructor receive host object
+        // as the first parameter, and
+        // host's arguments as the second.
+    },
+    // called after $beforeInit and before $init
+    $beforeHostInit: function() {
+        // this function receives
+        // the same parameters as host's constructor
+    },
+    // called after $afterInit
+    $afterHostInit: function() {
+        // this function receives
+        // the same parameters as host's constructor
+    }
+    // and yes, plugins can have their own plugins :)
+});
+
+cs.define({
+    $class: "PluginHost",
+    $constructor: function(cfg) {
+        this.$plugins = cfg.plugins;
+    }
+});
+
+var host = new PluginHost({
+    plugins: [PluginClass]
+});
+
+// you can use $extend shortcut to avoid calling "define()"
+// and there is a cs.BaseClass.$extend you can start with.
+var ClassWithoutName = My.ExtendedPerson.$extend({
+    getAge: function() {
+        return this.$super() * 10;
+    }
+});
+
+// you can also extend your own classes:
+var PrototypedClass = function() {
+    // this will become $constructor
+};
+PrototypedClass.prototype.someMethod = function(){};
+
+cs.define({
+    $class: "SomeClass",
+    $extends: PrototypedClass,
+    $constructor: function() {
+        this.$super(); // call PrototypedClass constructor
+    }
+});
+
+// instantiate with variable number of arguments:
+var person = My.ExtendedPerson.$instantiate(["John", "Smith", 30]);
+var second = cs.factory("My.ExtendedPerson", "John", "Smith", 30);
+var another = new My.ExtendedPerson("Jane", "Smith", 29);
+</code></pre>
+        
+    </div>
+
+
+
+
+    <div class="col-md-2 nopadding item-nav-container">
+        <ul class="item-nav">
+    <li class="item-nav-group-name">Methods</li>
+    <li class="item-nav-property item-nav-property-method">
+
+        <a href="#Class.Class">
+            <span class="item-nav-item-name">Class</span>
+            
+                
+                    <span class="item-nav-item-arguments">(ns)</span>
+                
+                
+            
+        </a>
+    </li><li class="item-nav-property item-nav-property-method">
+
+        <a href="#Class.define">
+            <span class="item-nav-item-name">define</span>
+            
+                
+                    <span class="item-nav-item-arguments">(definition, statics, $extends)</span>
+                
+                
+            
+        </a>
+    </li><li class="item-nav-property item-nav-property-method">
+
+        <a href="#Class.factory">
+            <span class="item-nav-item-name">factory</span>
+            
+                
+                    <span class="item-nav-item-arguments">(name)</span>
+                
+                
+            
+        </a>
+    </li><li class="item-nav-property item-nav-property-method">
+
+        <a href="#Class.isInstanceOf">
+            <span class="item-nav-item-name">isInstanceOf</span>
+            
+                
+                    <span class="item-nav-item-arguments">(cmp, cls)</span>
+                
+                
+            
+        </a>
+    </li><li class="item-nav-property item-nav-property-method">
+
+        <a href="#Class.isSubclassOf">
+            <span class="item-nav-item-name">isSubclassOf</span>
+            
+                
+                    <span class="item-nav-item-arguments">(childClass, parentClass)</span>
+                
+                
+            
+        </a>
+    </li><li class="item-nav-property item-nav-property-method">
+
+        <a href="#Class.global">
+            <span class="item-nav-item-name">global</span>
+            
+                
+                
+                    <span class="item-nav-item-arguments">()</span>
+                
+            
+        </a>
+    </li>
+</ul><ul class="item-nav">
+    <li class="item-nav-group-name">Properties</li>
+    <li class="item-nav-property item-nav-property-property">
+
+        <a href="#Class.BaseClass">
+            <span class="item-nav-item-name">BaseClass</span>
+            
+        </a>
+    </li>
+</ul>
+    </div>
+    <div class="col-md-10 nopadding item-properties-container">
+        
+    <div class="item-property-group-name">Methods</div>
+    <ul class="item-properties item-properties-method level-0">
+        <li class="item-property item-property-method">
+            <div class="item-header" id="Class.Class">
+    
+        <span class="label label-warning item-label">constructor</span>
+    
+    <h4>
+        
+        <span class="item-name">Class</span>
+        
+            
+                <span class="item-name-arguments">(ns)</span>
+            
+            
+            
+            
+        
+    </h4>
+</div>
+
+
+
+
+
+
+
+    
+    
+    <ul class="item-properties item-properties-param level-1">
+        <li class="item-property item-property-param">
+            <div class="item-header" id="Class.Class/ns">
+    
+        
+    
+    <h5>
+        
+            <span class="item-type">Namespace</span>
+        
+        <span class="item-name">ns</span>
+        
+    </h5>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>optional namespace. See metaphorjs-namespace repository</p>
+
+        
+        
+    </div>
+
+
+
+
+
+
+    
+
+        </li>
+    </ul>
+
+
+        </li><li class="item-property item-property-method">
+            <div class="item-header" id="Class.define">
+    
+        
+    
+    <h4>
+        
+        <span class="item-name">define</span>
+        
+            
+                <span class="item-name-arguments">(definition, statics, $extends)</span>
+            
+            
+            
+            
+        
+    </h4>
+</div>
+
+
+    <div class="item-description">
+        
+        
+            <pre><code class="language-javascript">var cls = cs.define({$class: "Name"});</code></pre>
+        
+    </div>
+
+
+
+
+
+
+    
+    
+    <ul class="item-properties item-properties-param level-1">
+        <li class="item-property item-property-param">
+            <div class="item-header" id="Class.define/definition">
+    
+        
+    
+    <h5>
+        
+            <span class="item-type">object</span>
+        
+        <span class="item-name">definition</span>
+        
+    </h5>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>Class properties and methods (all optional). Try not to use
+objects and arrays as properties for instance property will modify prototype property.</p>
+
+        
+        
+    </div><div class="item-description">
+        
+            <p>All $beforeInit and $afterInit and $init functions receive same
+arguments as passed to the constructor.</p>
+
+        
+        
+    </div><div class="item-description">
+        
+            <p>All $beforeDestroy, $afterDestroy and destroy() function receive
+same arguments as $destroy().</p>
+
+        
+        
+    </div>
+
+
+
+
+
+
+    
+    
+    <ul class="item-properties item-properties-property level-2">
+        <li class="item-property item-property-property">
+            <div class="item-header" id="Class.define/definition.$class">
+    
+        
+    
+    <h6>
+        
+            <span class="item-type">string</span>
+        
+        <span class="item-name">$class</span>
+        
+    </h6>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>optional</p>
+
+        
+        
+    </div>
+
+
+
+
+
+
+    
+
+        </li><li class="item-property item-property-property">
+            <div class="item-header" id="Class.define/definition.$extends">
+    
+        
+    
+    <h6>
+        
+            <span class="item-type">string</span>
+        
+        <span class="item-name">$extends</span>
+        
+    </h6>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>optional</p>
+
+        
+        
+    </div>
+
+
+
+
+
+
+    
+
+        </li><li class="item-property item-property-property">
+            <div class="item-header" id="Class.define/definition.$mixins">
+    
+        
+    
+    <h6>
+        
+            <span class="item-type">array</span>
+        
+        <span class="item-name">$mixins</span>
+        
+    </h6>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>optional</p>
+
+        
+        
+    </div>
+
+
+
+
+
+
+    
+
+        </li><li class="item-property item-property-property">
+            <div class="item-header" id="Class.define/definition.$constructor">
+    
+        
+    
+    <h6>
+        
+            <span class="item-type">function</span>
+        
+        <span class="item-name">$constructor</span>
+        
+            
+            
+                <span class="item-name-arguments">()</span>
+            
+            
+            
+        
+    </h6>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>optional</p>
+
+        
+        
+    </div>
+
+
+
+
+
+
+    
+
+        </li><li class="item-property item-property-property">
+            <div class="item-header" id="Class.define/definition.$init">
+    
+        
+    
+    <h6>
+        
+            <span class="item-type">function</span>
+        
+        <span class="item-name">$init</span>
+        
+            
+            
+                <span class="item-name-arguments">()</span>
+            
+            
+            
+        
+    </h6>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>optional</p>
+
+        
+        
+    </div>
+
+
+
+
+
+
+    
+
+        </li><li class="item-property item-property-property">
+            <div class="item-header" id="Class.define/definition.$beforeInit">
+    
+        
+    
+    <h6>
+        
+            <span class="item-type">function</span>
+        
+        <span class="item-name">$beforeInit</span>
+        
+            
+            
+                <span class="item-name-arguments">()</span>
+            
+            
+            
+        
+    </h6>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>if this is a mixin</p>
+
+        
+        
+    </div>
+
+
+
+
+
+
+    
+
+        </li><li class="item-property item-property-property">
+            <div class="item-header" id="Class.define/definition.$afterInit">
+    
+        
+    
+    <h6>
+        
+            <span class="item-type">function</span>
+        
+        <span class="item-name">$afterInit</span>
+        
+            
+            
+                <span class="item-name-arguments">()</span>
+            
+            
+            
+        
+    </h6>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>if this is a mixin</p>
+
+        
+        
+    </div>
+
+
+
+
+
+
+    
+
+        </li><li class="item-property item-property-property">
+            <div class="item-header" id="Class.define/definition.$beforeHostInit">
+    
+        
+    
+    <h6>
+        
+            <span class="item-type">function</span>
+        
+        <span class="item-name">$beforeHostInit</span>
+        
+            
+            
+                <span class="item-name-arguments">()</span>
+            
+            
+            
+        
+    </h6>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>if this is a plugin</p>
+
+        
+        
+    </div>
+
+
+
+
+
+
+    
+
+        </li><li class="item-property item-property-property">
+            <div class="item-header" id="Class.define/definition.$afterHostInit">
+    
+        
+    
+    <h6>
+        
+            <span class="item-type">function</span>
+        
+        <span class="item-name">$afterHostInit</span>
+        
+            
+            
+                <span class="item-name-arguments">()</span>
+            
+            
+            
+        
+    </h6>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>if this is a plugin</p>
+
+        
+        
+    </div>
+
+
+
+
+
+
+    
+
+        </li><li class="item-property item-property-property">
+            <div class="item-header" id="Class.define/definition.$beforeDestroy">
+    
+        
+    
+    <h6>
+        
+            <span class="item-type">function</span>
+        
+        <span class="item-name">$beforeDestroy</span>
+        
+            
+            
+                <span class="item-name-arguments">()</span>
+            
+            
+            
+        
+    </h6>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>if this is a mixin</p>
+
+        
+        
+    </div>
+
+
+
+
+
+
+    
+
+        </li><li class="item-property item-property-property">
+            <div class="item-header" id="Class.define/definition.$afterDestroy">
+    
+        
+    
+    <h6>
+        
+            <span class="item-type">function</span>
+        
+        <span class="item-name">$afterDestroy</span>
+        
+            
+            
+                <span class="item-name-arguments">()</span>
+            
+            
+            
+        
+    </h6>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>if this is a mixin</p>
+
+        
+        
+    </div>
+
+
+
+
+
+
+    
+
+        </li><li class="item-property item-property-property">
+            <div class="item-header" id="Class.define/definition.$beforeHostDestroy">
+    
+        
+    
+    <h6>
+        
+            <span class="item-type">function</span>
+        
+        <span class="item-name">$beforeHostDestroy</span>
+        
+            
+            
+                <span class="item-name-arguments">()</span>
+            
+            
+            
+        
+    </h6>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>if this is a plugin</p>
+
+        
+        
+    </div>
+
+
+
+
+
+
+    
+
+        </li><li class="item-property item-property-property">
+            <div class="item-header" id="Class.define/definition.destroy">
+    
+        
+    
+    <h6>
+        
+            <span class="item-type">function</span>
+        
+        <span class="item-name">destroy</span>
+        
+            
+            
+                <span class="item-name-arguments">()</span>
+            
+            
+            
+        
+    </h6>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>your own destroy function</p>
+
+        
+        
+    </div>
+
+
+
+
+
+
+    
+
+        </li>
+    </ul>
+
+
+        </li><li class="item-property item-property-param">
+            <div class="item-header" id="Class.define/statics">
+    
+        
+    
+    <h5>
+        
+            <span class="item-type">object</span>
+        
+        <span class="item-name">statics</span>
+        
+    </h5>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>any statis properties or methods</p>
+
+        
+        
+    </div>
+
+
+
+
+
+
+    
+
+        </li><li class="item-property item-property-param">
+            <div class="item-header" id="Class.define/$extends">
+    
+        
+    
+    <h5>
+        
+            <span class="item-type">string | function</span>
+        
+        <span class="item-name">$extends</span>
+        
+    </h5>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>this is a private parameter; use definition.$extends</p>
+
+        
+        
+    </div>
+
+
+
+
+
+
+    
+
+        </li>
+    </ul>
+
+
+        </li><li class="item-property item-property-method">
+            <div class="item-header" id="Class.factory">
+    
+        
+    
+    <h4>
+        
+        <span class="item-name">factory</span>
+        
+            
+                <span class="item-name-arguments">(name)</span>
+            
+            
+            
+                <span class="item-name-returns">&nbsp;-&gt;
+                    object
+            </span>
+            
+                <small class="item-name-return-descr">class instance</small>
+            
+        
+    </h4>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>Instantiate class. Pass constructor parameters after "name"</p>
+
+        
+        
+    </div><div class="item-description">
+        
+        
+            <pre><code class="language-javascript">cs.factory("My.Class.Name", arg1, arg2, ...);</code></pre>
+        
+    </div>
+
+
+
+
+
+
+    
+    
+    <ul class="item-properties item-properties-param level-1">
+        <li class="item-property item-property-param">
+            <div class="item-header" id="Class.factory/name">
+    
+        
+    
+    <h5>
+        
+            <span class="item-type">string</span>
+        
+        <span class="item-name">name</span>
+        
+    </h5>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>Full name of the class</p>
+
+        
+        
+    </div>
+
+
+
+
+
+
+    
+
+        </li>
+    </ul>
+
+
+        </li><li class="item-property item-property-method">
+            <div class="item-header" id="Class.isInstanceOf">
+    
+        
+    
+    <h4>
+        
+        <span class="item-name">isInstanceOf</span>
+        
+            
+                <span class="item-name-arguments">(cmp, cls)</span>
+            
+            
+            
+                <span class="item-name-returns">&nbsp;-&gt;
+                    boolean
+            </span>
+            
+        
+    </h4>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>Is cmp instance of cls</p>
+
+        
+        
+    </div><div class="item-description">
+        
+        
+            <pre><code class="language-javascript">cs.instanceOf(myObj, "My.Class");</code></pre>
+        
+    </div><div class="item-description">
+        
+        
+            <pre><code class="language-javascript">cs.instanceOf(myObj, My.Class);</code></pre>
+        
+    </div>
+
+
+
+
+
+
+    
+    
+    <ul class="item-properties item-properties-param level-1">
+        <li class="item-property item-property-param">
+            <div class="item-header" id="Class.isInstanceOf/cmp">
+    
+        
+    
+    <h5>
+        
+            <span class="item-type">object</span>
+        
+        <span class="item-name">cmp</span>
+        
+    </h5>
+</div>
+
+
+
+
+
+
+
+    
+
+        </li><li class="item-property item-property-param">
+            <div class="item-header" id="Class.isInstanceOf/cls">
+    
+        
+    
+    <h5>
+        
+            <span class="item-type">string | object</span>
+        
+        <span class="item-name">cls</span>
+        
+    </h5>
+</div>
+
+
+
+
+
+
+
+    
+
+        </li>
+    </ul>
+
+
+        </li><li class="item-property item-property-method">
+            <div class="item-header" id="Class.isSubclassOf">
+    
+        
+    
+    <h4>
+        
+        <span class="item-name">isSubclassOf</span>
+        
+            
+                <span class="item-name-arguments">(childClass, parentClass)</span>
+            
+            
+            
+                <span class="item-name-returns">&nbsp;-&gt;
+                    boolean
+            </span>
+            
+        
+    </h4>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>Is one class subclass of another class</p>
+
+        
+        
+    </div><div class="item-description">
+        
+        
+            <pre><code class="language-javascript">cs.isSubclassOf("My.Subclass", "My.Class");</code></pre>
+        
+    </div><div class="item-description">
+        
+        
+            <pre><code class="language-javascript">cs.isSubclassOf(myObj, "My.Class");</code></pre>
+        
+    </div><div class="item-description">
+        
+        
+            <pre><code class="language-javascript">cs.isSubclassOf("My.Subclass", My.Class);</code></pre>
+        
+    </div><div class="item-description">
+        
+        
+            <pre><code class="language-javascript">cs.isSubclassOf(myObj, My.Class);</code></pre>
+        
+    </div>
+
+
+
+
+
+
+    
+    
+    <ul class="item-properties item-properties-param level-1">
+        <li class="item-property item-property-param">
+            <div class="item-header" id="Class.isSubclassOf/childClass">
+    
+        
+    
+    <h5>
+        
+            <span class="item-type">string | object</span>
+        
+        <span class="item-name">childClass</span>
+        
+    </h5>
+</div>
+
+
+
+
+
+
+
+    
+
+        </li><li class="item-property item-property-param">
+            <div class="item-header" id="Class.isSubclassOf/parentClass">
+    
+        
+    
+    <h5>
+        
+            <span class="item-type">string | object</span>
+        
+        <span class="item-name">parentClass</span>
+        
+    </h5>
+</div>
+
+
+
+
+
+
+
+    
+
+        </li>
+    </ul>
+
+
+        </li><li class="item-property item-property-method">
+            <div class="item-header" id="Class.global">
+    
+        <span class="label label-warning item-label">static</span>
+    
+    <h4>
+        
+        <span class="item-name">global</span>
+        
+            
+            
+                <span class="item-name-arguments">()</span>
+            
+            
+                <span class="item-name-returns">&nbsp;-&gt;
+                    <a href="#Class">Class</a>
+            </span>
+            
+        
+    </h4>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>Get default global class manager</p>
+
+        
+        
+    </div>
+
+
+
+
+
+
+    
+
+        </li>
+    </ul>
+
+    <div class="item-property-group-name">Properties</div>
+    <ul class="item-properties item-properties-property level-0">
+        <li class="item-property item-property-property">
+            <div class="item-header" id="Class.BaseClass">
+    
+        
+    
+    <h4>
+        
+            <span class="item-type"><a href="#BaseClass">BaseClass</a></span>
+        
+        <span class="item-name">BaseClass</span>
+        
+    </h4>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>reference to the BaseClass class</p>
+
+        
+        
+    </div>
+
+
+
+
+
+
+    
+
+        </li>
+    </ul>
+
+    </div>
+
+
+
+        </div><div class="col-md-12 item-group-items item-group-type-class level-0">
+            <div class="item-header" id="BaseClass">
+    
+        
+    
+    <h3>
+        
+        <span class="item-name">BaseClass</span>
+        
+    </h3>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>All classes defined with MetaphorJs.Class extend this class.
+You can access it via <code>cs.BaseClass</code>. Basically,
+<code>cs.define({});</code> is the same as <code>cs.BaseClass.$extend({})</code>.</p>
+
+        
+        
+    </div>
+
+
+
+
+    <div class="col-md-2 nopadding item-nav-container">
+        <ul class="item-nav">
+    <li class="item-nav-group-name">Methods</li>
+    <li class="item-nav-property item-nav-property-method">
+
+        <a href="#BaseClass.$getClass">
+            <span class="item-nav-item-name">$getClass</span>
+            
+                
+                
+                    <span class="item-nav-item-arguments">()</span>
+                
+            
+        </a>
+    </li><li class="item-nav-property item-nav-property-method">
+
+        <a href="#BaseClass.$getParentClass">
+            <span class="item-nav-item-name">$getParentClass</span>
+            
+                
+                
+                    <span class="item-nav-item-arguments">()</span>
+                
+            
+        </a>
+    </li><li class="item-nav-property item-nav-property-method">
+
+        <a href="#BaseClass.$intercept">
+            <span class="item-nav-item-name">$intercept</span>
+            
+                
+                    <span class="item-nav-item-arguments">(method, fn, newContext, when, replaceValue)</span>
+                
+                
+            
+        </a>
+    </li><li class="item-nav-property item-nav-property-method">
+
+        <a href="#BaseClass.$implement">
+            <span class="item-nav-item-name">$implement</span>
+            
+                
+                    <span class="item-nav-item-arguments">(methods)</span>
+                
+                
+            
+        </a>
+    </li><li class="item-nav-property item-nav-property-method">
+
+        <a href="#BaseClass.$destroy">
+            <span class="item-nav-item-name">$destroy</span>
+            
+                
+                
+                    <span class="item-nav-item-arguments">()</span>
+                
+            
+        </a>
+    </li><li class="item-nav-property item-nav-property-method">
+
+        <a href="#BaseClass.$instantiate">
+            <span class="item-nav-item-name">$instantiate</span>
+            
+                
+                
+                    <span class="item-nav-item-arguments">()</span>
+                
+            
+        </a>
+    </li><li class="item-nav-property item-nav-property-method">
+
+        <a href="#BaseClass.$override">
+            <span class="item-nav-item-name">$override</span>
+            
+                
+                    <span class="item-nav-item-arguments">(methods)</span>
+                
+                
+            
+        </a>
+    </li><li class="item-nav-property item-nav-property-method">
+
+        <a href="#BaseClass.$extend">
+            <span class="item-nav-item-name">$extend</span>
+            
+                
+                    <span class="item-nav-item-arguments">(definition, statics)</span>
+                
+                
+            
+        </a>
+    </li><li class="item-nav-property item-nav-property-method">
+
+        <a href="#BaseClass.$destroy">
+            <span class="item-nav-item-name">$destroy</span>
+            
+                
+                
+                    <span class="item-nav-item-arguments">()</span>
+                
+            
+        </a>
+    </li>
+</ul>
+    </div>
+    <div class="col-md-10 nopadding item-properties-container">
+        
+    <div class="item-property-group-name">Methods</div>
+    <ul class="item-properties item-properties-method level-0">
+        <li class="item-property item-property-method">
+            <div class="item-header" id="BaseClass.$getClass">
+    
+        
+    
+    <h4>
+        
+        <span class="item-name">$getClass</span>
+        
+            
+            
+                <span class="item-name-arguments">()</span>
+            
+            
+                <span class="item-name-returns">&nbsp;-&gt;
+                    string
+            </span>
+            
+        
+    </h4>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>Get class name</p>
+
+        
+        
+    </div>
+
+
+
+
+
+
+    
+
+        </li><li class="item-property item-property-method">
+            <div class="item-header" id="BaseClass.$getParentClass">
+    
+        
+    
+    <h4>
+        
+        <span class="item-name">$getParentClass</span>
+        
+            
+            
+                <span class="item-name-arguments">()</span>
+            
+            
+                <span class="item-name-returns">&nbsp;-&gt;
+                    string  |  null
+            </span>
+            
+        
+    </h4>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>Get parent class name</p>
+
+        
+        
+    </div>
+
+
+
+
+
+
+    
+
+        </li><li class="item-property item-property-method">
+            <div class="item-header" id="BaseClass.$intercept">
+    
+        
+    
+    <h4>
+        
+        <span class="item-name">$intercept</span>
+        
+            
+                <span class="item-name-arguments">(method, fn, newContext, when, replaceValue)</span>
+            
+            
+            
+            
+        
+    </h4>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>Intercept method</p>
+
+        
+        
+    </div>
+
+
+
+
+
+
+    
+    
+    <ul class="item-properties item-properties-param level-1">
+        <li class="item-property item-property-param">
+            <div class="item-header" id="BaseClass.$intercept/method">
+    
+        
+    
+    <h5>
+        
+            <span class="item-type">string</span>
+        
+        <span class="item-name">method</span>
+        
+    </h5>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>Intercepted method name</p>
+
+        
+        
+    </div>
+
+
+
+
+
+
+    
+
+        </li><li class="item-property item-property-param">
+            <div class="item-header" id="BaseClass.$intercept/fn">
+    
+        
+    
+    <h5>
+        
+            <span class="item-type">function</span>
+        
+        <span class="item-name">fn</span>
+        
+            
+            
+                <span class="item-name-arguments">()</span>
+            
+            
+            
+        
+    </h5>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>function to call before or after intercepted method</p>
+
+        
+        
+    </div>
+
+
+
+
+
+
+    
+
+        </li><li class="item-property item-property-param">
+            <div class="item-header" id="BaseClass.$intercept/newContext">
+    
+        
+    
+    <h5>
+        
+            <span class="item-type">object</span>
+        
+        <span class="item-name">newContext</span>
+        
+    </h5>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>optional interceptor's "this" object</p>
+
+        
+        
+    </div>
+
+
+
+
+
+
+    
+
+        </li><li class="item-property item-property-param">
+            <div class="item-header" id="BaseClass.$intercept/when">
+    
+        
+    
+    <h5>
+        
+            <span class="item-type">string</span>
+        
+        <span class="item-name">when</span>
+        
+    </h5>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>optional, when to call interceptor before | after | instead; default "before"</p>
+
+        
+        
+    </div>
+
+
+
+
+
+
+    
+
+        </li><li class="item-property item-property-param">
+            <div class="item-header" id="BaseClass.$intercept/replaceValue">
+    
+        
+    
+    <h5>
+        
+            <span class="item-type">boolean</span>
+        
+        <span class="item-name">replaceValue</span>
+        
+    </h5>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>optional, return interceptor's return value or original method's; default false</p>
+
+        
+        
+    </div>
+
+
+
+
+
+
+    
+
+        </li>
+    </ul>
+
+
+        </li><li class="item-property item-property-method">
+            <div class="item-header" id="BaseClass.$implement">
+    
+        
+    
+    <h4>
+        
+        <span class="item-name">$implement</span>
+        
+            
+                <span class="item-name-arguments">(methods)</span>
+            
+            
+            
+            
+        
+    </h4>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>Implement new methods or properties on instance</p>
+
+        
+        
+    </div>
+
+
+
+
+
+
+    
+    
+    <ul class="item-properties item-properties-param level-1">
+        <li class="item-property item-property-param">
+            <div class="item-header" id="BaseClass.$implement/methods">
+    
+        
+    
+    <h5>
+        
+            <span class="item-type">object</span>
+        
+        <span class="item-name">methods</span>
+        
+    </h5>
+</div>
+
+
+
+
+
+
+
+    
+
+        </li>
+    </ul>
+
+
+        </li><li class="item-property item-property-method">
+            <div class="item-header" id="BaseClass.$destroy">
+    
+        
+    
+    <h4>
+        
+        <span class="item-name">$destroy</span>
+        
+            
+            
+                <span class="item-name-arguments">()</span>
+            
+            
+            
+        
+    </h4>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>Destroy instance</p>
+
+        
+        
+    </div>
+
+
+
+
+
+
+    
+
+        </li><li class="item-property item-property-method">
+            <div class="item-header" id="BaseClass.$instantiate">
+    
+        <span class="label label-warning item-label">static</span>
+    
+    <h4>
+        
+        <span class="item-name">$instantiate</span>
+        
+            
+            
+                <span class="item-name-arguments">()</span>
+            
+            
+                <span class="item-name-returns">&nbsp;-&gt;
+                    object
+            </span>
+            
+                <small class="item-name-return-descr">class instance</small>
+            
+        
+    </h4>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>Create an instance of current class. Same as cs.factory(name)</p>
+
+        
+        
+    </div><div class="item-description">
+        
+        
+            <pre><code class="language-javascript">var myObj = My.Class.$instantiate(arg1, arg2, ...);</code></pre>
+        
+    </div>
+
+
+
+
+
+
+    
+
+        </li><li class="item-property item-property-method">
+            <div class="item-header" id="BaseClass.$override">
+    
+        <span class="label label-warning item-label">static</span>
+    
+    <h4>
+        
+        <span class="item-name">$override</span>
+        
+            
+                <span class="item-name-arguments">(methods)</span>
+            
+            
+            
+            
+        
+    </h4>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>Override class methods (on prototype level, not on instance level)</p>
+
+        
+        
+    </div>
+
+
+
+
+
+
+    
+    
+    <ul class="item-properties item-properties-param level-1">
+        <li class="item-property item-property-param">
+            <div class="item-header" id="BaseClass.$override/methods">
+    
+        
+    
+    <h5>
+        
+            <span class="item-type">object</span>
+        
+        <span class="item-name">methods</span>
+        
+    </h5>
+</div>
+
+
+
+
+
+
+
+    
+
+        </li>
+    </ul>
+
+
+        </li><li class="item-property item-property-method">
+            <div class="item-header" id="BaseClass.$extend">
+    
+        
+    
+    <h4>
+        
+        <span class="item-name">$extend</span>
+        
+            
+                <span class="item-name-arguments">(definition, statics)</span>
+            
+            
+            
+                <span class="item-name-returns">&nbsp;-&gt;
+                    function
+            </span>
+            
+        
+    </h4>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>Create new class based on current one</p>
+
+        
+        
+    </div>
+
+
+
+
+
+
+    
+    
+    <ul class="item-properties item-properties-param level-1">
+        <li class="item-property item-property-param">
+            <div class="item-header" id="BaseClass.$extend/definition">
+    
+        
+    
+    <h5>
+        
+            <span class="item-type">object</span>
+        
+        <span class="item-name">definition</span>
+        
+    </h5>
+</div>
+
+
+
+
+
+
+
+    
+
+        </li><li class="item-property item-property-param">
+            <div class="item-header" id="BaseClass.$extend/statics">
+    
+        
+    
+    <h5>
+        
+            <span class="item-type">object</span>
+        
+        <span class="item-name">statics</span>
+        
+    </h5>
+</div>
+
+
+
+
+
+
+
+    
+
+        </li>
+    </ul>
+
+
+        </li><li class="item-property item-property-method">
+            <div class="item-header" id="BaseClass.$destroy">
+    
+        
+    
+    <h4>
+        
+        <span class="item-name">$destroy</span>
+        
+            
+            
+                <span class="item-name-arguments">()</span>
+            
+            
+            
+        
+    </h4>
+</div>
+
+
+    <div class="item-description">
+        
+            <p>Destroy class</p>
+
+        
+        
+    </div>
+
+
+
+
+
+
+    
+
+        </li>
+    </ul>
+
+    </div>
+
+
+
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    <div class="container"></div>
+</div>
+
+
+</body></html>
