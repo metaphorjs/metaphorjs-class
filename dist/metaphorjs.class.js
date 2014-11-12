@@ -1,7 +1,9 @@
 (function(){
 "use strict";
 
+
 var MetaphorJs = {
+
 
 };
 
@@ -32,19 +34,21 @@ var varType = function(){
 
 
     /**
-        'string': 0,
-        'number': 1,
-        'boolean': 2,
-        'object': 3,
-        'function': 4,
-        'array': 5,
-        'null': 6,
-        'undefined': 7,
-        'NaN': 8,
-        'regexp': 9,
-        'date': 10
-    */
-
+     * 'string': 0,
+     * 'number': 1,
+     * 'boolean': 2,
+     * 'object': 3,
+     * 'function': 4,
+     * 'array': 5,
+     * 'null': 6,
+     * 'undefined': 7,
+     * 'NaN': 8,
+     * 'regexp': 9,
+     * 'date': 10,
+     * unknown: -1
+     * @param {*} value
+     * @returns {number}
+     */
     return function varType(val) {
 
         if (!val) {
@@ -102,25 +106,182 @@ function isObject(value) {
 
 
 
+var Cache = function(){
+
+    var globalCache;
+
+    /**
+     * @class Cache
+     * @param {bool} cacheRewritable
+     * @constructor
+     */
+    var Cache = function(cacheRewritable) {
+
+        var storage = {},
+
+            finders = [];
+
+        if (arguments.length == 0) {
+            cacheRewritable = true;
+        }
+
+        return {
+
+            /**
+             * @param {function} fn
+             * @param {object} context
+             * @param {bool} prepend
+             */
+            addFinder: function(fn, context, prepend) {
+                finders[prepend? "unshift" : "push"]({fn: fn, context: context});
+            },
+
+            /**
+             * @method
+             * @param {string} name
+             * @param {*} value
+             * @param {bool} rewritable
+             * @returns {*} value
+             */
+            add: function(name, value, rewritable) {
+
+                if (storage[name] && storage[name].rewritable === false) {
+                    return storage[name];
+                }
+
+                storage[name] = {
+                    rewritable: typeof rewritable != strUndef ? rewritable : cacheRewritable,
+                    value: value
+                };
+
+                return value;
+            },
+
+            /**
+             * @method
+             * @param {string} name
+             * @returns {*}
+             */
+            get: function(name) {
+
+                if (!storage[name]) {
+                    if (finders.length) {
+
+                        var i, l, res,
+                            self = this;
+
+                        for (i = 0, l = finders.length; i < l; i++) {
+
+                            res = finders[i].fn.call(finders[i].context, name, self);
+
+                            if (res !== undf) {
+                                return self.add(name, res, true);
+                            }
+                        }
+                    }
+
+                    return undf;
+                }
+
+                return storage[name].value;
+            },
+
+            /**
+             * @method
+             * @param {string} name
+             * @returns {*}
+             */
+            remove: function(name) {
+                var rec = storage[name];
+                if (rec && rec.rewritable === true) {
+                    delete storage[name];
+                }
+                return rec ? rec.value : undf;
+            },
+
+            /**
+             * @method
+             * @param {string} name
+             * @returns {boolean}
+             */
+            exists: function(name) {
+                return !!storage[name];
+            },
+
+            /**
+             * @param {function} fn
+             * @param {object} context
+             */
+            eachEntry: function(fn, context) {
+                var k;
+                for (k in storage) {
+                    fn.call(context, storage[k].value, k);
+                }
+            },
+
+            /**
+             * @method
+             */
+            destroy: function() {
+
+                var self = this;
+
+                if (self === globalCache) {
+                    globalCache = null;
+                }
+
+                storage = null;
+                cacheRewritable = null;
+
+                self.add = null;
+                self.get = null;
+                self.destroy = null;
+                self.exists = null;
+                self.remove = null;
+            }
+        };
+    };
+
+    /**
+     * @method
+     * @static
+     * @returns {Cache}
+     */
+    Cache.global = function() {
+
+        if (!globalCache) {
+            globalCache = new Cache(true);
+        }
+
+        return globalCache;
+    };
+
+    return Cache;
+
+}();
+
+
+
+
+
+/**
+ * @class Namespace
+ */
 var Namespace = function(){
+
 
     /**
      * @param {Object} root optional; usually window or global
      * @param {String} rootName optional. If you want custom object to be root and
-     * this object itself if the first level of namespace:<br>
-     * <pre><code class="language-javascript">
-     * var ns = MetaphorJs.lib.Namespace(window);
-     * ns.register("My.Test", something); // -> window.My.Test
-     * var privateNs = {};
-     * var ns = new MetaphorJs.lib.Namespace(privateNs, "privateNs");
-     * ns.register("privateNs.Test", something); // -> privateNs.Test
-     * </code></pre>
+     * this object itself if the first level of namespace: {@code ../examples/main.js}
+     * @param {Cache} cache optional
      * @constructor
      */
-    var Namespace   = function(root, rootName) {
+    var Namespace   = function(root, rootName, cache) {
 
-        var cache   = {},
-            self    = this;
+        cache       = cache || new Cache(false);
+        var self    = this,
+            rootL   = rootName ? rootName.length : null;
 
         if (!root) {
             if (typeof global != strUndef) {
@@ -132,13 +293,15 @@ var Namespace = function(){
         }
 
         var normalize   = function(ns) {
-            if (ns && rootName && ns.indexOf(rootName) !== 0) {
+            if (ns && rootName && ns.substr(0, rootL) != rootName) {
                 return rootName + "." + ns;
             }
             return ns;
         };
 
         var parseNs     = function(ns) {
+
+            ns = normalize(ns);
 
             var tmp     = ns.split("."),
                 i,
@@ -158,14 +321,9 @@ var Namespace = function(){
 
                     name    = tmp[i];
 
-                    if (rootName && i == 0) {
-                        if (name == rootName) {
-                            current = root;
-                            continue;
-                        }
-                        else {
-                            ns = rootName + "." + ns;
-                        }
+                    if (rootName && i == 0 && name == rootName) {
+                        current = root;
+                        continue;
                     }
 
                     if (current[name] === undf) {
@@ -175,30 +333,23 @@ var Namespace = function(){
                     current = current[name];
                 }
             }
-            else {
-                if (rootName) {
-                    ns = rootName + "." + ns;
-                }
-            }
 
             return [current, last, ns];
         };
 
         /**
          * Get namespace/cache object
-         * @function MetaphorJs.ns.get
+         * @method
          * @param {string} ns
          * @param {bool} cacheOnly
-         * @returns {object} constructor
+         * @returns {*}
          */
         var get       = function(ns, cacheOnly) {
 
-            if (cache[ns] !== undf) {
-                return cache[ns];
-            }
+            ns = normalize(ns);
 
-            if (rootName && cache[rootName + "." + ns] !== undf) {
-                return cache[rootName + "." + ns];
+            if (cache.exists(ns)) {
+                return cache.get(ns);
             }
 
             if (cacheOnly) {
@@ -215,11 +366,9 @@ var Namespace = function(){
 
                 name    = tmp[i];
 
-                if (rootName && i == 0) {
-                    if (name == rootName) {
-                        current = root;
-                        continue;
-                    }
+                if (rootName && i == 0 && name == rootName) {
+                    current = root;
+                    continue;
                 }
 
                 if (current[name] === undf) {
@@ -230,15 +379,15 @@ var Namespace = function(){
             }
 
             if (current) {
-                cache[ns] = current;
+                cache.add(ns, current);
             }
 
             return current;
         };
 
         /**
-         * Register class constructor
-         * @function MetaphorJs.ns.register
+         * Register item
+         * @method
          * @param {string} ns
          * @param {*} value
          */
@@ -251,40 +400,87 @@ var Namespace = function(){
             if (isObject(parent) && parent[name] === undf) {
 
                 parent[name]        = value;
-                cache[parse[2]]     = value;
+                cache.add(parse[2], value);
             }
 
             return value;
         };
 
         /**
-         * Class exists
-         * @function MetaphorJs.ns.exists
+         * Item exists
+         * @method
          * @param {string} ns
          * @returns boolean
          */
         var exists      = function(ns) {
-            return cache[ns] !== undf;
+            return get(ns, true) !== undf;
         };
 
         /**
-         * Add constructor to cache
-         * @function MetaphorJs.ns.add
+         * Add item only to the cache
+         * @function add
          * @param {string} ns
          * @param {*} value
          */
         var add = function(ns, value) {
-            if (rootName && ns.indexOf(rootName) !== 0) {
-                ns = rootName + "." + ns;
-            }
-            if (cache[ns] === undf) {
-                cache[ns] = value;
-            }
+
+            ns = normalize(ns);
+            cache.add(ns, value);
             return value;
         };
 
+        /**
+         * Remove item from cache
+         * @method
+         * @param {string} ns
+         */
         var remove = function(ns) {
-            delete cache[ns];
+            ns = normalize(ns);
+            cache.remove(ns);
+        };
+
+        /**
+         * Make alias in the cache
+         * @method
+         * @param {string} from
+         * @param {string} to
+         */
+        var makeAlias = function(from, to) {
+
+            from = normalize(from);
+            to = normalize(to);
+
+            var value = cache.get(from);
+
+            if (value !== undf) {
+                cache.add(to, value);
+            }
+        };
+
+        /**
+         * Destroy namespace and all classes in it
+         */
+        var destroy     = function() {
+
+            var self = this,
+                k;
+
+            if (self === globalNs) {
+                globalNs = null;
+            }
+
+            cache.eachEntry(function(entry){
+                if (entry && entry.$destroy) {
+                    entry.$destroy();
+                }
+            });
+
+            cache.destroy();
+            cache = null;
+
+            for (k in self) {
+                self[k] = null;
+            }
         };
 
         self.register   = register;
@@ -293,6 +489,8 @@ var Namespace = function(){
         self.add        = add;
         self.remove     = remove;
         self.normalize  = normalize;
+        self.makeAlias  = makeAlias;
+        self.destroy    = destroy;
     };
 
     Namespace.prototype.register = null;
@@ -301,9 +499,17 @@ var Namespace = function(){
     Namespace.prototype.add = null;
     Namespace.prototype.remove = null;
     Namespace.prototype.normalize = null;
+    Namespace.prototype.makeAlias = null;
+    Namespace.prototype.destroy = null;
 
     var globalNs;
 
+    /**
+     * Get global namespace
+     * @method
+     * @static
+     * @returns {*}
+     */
     Namespace.global = function() {
         if (!globalNs) {
             globalNs = new Namespace;
@@ -453,7 +659,7 @@ var intercept = function(origFn, interceptor, context, origContext, when, replac
 
 
 
-var Class = function(){
+function(){
 
 
     var proto   = "prototype",
@@ -544,8 +750,6 @@ var Class = function(){
         };
 
 
-
-
     var Class = function(ns){
 
         if (!ns) {
@@ -626,6 +830,10 @@ var Class = function(){
         };
 
 
+        /**
+         * @class BaseClass
+         * @constructor
+         */
         var BaseClass = function() {
 
         };
@@ -646,19 +854,42 @@ var Class = function(){
             $beforeDestroy: [],
             $afterDestroy: [],
 
+            /**
+             * Get class name
+             * @method
+             * @returns {string}
+             */
             $getClass: function() {
                 return this.$class;
             },
 
+            /**
+             * Get parent class name
+             * @method
+             * @returns {null}
+             */
             $getParentClass: function() {
                 return this.$extends;
             },
 
+            /**
+             * Intercept method
+             * @method
+             * @param {string} method Intercepted method name
+             * @param {function} fn function to call before or after intercepted method
+             * @param {object} newContext optional interceptor's "this" object
+             * @param {string} when optional, when to call interceptor before | after | instead; default "before"
+             * @param {bool} replaceValue optional, return interceptor's return value or original method's; default false
+             */
             $intercept: function(method, fn, newContext, when, replaceValue) {
                 var self = this;
                 self[method] = intercept(self[method], fn, newContext || self, self, when, replaceValue);
             },
 
+            /**
+             * Implement new methods or properties on instance
+             * @param {object} methods
+             */
             $implement: function(methods) {
                 var $self = this.constructor;
                 if ($self && $self.$parent) {
@@ -666,6 +897,9 @@ var Class = function(){
                 }
             },
 
+            /**
+             * @method
+             */
             $destroy: function() {
 
                 var self    = this,
@@ -709,11 +943,21 @@ var Class = function(){
                 self.$destroyed = true;
             },
 
+            /**
+             * Implement your destroy actions here
+             * @method
+             */
             destroy: function(){}
         });
 
         BaseClass.$self = BaseClass;
 
+        /**
+         * Create an instance of current class.
+         * @method
+         * @static
+         * @returns {object} class instance
+         */
         BaseClass.$instantiate = function() {
 
             var cls = this,
@@ -739,6 +983,12 @@ var Class = function(){
             }
         };
 
+        /**
+         * Override class methods
+         * @method
+         * @static
+         * @param {object} methods
+         */
         BaseClass.$override = function(methods) {
             var $self = this.$self,
                 $parent = this.$parent;
@@ -748,22 +998,35 @@ var Class = function(){
             }
         };
 
+        /**
+         * Create new class based on current one
+         * @param {object} definition
+         * @param {object} statics
+         * @returns {function}
+         */
         BaseClass.$extend = function(definition, statics) {
             return define(definition, statics, this);
         };
 
-
         /**
-         * @namespace MetaphorJs
+         * Destroy class
          */
+        BaseClass.$destroy = function() {
+            var self = this,
+                k;
+
+            for (k in self) {
+                self[k] = null;
+            }
+        };
 
 
         /**
-         * Define class
-         * @function MetaphorJs.define
+         * @class Class
+         * @method
          * @param {object} definition
-         * @param {object} statics (optional)
-         * @return function New class constructor
+         * @param {object} statics
+         * @param {string|function} $extends
          */
         var define = function(definition, statics, $extends) {
 
@@ -858,11 +1121,12 @@ var Class = function(){
 
 
         /**
-         * Instantiate class
-         * @function MetaphorJs.create
+         * Instantiate class. Pass constructor parameters after "name"
+         * @method
          * @param {string} name Full name of the class
+         * @returns {object} class instance
          */
-        var instantiate = function(name) {
+        var factory = function(name) {
 
             var cls     = ns.get(name),
                 args    = slice.call(arguments, 1);
@@ -878,10 +1142,10 @@ var Class = function(){
 
         /**
          * Is cmp instance of cls
-         * @function MetaphorJs.is
+         * @method
          * @param {object} cmp
          * @param {string|object} cls
-         * @returns boolean
+         * @returns {boolean}
          */
         var isInstanceOf = function(cmp, cls) {
             var _cls    = isString(cls) ? ns.get(cls) : cls;
@@ -892,11 +1156,10 @@ var Class = function(){
 
         /**
          * Is one class subclass of another class
-         * @function MetaphorJs.isSubclass
+         * @method
          * @param {string|object} childClass
          * @param {string|object} parentClass
-         * @return bool
-         * @alias MetaphorJs.iss
+         * @return {bool}
          */
         var isSubclassOf = function(childClass, parentClass) {
 
@@ -927,10 +1190,30 @@ var Class = function(){
 
         var self    = this;
 
-        self.factory = instantiate;
+        self.factory = factory;
         self.isSubclassOf = isSubclassOf;
         self.isInstanceOf = isInstanceOf;
         self.define = define;
+
+        self.destroy = function(){
+
+            if (self === globalCs) {
+                globalCs = null;
+            }
+
+            BaseClass.$destroy();
+            BaseClass = null;
+
+            ns.destroy();
+            ns = null;
+
+            Class = null;
+
+        };
+
+        /**
+         * @type {function} BaseClass reference to the BaseClass class
+         */
         self.BaseClass = BaseClass;
 
     };
@@ -940,11 +1223,18 @@ var Class = function(){
         factory: null,
         isSubclassOf: null,
         isInstanceOf: null,
-        define: null
+        define: null,
+        destroy: null
     };
 
     var globalCs;
 
+    /**
+     * Get default global class manager
+     * @method
+     * @static
+     * @returns {Class}
+     */
     Class.global = function() {
         if (!globalCs) {
             globalCs = new Class(Namespace.global());

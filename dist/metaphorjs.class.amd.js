@@ -26,19 +26,21 @@ var varType = function(){
 
 
     /**
-        'string': 0,
-        'number': 1,
-        'boolean': 2,
-        'object': 3,
-        'function': 4,
-        'array': 5,
-        'null': 6,
-        'undefined': 7,
-        'NaN': 8,
-        'regexp': 9,
-        'date': 10
-    */
-
+     * 'string': 0,
+     * 'number': 1,
+     * 'boolean': 2,
+     * 'object': 3,
+     * 'function': 4,
+     * 'array': 5,
+     * 'null': 6,
+     * 'undefined': 7,
+     * 'NaN': 8,
+     * 'regexp': 9,
+     * 'date': 10,
+     * unknown: -1
+     * @param {*} value
+     * @returns {number}
+     */
     return function varType(val) {
 
         if (!val) {
@@ -229,7 +231,7 @@ var intercept = function(origFn, interceptor, context, origContext, when, replac
 
 
 
-var Class = function(){
+function(){
 
 
     var proto   = "prototype",
@@ -320,8 +322,6 @@ var Class = function(){
         };
 
 
-
-
     var Class = function(ns){
 
         if (!ns) {
@@ -402,6 +402,10 @@ var Class = function(){
         };
 
 
+        /**
+         * @class BaseClass
+         * @constructor
+         */
         var BaseClass = function() {
 
         };
@@ -422,19 +426,42 @@ var Class = function(){
             $beforeDestroy: [],
             $afterDestroy: [],
 
+            /**
+             * Get class name
+             * @method
+             * @returns {string}
+             */
             $getClass: function() {
                 return this.$class;
             },
 
+            /**
+             * Get parent class name
+             * @method
+             * @returns {null}
+             */
             $getParentClass: function() {
                 return this.$extends;
             },
 
+            /**
+             * Intercept method
+             * @method
+             * @param {string} method Intercepted method name
+             * @param {function} fn function to call before or after intercepted method
+             * @param {object} newContext optional interceptor's "this" object
+             * @param {string} when optional, when to call interceptor before | after | instead; default "before"
+             * @param {bool} replaceValue optional, return interceptor's return value or original method's; default false
+             */
             $intercept: function(method, fn, newContext, when, replaceValue) {
                 var self = this;
                 self[method] = intercept(self[method], fn, newContext || self, self, when, replaceValue);
             },
 
+            /**
+             * Implement new methods or properties on instance
+             * @param {object} methods
+             */
             $implement: function(methods) {
                 var $self = this.constructor;
                 if ($self && $self.$parent) {
@@ -442,6 +469,9 @@ var Class = function(){
                 }
             },
 
+            /**
+             * @method
+             */
             $destroy: function() {
 
                 var self    = this,
@@ -485,11 +515,21 @@ var Class = function(){
                 self.$destroyed = true;
             },
 
+            /**
+             * Implement your destroy actions here
+             * @method
+             */
             destroy: function(){}
         });
 
         BaseClass.$self = BaseClass;
 
+        /**
+         * Create an instance of current class.
+         * @method
+         * @static
+         * @returns {object} class instance
+         */
         BaseClass.$instantiate = function() {
 
             var cls = this,
@@ -515,6 +555,12 @@ var Class = function(){
             }
         };
 
+        /**
+         * Override class methods
+         * @method
+         * @static
+         * @param {object} methods
+         */
         BaseClass.$override = function(methods) {
             var $self = this.$self,
                 $parent = this.$parent;
@@ -524,22 +570,35 @@ var Class = function(){
             }
         };
 
+        /**
+         * Create new class based on current one
+         * @param {object} definition
+         * @param {object} statics
+         * @returns {function}
+         */
         BaseClass.$extend = function(definition, statics) {
             return define(definition, statics, this);
         };
 
-
         /**
-         * @namespace MetaphorJs
+         * Destroy class
          */
+        BaseClass.$destroy = function() {
+            var self = this,
+                k;
+
+            for (k in self) {
+                self[k] = null;
+            }
+        };
 
 
         /**
-         * Define class
-         * @function MetaphorJs.define
+         * @class Class
+         * @method
          * @param {object} definition
-         * @param {object} statics (optional)
-         * @return function New class constructor
+         * @param {object} statics
+         * @param {string|function} $extends
          */
         var define = function(definition, statics, $extends) {
 
@@ -634,11 +693,12 @@ var Class = function(){
 
 
         /**
-         * Instantiate class
-         * @function MetaphorJs.create
+         * Instantiate class. Pass constructor parameters after "name"
+         * @method
          * @param {string} name Full name of the class
+         * @returns {object} class instance
          */
-        var instantiate = function(name) {
+        var factory = function(name) {
 
             var cls     = ns.get(name),
                 args    = slice.call(arguments, 1);
@@ -654,10 +714,10 @@ var Class = function(){
 
         /**
          * Is cmp instance of cls
-         * @function MetaphorJs.is
+         * @method
          * @param {object} cmp
          * @param {string|object} cls
-         * @returns boolean
+         * @returns {boolean}
          */
         var isInstanceOf = function(cmp, cls) {
             var _cls    = isString(cls) ? ns.get(cls) : cls;
@@ -668,11 +728,10 @@ var Class = function(){
 
         /**
          * Is one class subclass of another class
-         * @function MetaphorJs.isSubclass
+         * @method
          * @param {string|object} childClass
          * @param {string|object} parentClass
-         * @return bool
-         * @alias MetaphorJs.iss
+         * @return {bool}
          */
         var isSubclassOf = function(childClass, parentClass) {
 
@@ -703,10 +762,30 @@ var Class = function(){
 
         var self    = this;
 
-        self.factory = instantiate;
+        self.factory = factory;
         self.isSubclassOf = isSubclassOf;
         self.isInstanceOf = isInstanceOf;
         self.define = define;
+
+        self.destroy = function(){
+
+            if (self === globalCs) {
+                globalCs = null;
+            }
+
+            BaseClass.$destroy();
+            BaseClass = null;
+
+            ns.destroy();
+            ns = null;
+
+            Class = null;
+
+        };
+
+        /**
+         * @type {function} BaseClass reference to the BaseClass class
+         */
         self.BaseClass = BaseClass;
 
     };
@@ -716,11 +795,18 @@ var Class = function(){
         factory: null,
         isSubclassOf: null,
         isInstanceOf: null,
-        define: null
+        define: null,
+        destroy: null
     };
 
     var globalCs;
 
+    /**
+     * Get default global class manager
+     * @method
+     * @static
+     * @returns {Class}
+     */
     Class.global = function() {
         if (!globalCs) {
             globalCs = new Class(Namespace.global());
