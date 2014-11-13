@@ -1,0 +1,22 @@
+<h2>Class lifecycle</h2>
+<p>Initialization cycle</p>
+<ol>
+    <li><code>$constructor()</code> (call parent constructor with <code>this.$super()</code>)</li>
+    <li>mixin's <code>$beforeInit()</code> (mixins are not classes, they don't have <code>$super()</code>;
+        '$beforeInit's are called in order mixins are specified)</li>
+    <li>plugin's <code>$beforeHostInit()</code> (plugins are classes,
+        they have their own <code>$super()</code>)</li>
+    <li><code>$init()</code> (call parent $init with <code>this.$super()</code>)</li>
+    <li>mixin's <code>$afterInit()</code></li>
+    <li>plugin's <code>$afterHostInit()</code></li>
+</ol>
+<p>Destroy cycle (<code>instance.$destroy()</code>)</p>
+<ol>
+    <li>mixin's <code>$beforeDestroy()</code> method</li>
+    <li>plugin's <code>$beforeHostDestroy()</code> method</li>
+    <li>instance's <code>destroy()</code> method</li>
+    <li>mixin's <code>$afterDestroy</code> method</li>
+    <li>plugin's <code>$destroy()</code> method</li>
+</ol>
+<p>the $destroy method will nullify all instance properties and methods.
+    If you want to prevent this, return <code>false</code> from your destroy() method.</p>

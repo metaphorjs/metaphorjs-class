@@ -26,8 +26,32 @@
 
         <div class="navbar-collapse collapse">
 
-            
-                <ul class="nav navbar-nav">
+            <ul class="nav navbar-nav">
+                
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            Guides
+                            <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li>
+                                <a href="#intro">Class system</a>
+                            </li><li>
+                                <a href="#lifecycle">Class lifecycle</a>
+                            </li><li>
+                                <a href="#define">Define class</a>
+                            </li><li>
+                                <a href="#extend">Extend class</a>
+                            </li><li>
+                                <a href="#mixins">Mixins</a>
+                            </li><li>
+                                <a href="#plugins">Plugins</a>
+                            </li><li>
+                                <a href="#misc">Misc</a>
+                            </li>
+                        </ul>
+                    </li>
+                
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                             Classes
@@ -35,21 +59,24 @@
                         </a>
                         <ul class="dropdown-menu" role="menu">
                             <li>
-                                <a href="#">Class</a>
+                                <a href="#Class">Class</a>
                             </li><li>
-                                <a href="#">BaseClass</a>
+                                <a href="#BaseClass">BaseClass</a>
                             </li>
                         </ul>
                     </li>
-                </ul>
-            
+                
+            </ul>
 
-            
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="https://github.com/metaphorjs/metaphorjs-class">Github</a>
+                </li>
+            </ul>
         </div><!--/.nav-collapse -->
 
     </div>
 </div>
-
 <div class="jumbotron">
     <div class="container">
         <h1>MetaphorJs.Class</h1>
@@ -58,117 +85,226 @@
     </div>
 </div>
 
+
 <div class="container source-container">
+    
     <div class="row item-group level-0">
+        <!--<div class="col-md-12 item-group-name" mjs-if=".$root.sourceTree.length > 1">
+            <h2>{{.group.name}}</h2>
+        </div>-->
         
-        <div class="col-md-12 item-group-items item-group-type-class level-0">
-            <div class="item-header" id="Class">
-    
-        
-    
-    <h3>
-        
-        <span class="item-name">Class</span>
-        
-    </h3>
-</div>
-
-
-    <div class="item-description">
-        
-        
-            <pre><code class="language-javascript">// initialization cycle:
-// 1. $constructor (call parent constructor with this.$super())
-// 2. mixin's $beforeInit (mixins are not classes, they don't have $super(); '$beforeInit's
-//    are called in order mixins are specified)
-// 3. plugin's $beforeHostInit (plugins are classes, they have their own $super())
-// 4. $init (call parent $init with this.$super())
-// 5. mixin's $afterInit
-// 6. plugin's $afterHostInit
-
-// destroy cycle (call instance.$destroy())
-// 1. mixin's $beforeDestroy method
-// 2. plugin's $beforeHostDestroy method
-// 3. instance's destroy() method
-// 4. mixin's $afterDestroy method
-// 5. plugin's $destroy method
-// the $destroy method will nullify all instance properties and methods.
-// if you want to prevent this, return false from your destroy() method.
-
+            <div class="col-md-12 content">
+                
+                    <h2>Class system</h2>
+<p>Before you start defining classes you need to initialize the class system.<br>
+The class system depends on a <a href="https://github.com/metaphorjs/metaphorjs-namespace">namespace manager</a>
+    (if not provided, it will use global namespace).<br>
+</p>
+<pre><code class="language-javascript">// global class system
 var cs = new MetaphorJs.Class;
 
+// private class system
+var privateClasses = {};
+var ns = new MetaphorJs.Namespace(privateClasses);
+var cs = new MetaphorJs.Class(ns);</code></pre>
+                
+            </div><div class="col-md-12 content">
+                
+                    <h2>Class lifecycle</h2>
+<p>Initialization cycle</p>
+<ol>
+    <li><code>$constructor()</code> (call parent constructor with <code>this.$super()</code>)</li>
+    <li>mixin's <code>$beforeInit()</code> (mixins are not classes, they don't have <code>$super()</code>;
+        '$beforeInit's are called in order mixins are specified)</li>
+    <li>plugin's <code>$beforeHostInit()</code> (plugins are classes,
+        they have their own <code>$super()</code>)</li>
+    <li><code>$init()</code> (call parent $init with <code>this.$super()</code>)</li>
+    <li>mixin's <code>$afterInit()</code></li>
+    <li>plugin's <code>$afterHostInit()</code></li>
+</ol>
+<p>Destroy cycle (<code>instance.$destroy()</code>)</p>
+<ol>
+    <li>mixin's <code>$beforeDestroy()</code> method</li>
+    <li>plugin's <code>$beforeHostDestroy()</code> method</li>
+    <li>instance's <code>destroy()</code> method</li>
+    <li>mixin's <code>$afterDestroy</code> method</li>
+    <li>plugin's <code>$destroy()</code> method</li>
+</ol>
+<p>the $destroy method will nullify all instance properties and methods.
+    If you want to prevent this, return <code>false</code> from your destroy() method.</p>
+                
+            </div><div class="col-md-12 content">
+                
+                    <h2>Define classes</h2>
+<pre><code class="language-javascript">var cs = new MetaphorJs.Class;
+
 // define(methodsAndProperties, statics)
-cs.define({
-    $class: "My.Person",
+var myPersonContructor = cs.define({
+
+    $class: "My.Person", // optional namespace path
+
     firstName: null,
     lastName: null,
 
+    // generally, you probably will use $constructor
+    // only when defining some base classes
     $constructor: function(firstName, lastName){
-        // if you want to use plugins, this function must set them up
-        // (probably take them from config)
-        // you can't define plugins in class's definition; this is "run-time" only.
-
-        //this.$plugins = [...];
-
-        // call parent constructor
+        // call parent $constructor()
         this.$super();
     },
 
-    // the class itself can't have $beforeInit and $afterInit methods
-    // they come from mixins
     $init: function(firstName, lastName) {
         this.firstName = firstName;
         this.lastName = lastName;
+
+        // call parent $init()
         this.$super();
     },
+
     getName: function() {
         return this.firstName + " " + this.lastName;
+    },
+
+    destroy: function() {
+        // do some cleanup
+        // (all properties will be nullified automatically)
     }
 });
-// define() returns newly created classes,
-// so you can create anonimous classes by omitting $class: "...".
 
-var mixin = {
+// you can instantiate class via
+new myPersonContructor(firstName, lastName);
+// also, depending on the namespace used to initialize class system
+// you can instantiate class via
+new window.My.Person(firstName, lastName);
+// it may be global.My.Person, or yourPrivateNs.My.Person
+// or
+myPersonConstructor.$instantiate(firstName, lastName);
+// or
+window.My.Person.$instantiate(firstName, lastName);
+// or
+cs.factory("My.Person", firstName, lastName);
+
+// you can also define classes by extending the BaseClass
+
+cs.BaseClass.$extend({
+    //...
+});</code></pre>
+                
+            </div><div class="col-md-12 content">
+                
+                    <h2>Extend classes</h2>
+<pre><code class="language-javascript">cs.define({
+
+    $class: "My.ExtendedPerson",
+    $extends: "My.Person",
+
+    age: null,
+
+    $init: function(firstName, lastName, age) {
+        this.$super(firstName, lastName);
+        this.age = age;
+    },
+
+    getAge: function() {
+        return this.age;
+    }
+});
+
+// or
+
+myPersonContructor.$extend({
+    $class: "My.ExtendedPerson"
+    // ...
+});
+
+// or
+
+window.My.Person.$extend({
+    // ...
+});
+
+// or
+
+cs.define({
+    // ...
+    $extends: myPersonContructor
+    // ...
+});</code></pre>
+                
+            </div><div class="col-md-12 content">
+                
+                    <h2>Mixins</h2>
+<pre><code class="language-javascript">var mixin = {
     $beforeInit: function() {
         // will be called before host class initialized
+        // receives the same arguments as the constructor
+        // this = class instance
     },
     $afterInit: function() {
         // will be called after host class initialized
+        // receives the same arguments as the constructor
+        // this = class instance
+    },
+    $beforeDestroy: function() {
+        // before class's destroy() method
+        // receives the same arguments
+        // this = class instance
+    },
+    $afterDestroy: function() {
+        // after class's destroy() method
+        // receives the same arguments
+        // this = class instance
     },
     mixinFunc: function() {
     }
 };
 
 cs.define({
-    $class: "My.ExtendedPerson",
-    $extends: "My.Person",
-    $mixins: [mixin], // or ["MixinName"] where it was added to namespace as mixin.MixinName
-    age: null,
-    $init: function(firstName, lastName, age) {
-        this.$super(firstName, lastName);
-        this.age = age;
-    },
-    getAge: function() {
-        return this.age;
-    }
+    $class: "ClassWithMixins",
+    mixins: [mixin]
+});
+
+var instance = new ClassWithMixins;
+instance.mixinFunc();
+
+// you can also use namespace registry
+
+ns.add("mixin.myFirstMixin", {
+    $beforeInit: function() {},
+    $afterInit: function() {},
+    mixinFunc: function() {}
 });
 
 cs.define({
+    $class: "ClassWithMixins",
+    mixins: ["mixin.myFirstMixin"]
+});</code></pre>
+                
+            </div><div class="col-md-12 content">
+                
+                    <h2>Plugins</h2>
+<pre><code class="language-javascript">cs.define({
     $class: "PluginClass",
-    $init: function(hostObject, hostObjectArguments) {
-        // plugin's $init and $constructor receive host object
-        // as the first parameter, and
-        // host's arguments as the second.
+    $constructor: function(hostObject, hostObjectArguments) {
     },
-    // called after $beforeInit and before $init
+    $init: function(hostObject, hostObjectArguments) {
+    },
+    // called after mixin's $beforeInit and before host's $init
     $beforeHostInit: function() {
         // this function receives
         // the same parameters as host's constructor
+        // this = plugin
     },
-    // called after $afterInit
+    // called after mixin's $afterInit
     $afterHostInit: function() {
         // this function receives
         // the same parameters as host's constructor
+        // this = plugin
+    },
+    $beforeHostDestroy: function() {
+        // before host's destroy()
+        // the same arguments as host's destroy()
+        // this = plugin
     }
     // and yes, plugins can have their own plugins :)
 });
@@ -181,18 +317,13 @@ cs.define({
 });
 
 var host = new PluginHost({
-    plugins: [PluginClass]
-});
-
-// you can use $extend shortcut to avoid calling "define()"
-// and there is a cs.BaseClass.$extend you can start with.
-var ClassWithoutName = My.ExtendedPerson.$extend({
-    getAge: function() {
-        return this.$super() * 10;
-    }
-});
-
-// you can also extend your own classes:
+    plugins: [PluginClass] // or ["PluginClass"]
+});</code></pre>
+                
+            </div><div class="col-md-12 content">
+                
+                    <h2>Extending native prototypes</h2>
+<pre><code class="language-javascript">// you can also extend your own classes:
 var PrototypedClass = function() {
     // this will become $constructor
 };
@@ -204,15 +335,34 @@ cs.define({
     $constructor: function() {
         this.$super(); // call PrototypedClass constructor
     }
-});
-
-// instantiate with variable number of arguments:
-var person = My.ExtendedPerson.$instantiate(["John", "Smith", 30]);
-var second = cs.factory("My.ExtendedPerson", "John", "Smith", 30);
-var another = new My.ExtendedPerson("Jane", "Smith", 29);
-</code></pre>
+});</code></pre>
+                
+            </div>
+        
         
     </div>
+    
+    <div class="row item-group level-0">
+        <!--<div class="col-md-12 item-group-name" mjs-if=".$root.sourceTree.length > 1">
+            <h2>{{.group.name}}</h2>
+        </div>-->
+        
+        
+            <div class="col-md-12 item-group-items item-group-type-class level-0">
+                <div class="item-header" id="Class">
+    
+        
+    
+    <h3>
+        
+        
+            <span class="item-type">class</span>
+        
+        <span class="item-name">Class</span>
+        
+    </h3>
+</div>
+
 
 
 
@@ -309,6 +459,7 @@ var another = new My.ExtendedPerson("Jane", "Smith", 29);
     
     <h4>
         
+        
         <span class="item-name">Class</span>
         
             
@@ -338,6 +489,7 @@ var another = new My.ExtendedPerson("Jane", "Smith", 29);
     <h5>
         
             <span class="item-type">Namespace</span>
+        
         
         <span class="item-name">ns</span>
         
@@ -370,6 +522,7 @@ var another = new My.ExtendedPerson("Jane", "Smith", 29);
         
     
     <h4>
+        
         
         <span class="item-name">define</span>
         
@@ -408,34 +561,12 @@ var another = new My.ExtendedPerson("Jane", "Smith", 29);
         
             <span class="item-type">object</span>
         
+        
         <span class="item-name">definition</span>
         
     </h5>
 </div>
 
-
-    <div class="item-description">
-        
-            <p>Class properties and methods (all optional). Try not to use
-objects and arrays as properties for instance property will modify prototype property.</p>
-
-        
-        
-    </div><div class="item-description">
-        
-            <p>All $beforeInit and $afterInit and $init functions receive same
-arguments as passed to the constructor.</p>
-
-        
-        
-    </div><div class="item-description">
-        
-            <p>All $beforeDestroy, $afterDestroy and destroy() function receive
-same arguments as $destroy().</p>
-
-        
-        
-    </div>
 
 
 
@@ -453,6 +584,7 @@ same arguments as $destroy().</p>
     <h6>
         
             <span class="item-type">string</span>
+        
         
         <span class="item-name">$class</span>
         
@@ -484,6 +616,7 @@ same arguments as $destroy().</p>
         
             <span class="item-type">string</span>
         
+        
         <span class="item-name">$extends</span>
         
     </h6>
@@ -514,6 +647,7 @@ same arguments as $destroy().</p>
         
             <span class="item-type">array</span>
         
+        
         <span class="item-name">$mixins</span>
         
     </h6>
@@ -543,6 +677,7 @@ same arguments as $destroy().</p>
     <h6>
         
             <span class="item-type">function</span>
+        
         
         <span class="item-name">$constructor</span>
         
@@ -581,6 +716,7 @@ same arguments as $destroy().</p>
         
             <span class="item-type">function</span>
         
+        
         <span class="item-name">$init</span>
         
             
@@ -617,6 +753,7 @@ same arguments as $destroy().</p>
     <h6>
         
             <span class="item-type">function</span>
+        
         
         <span class="item-name">$beforeInit</span>
         
@@ -655,6 +792,7 @@ same arguments as $destroy().</p>
         
             <span class="item-type">function</span>
         
+        
         <span class="item-name">$afterInit</span>
         
             
@@ -691,6 +829,7 @@ same arguments as $destroy().</p>
     <h6>
         
             <span class="item-type">function</span>
+        
         
         <span class="item-name">$beforeHostInit</span>
         
@@ -729,6 +868,7 @@ same arguments as $destroy().</p>
         
             <span class="item-type">function</span>
         
+        
         <span class="item-name">$afterHostInit</span>
         
             
@@ -765,6 +905,7 @@ same arguments as $destroy().</p>
     <h6>
         
             <span class="item-type">function</span>
+        
         
         <span class="item-name">$beforeDestroy</span>
         
@@ -803,6 +944,7 @@ same arguments as $destroy().</p>
         
             <span class="item-type">function</span>
         
+        
         <span class="item-name">$afterDestroy</span>
         
             
@@ -840,6 +982,7 @@ same arguments as $destroy().</p>
         
             <span class="item-type">function</span>
         
+        
         <span class="item-name">$beforeHostDestroy</span>
         
             
@@ -876,6 +1019,7 @@ same arguments as $destroy().</p>
     <h6>
         
             <span class="item-type">function</span>
+        
         
         <span class="item-name">destroy</span>
         
@@ -918,6 +1062,7 @@ same arguments as $destroy().</p>
         
             <span class="item-type">object</span>
         
+        
         <span class="item-name">statics</span>
         
     </h5>
@@ -947,6 +1092,7 @@ same arguments as $destroy().</p>
     <h5>
         
             <span class="item-type">string | function</span>
+        
         
         <span class="item-name">$extends</span>
         
@@ -979,6 +1125,7 @@ same arguments as $destroy().</p>
         
     
     <h4>
+        
         
         <span class="item-name">factory</span>
         
@@ -1028,6 +1175,7 @@ same arguments as $destroy().</p>
         
             <span class="item-type">string</span>
         
+        
         <span class="item-name">name</span>
         
     </h5>
@@ -1059,6 +1207,7 @@ same arguments as $destroy().</p>
         
     
     <h4>
+        
         
         <span class="item-name">isInstanceOf</span>
         
@@ -1111,6 +1260,7 @@ same arguments as $destroy().</p>
         
             <span class="item-type">object</span>
         
+        
         <span class="item-name">cmp</span>
         
     </h5>
@@ -1132,6 +1282,7 @@ same arguments as $destroy().</p>
     <h5>
         
             <span class="item-type">string | object</span>
+        
         
         <span class="item-name">cls</span>
         
@@ -1156,6 +1307,7 @@ same arguments as $destroy().</p>
         
     
     <h4>
+        
         
         <span class="item-name">isSubclassOf</span>
         
@@ -1218,6 +1370,7 @@ same arguments as $destroy().</p>
         
             <span class="item-type">string | object</span>
         
+        
         <span class="item-name">childClass</span>
         
     </h5>
@@ -1239,6 +1392,7 @@ same arguments as $destroy().</p>
     <h5>
         
             <span class="item-type">string | object</span>
+        
         
         <span class="item-name">parentClass</span>
         
@@ -1263,6 +1417,7 @@ same arguments as $destroy().</p>
         <span class="label label-warning item-label">static</span>
     
     <h4>
+        
         
         <span class="item-name">global</span>
         
@@ -1309,6 +1464,7 @@ same arguments as $destroy().</p>
         
             <span class="item-type"><a href="#BaseClass">BaseClass</a></span>
         
+        
         <span class="item-name">BaseClass</span>
         
     </h4>
@@ -1337,12 +1493,15 @@ same arguments as $destroy().</p>
 
 
 
-        </div><div class="col-md-12 item-group-items item-group-type-class level-0">
-            <div class="item-header" id="BaseClass">
+            </div><div class="col-md-12 item-group-items item-group-type-class level-0">
+                <div class="item-header" id="BaseClass">
     
         
     
     <h3>
+        
+        
+            <span class="item-type">class</span>
         
         <span class="item-name">BaseClass</span>
         
@@ -1479,6 +1638,7 @@ You can access it via <code>cs.BaseClass</code>. Basically,
     
     <h4>
         
+        
         <span class="item-name">$getClass</span>
         
             
@@ -1516,6 +1676,7 @@ You can access it via <code>cs.BaseClass</code>. Basically,
         
     
     <h4>
+        
         
         <span class="item-name">$getParentClass</span>
         
@@ -1555,6 +1716,7 @@ You can access it via <code>cs.BaseClass</code>. Basically,
     
     <h4>
         
+        
         <span class="item-name">$intercept</span>
         
             
@@ -1593,6 +1755,7 @@ You can access it via <code>cs.BaseClass</code>. Basically,
         
             <span class="item-type">string</span>
         
+        
         <span class="item-name">method</span>
         
     </h5>
@@ -1622,6 +1785,7 @@ You can access it via <code>cs.BaseClass</code>. Basically,
     <h5>
         
             <span class="item-type">function</span>
+        
         
         <span class="item-name">fn</span>
         
@@ -1660,6 +1824,7 @@ You can access it via <code>cs.BaseClass</code>. Basically,
         
             <span class="item-type">object</span>
         
+        
         <span class="item-name">newContext</span>
         
     </h5>
@@ -1690,6 +1855,7 @@ You can access it via <code>cs.BaseClass</code>. Basically,
         
             <span class="item-type">string</span>
         
+        
         <span class="item-name">when</span>
         
     </h5>
@@ -1719,6 +1885,7 @@ You can access it via <code>cs.BaseClass</code>. Basically,
     <h5>
         
             <span class="item-type">boolean</span>
+        
         
         <span class="item-name">replaceValue</span>
         
@@ -1751,6 +1918,7 @@ You can access it via <code>cs.BaseClass</code>. Basically,
         
     
     <h4>
+        
         
         <span class="item-name">$implement</span>
         
@@ -1790,6 +1958,7 @@ You can access it via <code>cs.BaseClass</code>. Basically,
         
             <span class="item-type">object</span>
         
+        
         <span class="item-name">methods</span>
         
     </h5>
@@ -1813,6 +1982,7 @@ You can access it via <code>cs.BaseClass</code>. Basically,
         
     
     <h4>
+        
         
         <span class="item-name">$destroy</span>
         
@@ -1848,6 +2018,7 @@ You can access it via <code>cs.BaseClass</code>. Basically,
         <span class="label label-warning item-label">static</span>
     
     <h4>
+        
         
         <span class="item-name">$instantiate</span>
         
@@ -1894,6 +2065,7 @@ You can access it via <code>cs.BaseClass</code>. Basically,
     
     <h4>
         
+        
         <span class="item-name">$override</span>
         
             
@@ -1932,6 +2104,7 @@ You can access it via <code>cs.BaseClass</code>. Basically,
         
             <span class="item-type">object</span>
         
+        
         <span class="item-name">methods</span>
         
     </h5>
@@ -1955,6 +2128,7 @@ You can access it via <code>cs.BaseClass</code>. Basically,
         
     
     <h4>
+        
         
         <span class="item-name">$extend</span>
         
@@ -1997,6 +2171,7 @@ You can access it via <code>cs.BaseClass</code>. Basically,
         
             <span class="item-type">object</span>
         
+        
         <span class="item-name">definition</span>
         
     </h5>
@@ -2018,6 +2193,7 @@ You can access it via <code>cs.BaseClass</code>. Basically,
     <h5>
         
             <span class="item-type">object</span>
+        
         
         <span class="item-name">statics</span>
         
@@ -2042,6 +2218,7 @@ You can access it via <code>cs.BaseClass</code>. Basically,
         
     
     <h4>
+        
         
         <span class="item-name">$destroy</span>
         
@@ -2078,9 +2255,14 @@ You can access it via <code>cs.BaseClass</code>. Basically,
 
 
 
-        </div>
+            </div>
+        
     </div>
+    
+    
+    
 </div>
+
 
 <div class="footer">
     <div class="container"></div>

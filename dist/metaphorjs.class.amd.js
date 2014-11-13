@@ -495,7 +495,7 @@ var Class = function(){
 
                 for (i = 0, l = plugins.length; i < l; i++) {
                     if (plugins[i].$beforeHostDestroy) {
-                        plugins[i].$beforeHostDestroy();
+                        plugins[i].$beforeHostDestroy.call(plugins[i], arguments);
                     }
                 }
 
@@ -596,7 +596,6 @@ var Class = function(){
 
         /**
          * @class Class
-         * @code ../examples/main.js
          */
 
         /**
@@ -608,12 +607,6 @@ var Class = function(){
         /**
          * @method
          * @param {object} definition {
-         *  @description Class properties and methods (all optional). Try not to use
-         *  objects and arrays as properties for instance property will modify prototype property.
-         *  @description All $beforeInit and $afterInit and $init functions receive same
-         *  arguments as passed to the constructor.
-         *  @description All $beforeDestroy, $afterDestroy and destroy() function receive
-         *  same arguments as $destroy().
          *  @type {string} $class optional
          *  @type {string} $extends optional
          *  @type {array} $mixins optional

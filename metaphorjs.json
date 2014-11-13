@@ -21,7 +21,13 @@
             "includeExternal": false,
             "data": {
                 "title": "MetaphorJs.Class",
-                "version": "v@{version}"
+                "version": "v@{version}",
+                "topRightMenu": [
+                    {
+                        "name": "Github",
+                        "href": "https://github.com/metaphorjs/metaphorjs-class"
+                    }
+                ]
             }
         }
     },
