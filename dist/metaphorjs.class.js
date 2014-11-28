@@ -2,7 +2,10 @@
 "use strict";
 
 
+var MetaphorJs = {
 
+
+};
 
 
 function isFunction(value) {
@@ -796,7 +799,7 @@ var Class = function(){
 
                         if (isString(plugin)) {
                             plCls = plugin;
-                            plugin = ns.get("plugin." + plugin, true);
+                            plugin = ns.get(plugin, true);
                             if (!plugin) {
                                 throw plCls + " not found";
                             }
@@ -882,10 +885,13 @@ var Class = function(){
              * @param {object} newContext optional interceptor's "this" object
              * @param {string} when optional, when to call interceptor before | after | instead; default "before"
              * @param {bool} replaceValue optional, return interceptor's return value or original method's; default false
+             * @returns {function} original method
              */
             $intercept: function(method, fn, newContext, when, replaceValue) {
-                var self = this;
-                self[method] = intercept(self[method], fn, newContext || self, self, when, replaceValue);
+                var self = this,
+                    orig = self[method];
+                self[method] = intercept(orig, fn, newContext || self, self, when, replaceValue);
+                return orig;
             },
 
             /**
