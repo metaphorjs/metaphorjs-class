@@ -906,6 +906,25 @@ var Class = function(){
             },
 
             /**
+             * Does this instance have a plugin
+             * @param cls
+             * @returns {bool}
+             */
+            $hasPlugin: function(cls) {
+                var pls = this.$plugins,
+                    i, l;
+                if (!cls) {
+                    return pls.length > 0;
+                }
+                for (i = 0, l = pls.length; i < l; i++) {
+                    if (isInstanceOf(pls[i], cls)) {
+                        return true;
+                    }
+                }
+                return false;
+            },
+
+            /**
              * Destroy instance
              * @method
              */
