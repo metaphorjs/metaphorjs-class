@@ -107,7 +107,7 @@ module.exports = function(){
             ns = new Namespace;
         }
 
-        var createConstructor = function() {
+        var createConstructor = function(className) {
 
             return function() {
 
@@ -122,7 +122,7 @@ module.exports = function(){
                     plCls;
 
                 if (!self) {
-                    throw "Must instantiate via new";
+                    throw "Must instantiate via new: " + className;
                 }
 
                 self.$plugins   = [];
@@ -484,7 +484,7 @@ module.exports = function(){
                 }
             }
 
-            c = createConstructor();
+            c = createConstructor(name);
             prototype.constructor = c;
             c[proto] = prototype;
 

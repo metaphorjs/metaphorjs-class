@@ -2,7 +2,10 @@
 "use strict";
 
 
+var MetaphorJs = {
 
+
+};
 
 
 function isFunction(value) {
@@ -764,7 +767,7 @@ var Class = function(){
             ns = new Namespace;
         }
 
-        var createConstructor = function() {
+        var createConstructor = function(className) {
 
             return function() {
 
@@ -779,7 +782,7 @@ var Class = function(){
                     plCls;
 
                 if (!self) {
-                    throw "Must instantiate via new";
+                    throw "Must instantiate via new: " + className;
                 }
 
                 self.$plugins   = [];
@@ -1141,7 +1144,7 @@ var Class = function(){
                 }
             }
 
-            c = createConstructor();
+            c = createConstructor(name);
             prototype.constructor = c;
             c[proto] = prototype;
 
