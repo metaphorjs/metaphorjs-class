@@ -1314,8 +1314,9 @@ var Class = function(){
 
 }();
 
-MetaphorJs['Namespace'] = Namespace;
-MetaphorJs['Class'] = Class;
-typeof global != "undefined" ? (global['MetaphorJs'] = MetaphorJs) : (window['MetaphorJs'] = MetaphorJs);
+var MetaphorJsExports = {};
+MetaphorJsExports['Namespace'] = Namespace;
+MetaphorJsExports['Class'] = Class;
+typeof global != "undefined" ? (global['MetaphorJs'] = MetaphorJsExports) : (window['MetaphorJs'] = MetaphorJsExports);
 
 }());

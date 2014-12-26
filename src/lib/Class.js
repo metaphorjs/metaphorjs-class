@@ -1,13 +1,13 @@
 
-var isFunction  = require("../../metaphorjs/src/func/isFunction.js"),
-    isString    = require("../../metaphorjs/src/func/isString.js"),
-    isArray     = require("../../metaphorjs/src/func/isArray.js"),
-    Namespace   = require("../../metaphorjs-namespace/src/metaphorjs.namespace.js"),
-    slice       = require("../../metaphorjs/src/func/array/slice.js"),
-    extend      = require("../../metaphorjs/src/func/extend.js"),
-    emptyFn     = require("../../metaphorjs/src/func/emptyFn.js"),
-    instantiate = require("../../metaphorjs/src/func/instantiate.js"),
-    intercept   = require("../../metaphorjs/src/func/intercept.js");
+var isFunction  = require("metaphorjs/src/func/isFunction.js"),
+    isString    = require("metaphorjs/src/func/isString.js"),
+    isArray     = require("metaphorjs/src/func/isArray.js"),
+    Namespace   = require("metaphorjs-namespace/src/lib/Namespace.js"),
+    slice       = require("metaphorjs/src/func/array/slice.js"),
+    extend      = require("metaphorjs/src/func/extend.js"),
+    emptyFn     = require("metaphorjs/src/func/emptyFn.js"),
+    instantiate = require("metaphorjs/src/func/instantiate.js"),
+    intercept   = require("metaphorjs/src/func/intercept.js");
 
 module.exports = function(){
 

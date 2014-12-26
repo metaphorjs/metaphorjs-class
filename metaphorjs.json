@@ -38,8 +38,8 @@
             "global": true,
             "target": "dist/metaphorjs.class.js",
             "files": [
-                "../metaphorjs/src/MetaphorJs.js",
-                ["src/metaphorjs.class.js", {"as": "Class"}]
+                "metaphorjs/src/MetaphorJs.js",
+                ["src/lib/Class.js", {"as": "Class"}]
             ],
             "expose": [
                 "Namespace",
@@ -51,14 +51,14 @@
             "compile": false,
             "files": [
                 [
-                    "src/metaphorjs.class.js",
+                    "src/lib/Class.js",
                     {
                         "keepExports": true
                     }
                 ]
             ],
             "omit": [
-                "../metaphorjs-namespace/src/metaphorjs.namespace.js"
+                "metaphorjs-namespace/src/lib/Namespace.js"
             ],
             "require": {
                 "metaphorjs-namespace": "Namespace"
@@ -67,10 +67,10 @@
         "amd": {
             "target": "dist/metaphorjs.class.amd.js",
             "files": [
-                ["src/metaphorjs.class.js", {"as": "Class"}]
+                ["src/lib/Class.js", {"as": "Class"}]
             ],
             "omit": [
-                "../metaphorjs-namespace/src/metaphorjs.namespace.js"
+                "metaphorjs-namespace/src/lib/Namespace.js"
             ],
             "define": {
                 "name": "metaphorjs-class",
