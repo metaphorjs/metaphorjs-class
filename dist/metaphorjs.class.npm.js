@@ -708,7 +708,7 @@ module.exports = function(){
                 for (i = 0, l = mixins.length; i < l; i++) {
                     mixin = mixins[i];
                     if (isString(mixin)) {
-                        mixin = ns.get("mixin." + mixin, true);
+                        mixin = ns.get(mixin, true);
                     }
                     mixinToPrototype(prototype, mixin);
                 }
