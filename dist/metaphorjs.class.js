@@ -2,10 +2,7 @@
 "use strict";
 
 
-var MetaphorJs = {
 
-
-};
 
 
 function isFunction(value) {
@@ -695,6 +692,10 @@ var Class = function(){
                 self.$super     = $super;
                 ret             = fn.apply(self, arguments);
                 self.$super     = prev;
+
+                if (self.$destroyed) {
+                    self.$super = null;
+                }
 
                 return ret;
             };
