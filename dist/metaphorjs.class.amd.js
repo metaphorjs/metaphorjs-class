@@ -439,6 +439,7 @@ var Class = function(){
             $mixins: null,
 
             $destroyed: false,
+            $destroying: false,
 
             $constructor: emptyFn,
             $init: emptyFn,
@@ -522,11 +523,11 @@ var Class = function(){
                     plugins = self.$plugins,
                     i, l, res;
 
-                if (self.$destroyed) {
+                if (self.$destroying || self.$destroyed) {
                     return;
                 }
 
-                self.$destroyed = true;
+                self.$destroying = true;
 
                 for (i = -1, l = before.length; ++i < l;
                      before[i].apply(self, arguments)){}
@@ -554,6 +555,7 @@ var Class = function(){
                     }
                 }
 
+                self.$destroying = false;
                 self.$destroyed = true;
             },
 
