@@ -63,8 +63,8 @@ module.exports = function(){
                 return;
             }
 
-            prototype.$plugins = null;
-            prototype.$pluginMap = null;
+            prototype.$plugins      = null;
+            prototype.$pluginMap    = null;
 
             if (pp.$beforeInit) {
                 prototype.$beforeInit = pp.$beforeInit.slice();

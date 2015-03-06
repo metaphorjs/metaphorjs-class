@@ -135,7 +135,8 @@ var extend = function(){
         }
 
         while (args.length) {
-            if (src = args.shift()) {
+            // IE < 9 fix: check for hasOwnProperty presence
+            if ((src = args.shift()) && src.hasOwnProperty) {
                 for (k in src) {
 
                     if (src.hasOwnProperty(k) && (value = src[k]) !== undf) {
@@ -293,8 +294,8 @@ module.exports = function(){
                 return;
             }
 
-            prototype.$plugins = null;
-            prototype.$pluginMap = null;
+            prototype.$plugins      = null;
+            prototype.$pluginMap    = null;
 
             if (pp.$beforeInit) {
                 prototype.$beforeInit = pp.$beforeInit.slice();
