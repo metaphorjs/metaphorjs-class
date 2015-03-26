@@ -690,13 +690,14 @@ var Class = function(){
                     self    = this,
                     prev    = self.$super;
 
+                if (self.$destroyed) {
+                    self.$super = null;
+                    return null;
+                }
+
                 self.$super     = $super;
                 ret             = fn.apply(self, arguments);
                 self.$super     = prev;
-
-                if (self.$destroyed) {
-                    self.$super = null;
-                }
 
                 return ret;
             };
@@ -937,6 +938,13 @@ var Class = function(){
              */
             $getPlugin: function(cls) {
                 return this.$pluginMap[ns.normalize(cls)] || null;
+            },
+
+            /**
+             * @return bool
+             */
+            $isDestroyed: function() {
+                return self.$destroying || self.$destroyed;
             },
 
             /**
