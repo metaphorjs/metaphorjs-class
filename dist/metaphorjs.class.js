@@ -2,7 +2,10 @@
 "use strict";
 
 
+var MetaphorJs = {
 
+
+};
 
 
 function isFunction(value) {
@@ -908,8 +911,8 @@ var Class = function(){
             $intercept: function(method, fn, newContext, when, replaceValue) {
                 var self = this,
                     orig = self[method];
-                self[method] = intercept(orig, fn, newContext || self, self, when, replaceValue);
-                return orig;
+                self[method] = intercept(orig || emptyFn, fn, newContext || self, self, when, replaceValue);
+                return orig || emptyFn;
             },
 
             /**
@@ -919,7 +922,7 @@ var Class = function(){
             $implement: function(methods) {
                 var $self = this.constructor;
                 if ($self && $self.$parent) {
-                    preparePrototype(this, methods, $self.$parent);
+                    preparePrototype(this, methods, $self.$parent, true);
                 }
             },
 
@@ -938,6 +941,20 @@ var Class = function(){
              */
             $getPlugin: function(cls) {
                 return this.$pluginMap[ns.normalize(cls)] || null;
+            },
+
+            /**
+             * @param {function} fn
+             * @returns {Function}
+             */
+            $bind: function(fn) {
+                var self = this;
+                return function() {
+                    if (self.$isDestroyed()) {
+                        return;
+                    }
+                    return fn.apply(self, arguments);
+                };
             },
 
             /**
