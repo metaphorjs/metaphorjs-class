@@ -2,10 +2,7 @@
 "use strict";
 
 
-var MetaphorJs = {
 
-
-};
 
 
 function isFunction(value) {
@@ -887,6 +884,14 @@ var Class = function(){
              */
             $getClass: function() {
                 return this.$class;
+            },
+
+            /**
+             * @param {string} cls
+             * @returns {boolean}
+             */
+            $is: function(cls) {
+                return isInstanceOf(this, cls);
             },
 
             /**

@@ -229,6 +229,14 @@ module.exports = function(){
             },
 
             /**
+             * @param {string} cls
+             * @returns {boolean}
+             */
+            $is: function(cls) {
+                return isInstanceOf(this, cls);
+            },
+
+            /**
              * Get parent class name
              * @method
              * @returns {string | null}
