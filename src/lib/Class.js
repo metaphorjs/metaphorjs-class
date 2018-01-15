@@ -418,7 +418,7 @@ module.exports = function(){
          * @returns {function}
          */
         BaseClass.$extend = function(definition, statics) {
-            return define(definition, statics, this);
+            return defineClass(definition, statics, this);
         };
 
         /**
@@ -465,7 +465,7 @@ module.exports = function(){
          * @param {string|function} $extends this is a private parameter; use definition.$extends
          * @code var cls = cs.define({$class: "Name"});
          */
-        var define = function(definition, statics, $extends) {
+        var defineClass = function(definition, statics, $extends) {
 
             definition          = definition || {};
             
@@ -637,7 +637,7 @@ module.exports = function(){
         self.factory = factory;
         self.isSubclassOf = isSubclassOf;
         self.isInstanceOf = isInstanceOf;
-        self.define = define;
+        self.define = defineClass;
 
         self.destroy = function(){
 
