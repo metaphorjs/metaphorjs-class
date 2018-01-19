@@ -472,6 +472,7 @@ module.exports = function(){
             var name            = definition.$class,
                 parentClass     = $extends || definition.$extends,
                 mixins          = definition.$mixins,
+                alias           = definition.$alias,
                 pConstructor,
                 i, l, k, noop, prototype, c, mixin;
 
@@ -549,6 +550,9 @@ module.exports = function(){
 
             if (name) {
                 ns.register(name, c);
+            }
+            if (alias) {
+                ns.register(alias, c);
             }
 
             return c;
