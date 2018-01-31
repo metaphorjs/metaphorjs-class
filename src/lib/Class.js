@@ -86,16 +86,16 @@ module.exports = function(){
             var k;
             for (k in mixin) {
                 if (mixin.hasOwnProperty(k)) {
-                    if (k == "$beforeInit") {
+                    if (k === "$beforeInit") {
                         prototype.$beforeInit.push(mixin[k]);
                     }
-                    else if (k == "$afterInit") {
+                    else if (k === "$afterInit") {
                         prototype.$afterInit.push(mixin[k]);
                     }
-                    else if (k == "$beforeDestroy") {
+                    else if (k === "$beforeDestroy") {
                         prototype.$beforeDestroy.push(mixin[k]);
                     }
-                    else if (k == "$afterDestroy") {
+                    else if (k === "$afterDestroy") {
                         prototype.$afterDestroy.push(mixin[k]);
                     }
                     else if (!prototype[k]) {
