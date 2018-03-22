@@ -25,7 +25,9 @@ module.exports = function(){
 
         wrapPrototypeMethod = function wrapPrototypeMethod(parent, k, fn) {
 
-            var $super = parent[proto][k] || (k == constr ? parent : emptyFn) || emptyFn;
+            var $super = parent[proto][k] ||
+                        (k === constr ? parent : emptyFn) ||
+                        emptyFn;
 
             return function() {
                 var ret,
@@ -276,7 +278,7 @@ module.exports = function(){
             /**
              * Does this instance have a plugin
              * @param cls
-             * @returns {bool}
+             * @returns {boolean}
              */
             $hasPlugin: function(cls) {
                 return !!this.$pluginMap[ns.normalize(cls)];
@@ -305,7 +307,7 @@ module.exports = function(){
             },
 
             /**
-             * @return bool
+             * @return boolean
              */
             $isDestroyed: function() {
                 return self.$destroying || self.$destroyed;
@@ -340,7 +342,7 @@ module.exports = function(){
 
                 res = self.destroy.apply(self, arguments);
 
-                for (i = -1, l = before.length; ++i < l;
+                for (i = -1, l = after.length; ++i < l;
                      after[i].apply(self, arguments)){}
 
                 for (i = 0, l = plugins.length; i < l; i++) {
@@ -526,20 +528,20 @@ module.exports = function(){
             c[proto] = prototype;
 
             for (k in BaseClass) {
-                if (k != proto && BaseClass.hasOwnProperty(k)) {
+                if (k !== proto && BaseClass.hasOwnProperty(k)) {
                     c[k] = BaseClass[k];
                 }
             }
 
             for (k in pConstructor) {
-                if (k != proto && pConstructor.hasOwnProperty(k)) {
+                if (k !== proto && pConstructor.hasOwnProperty(k)) {
                     c[k] = pConstructor[k];
                 }
             }
 
             if (statics) {
                 for (k in statics) {
-                    if (k != proto && statics.hasOwnProperty(k)) {
+                    if (k !== proto && statics.hasOwnProperty(k)) {
                         c[k] = statics[k];
                     }
                 }
@@ -607,7 +609,7 @@ module.exports = function(){
          * @code cs.isSubclassOf(myObj, My.Class);
          * @param {string|object} childClass
          * @param {string|object} parentClass
-         * @return {bool}
+         * @return {boolean}
          */
         var isSubclassOf = function(childClass, parentClass) {
 
@@ -626,7 +628,7 @@ module.exports = function(){
 
             while (p && p.prototype) {
 
-                if (p.prototype.$class == parentClass) {
+                if (p.prototype.$class === parentClass) {
                     return true;
                 }
 
