@@ -5,7 +5,6 @@
         "kuindji <kuindji@gmail.com>"
     ],
     "description": "MetaphorJs class system",
-    "main": "dist/metaphorjs.class.amd.min.js",
     "moduleType": [
         "amd"
     ],

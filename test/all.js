@@ -1,7 +1,7 @@
 
 var assert = require("assert"),
-    Class = require("../src/metaphorjs.class.js"),
-    Namespace = require("../../metaphorjs-namespace/src/metaphorjs.namespace.js");
+    Class = require("../src/lib/Class.js"),
+    Namespace = require("metaphorjs-namespace/src/lib/Namespace.js");
 
 describe("Class", function(){
 

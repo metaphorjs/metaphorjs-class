@@ -2,7 +2,6 @@
     "name": "metaphorjs-class",
     "version": "1.0.10",
     "description": "MetaphorJs class system",
-    "main": "dist/metaphorjs.class.npm.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
     },
@@ -11,8 +10,5 @@
         "url": "https://github.com/metaphorjs/metaphorjs-class.git"
     },
     "author": "johann kuindji",
-    "license": "MIT",
-    "dependencies": {
-        "metaphorjs-namespace": "*"
-    }
+    "license": "MIT"
 }
