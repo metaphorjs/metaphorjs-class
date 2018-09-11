@@ -505,10 +505,11 @@ module.exports = function(){
             definition.$mixins  = null;
 
 
-            noop                = function(){};
-            noop[proto]         = pConstructor[proto];
-            prototype           = new noop;
-            noop                = null;
+            //noop                = function(){};
+            //noop[proto]         = pConstructor[proto];
+            //prototype           = new noop;
+            //noop                = null;
+            prototype           = Object.create(pConstructor[proto]);
             definition[constr]  = definition[constr] || $constr;
 
             preparePrototype(prototype, definition, pConstructor);
