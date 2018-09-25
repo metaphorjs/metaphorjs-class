@@ -1,15 +1,14 @@
 
 var assert = require("assert"),
-    Class = require("../src/lib/Class.js"),
-    Namespace = require("metaphorjs-namespace/src/lib/Namespace.js");
+    cls = require("../dist/metaphorjs.class.npm.js");
 
 describe("Class", function(){
 
     describe("definition", function(){
 
         var local   = {},
-            ns = new Namespace(local, "local"),
-            cs = new Class(ns);
+            ns = new cls.Namespace(local),
+            cs = cls.classManagerFactory(ns);
 
         it("should define class", function(){
 
@@ -40,7 +39,6 @@ describe("Class", function(){
 
             assert.equal(true, !!inst);
             assert.equal(true, cs.isInstanceOf(inst, local.My.Class));
-            assert.equal(true, cs.isInstanceOf(inst, "local.My.Class"));
             assert.equal(true, cs.isInstanceOf(inst, "My.Class"));
             assert.equal(true, inst instanceof local.My.Class);
         });
@@ -78,11 +76,11 @@ describe("Class", function(){
             var inst = cs.factory("ChildClass");
 
             assert.equal(true, cs.isInstanceOf(inst, local.ChildClass));
-            assert.equal(true, cs.isInstanceOf(inst, "local.ChildClass"));
+            assert.equal(true, cs.isInstanceOf(inst, "ChildClass"));
             assert.equal(true, cs.isInstanceOf(inst, "ParentClass"));
 
             assert.equal(true, cs.isSubclassOf(local.ChildClass, local.ParentClass));
-            assert.equal(true, cs.isSubclassOf("local.ChildClass", "local.ParentClass"));
+            assert.equal(true, cs.isSubclassOf("ChildClass", "ParentClass"));
             assert.equal(true, cs.isSubclassOf("ChildClass", "ParentClass"));
 
             assert.equal(true, inst instanceof local.ChildClass);

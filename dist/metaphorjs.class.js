@@ -1,12 +1,13 @@
 (function(){
+/* BUNDLE START 003 */
 "use strict";
-
-
-
-
 
 function isFunction(value) {
     return typeof value == 'function';
+};
+
+function isString(value) {
+    return typeof value === "string" || value === ""+value;
 };
 
 var toString = Object.prototype.toString;
@@ -30,7 +31,7 @@ var varType = function(){
     };
 
 
-    /**
+    /*
      * 'string': 0,
      * 'number': 1,
      * 'boolean': 2,
@@ -46,6 +47,9 @@ var varType = function(){
      * @param {*} value
      * @returns {number}
      */
+
+
+
     return function varType(val) {
 
         if (!val) {
@@ -63,7 +67,7 @@ var varType = function(){
             return -1;
         }
 
-        if (num == 1 && isNaN(val)) {
+        if (num === 1 && isNaN(val)) {
             return 8;
         }
 
@@ -74,22 +78,13 @@ var varType = function(){
 
 
 
-function isString(value) {
-    return typeof value == "string" || value === ""+value;
-    //return typeof value == "string" || varType(value) === 0;
-};
-
-
-
 /**
  * @param {*} value
  * @returns {boolean}
  */
 function isArray(value) {
-    return typeof value == "object" && varType(value) === 5;
+    return typeof value === "object" && varType(value) === 5;
 };
-
-var strUndef = "undefined";
 
 
 
@@ -102,6 +97,15 @@ function isObject(value) {
 };
 
 
+var MetaphorJs = {
+    plugin: {},
+    mixin: {}
+};
+
+
+var strUndef = "undefined";
+
+
 
 var Cache = function(){
 
@@ -109,8 +113,11 @@ var Cache = function(){
 
     /**
      * @class Cache
-     * @param {bool} cacheRewritable
+     */
+
+    /**
      * @constructor
+     * @param {bool} cacheRewritable
      */
     var Cache = function(cacheRewritable) {
 
@@ -219,7 +226,7 @@ var Cache = function(){
             /**
              * @method
              */
-            destroy: function() {
+            $destroy: function() {
 
                 var self = this;
 
@@ -259,266 +266,204 @@ var Cache = function(){
 
 
 
-
-
 /**
  * @class Namespace
- * @code ../examples/main.js
+ * @code src-docs/examples/main.js
  */
-var Namespace = function(){
 
+/**
+ * Construct namespace
+ * @constructor
+ * @param {object} root {
+ *  Namespace root object. Everything you register
+ *  will be assigned as property of root object at some level.
+ *  The parameter is optional. Pass your own object or window or global
+ *  to have direct access to its properties. 
+ *  @optional
+ * }
+ */
+var Namespace = MetaphorJs.Namespace = function(root) {
 
-    /**
-     * @param {Object} root optional; usually window or global
-     * @param {String} rootName optional. If you want custom object to be root and
-     * this object itself is the first level of namespace
-     * @param {Cache} cache optional
-     * @constructor
-     */
-    var Namespace   = function(root, rootName, cache) {
+    root        = root || {};
 
-        cache       = cache || new Cache(false);
-        var self    = this,
-            rootL   = rootName ? rootName.length : null;
+    var self    = this,
+        cache   = new Cache(false);
 
-        if (!root) {
-            if (typeof global != strUndef) {
-                root    = global;
-            }
-            else {
-                root    = window;
-            }
+    var parseNs     = function(ns) {
+
+        var tmp     = ns.split("."),
+            i,
+            last    = tmp.pop(),
+            parent  = tmp.join("."),
+            len     = tmp.length,
+            name,
+            current = root;
+
+        if (cache[parent]) {
+            return [cache[parent], last, ns];
         }
 
-        var normalize   = function(ns) {
-            if (ns && rootName && ns.substr(0, rootL) != rootName) {
-                return rootName + "." + ns;
-            }
-            return ns;
-        };
-
-        var parseNs     = function(ns) {
-
-            ns = normalize(ns);
-
-            var tmp     = ns.split("."),
-                i,
-                last    = tmp.pop(),
-                parent  = tmp.join("."),
-                len     = tmp.length,
-                name,
-                current = root;
-
-
-            if (cache[parent]) {
-                return [cache[parent], last, ns];
-            }
-
-            if (len > 0) {
-                for (i = 0; i < len; i++) {
-
-                    name    = tmp[i];
-
-                    if (rootName && i == 0 && name == rootName) {
-                        current = root;
-                        continue;
-                    }
-
-                    if (current[name] === undf) {
-                        current[name]   = {};
-                    }
-
-                    current = current[name];
-                }
-            }
-
-            return [current, last, ns];
-        };
-
-        /**
-         * Get namespace/cache object
-         * @method
-         * @param {string} ns
-         * @param {bool} cacheOnly
-         * @returns {*}
-         */
-        var get       = function(ns, cacheOnly) {
-
-            ns = normalize(ns);
-
-            if (cache.exists(ns)) {
-                return cache.get(ns);
-            }
-
-            if (cacheOnly) {
-                return undf;
-            }
-
-            var tmp     = ns.split("."),
-                i,
-                len     = tmp.length,
-                name,
-                current = root;
-
+        if (len > 0) {
             for (i = 0; i < len; i++) {
 
                 name    = tmp[i];
 
-                if (rootName && i == 0 && name == rootName) {
-                    current = root;
-                    continue;
-                }
-
                 if (current[name] === undf) {
-                    return undf;
+                    current[name]   = {};
                 }
 
                 current = current[name];
             }
+        }
 
-            if (current) {
-                cache.add(ns, current);
-            }
-
-            return current;
-        };
-
-        /**
-         * Register item
-         * @method
-         * @param {string} ns
-         * @param {*} value
-         */
-        var register    = function(ns, value) {
-
-            var parse   = parseNs(ns),
-                parent  = parse[0],
-                name    = parse[1];
-
-            if (isObject(parent) && parent[name] === undf) {
-
-                parent[name]        = value;
-                cache.add(parse[2], value);
-            }
-
-            return value;
-        };
-
-        /**
-         * Item exists
-         * @method
-         * @param {string} ns
-         * @returns boolean
-         */
-        var exists      = function(ns) {
-            return get(ns, true) !== undf;
-        };
-
-        /**
-         * Add item only to the cache
-         * @function add
-         * @param {string} ns
-         * @param {*} value
-         */
-        var add = function(ns, value) {
-
-            ns = normalize(ns);
-            cache.add(ns, value);
-            return value;
-        };
-
-        /**
-         * Remove item from cache
-         * @method
-         * @param {string} ns
-         */
-        var remove = function(ns) {
-            ns = normalize(ns);
-            cache.remove(ns);
-        };
-
-        /**
-         * Make alias in the cache
-         * @method
-         * @param {string} from
-         * @param {string} to
-         */
-        var makeAlias = function(from, to) {
-
-            from = normalize(from);
-            to = normalize(to);
-
-            var value = cache.get(from);
-
-            if (value !== undf) {
-                cache.add(to, value);
-            }
-        };
-
-        /**
-         * Destroy namespace and all classes in it
-         * @method
-         */
-        var destroy     = function() {
-
-            var self = this,
-                k;
-
-            if (self === globalNs) {
-                globalNs = null;
-            }
-
-            cache.eachEntry(function(entry){
-                if (entry && entry.$destroy) {
-                    entry.$destroy();
-                }
-            });
-
-            cache.destroy();
-            cache = null;
-
-            for (k in self) {
-                self[k] = null;
-            }
-        };
-
-        self.register   = register;
-        self.exists     = exists;
-        self.get        = get;
-        self.add        = add;
-        self.remove     = remove;
-        self.normalize  = normalize;
-        self.makeAlias  = makeAlias;
-        self.destroy    = destroy;
+        return [current, last, ns];
     };
-
-    Namespace.prototype.register = null;
-    Namespace.prototype.exists = null;
-    Namespace.prototype.get = null;
-    Namespace.prototype.add = null;
-    Namespace.prototype.remove = null;
-    Namespace.prototype.normalize = null;
-    Namespace.prototype.makeAlias = null;
-    Namespace.prototype.destroy = null;
-
-    var globalNs;
 
     /**
-     * Get global namespace
+     * Get namespace/cache object. 
      * @method
-     * @static
-     * @returns {Namespace}
+     * @param {string} objName Object name to get link to. Use the same name
+     * as you used then registered or added the object.
+     * @param {bool} cacheOnly Only get cached value. 
+     * Return undefined if there is no cached value.
+     * @returns {*}
      */
-    Namespace.global = function() {
-        if (!globalNs) {
-            globalNs = new Namespace;
+    var get       = function(objName, cacheOnly) {
+
+        var ex = cache.get(objName, true);
+        if (ex !== undf || cacheOnly) {
+            return ex;
         }
-        return globalNs;
+
+        var tmp     = objName.split("."),
+            i,
+            len     = tmp.length,
+            name,
+            current = root;
+
+        for (i = 0; i < len; i++) {
+
+            name    = tmp[i];
+
+            if (current[name] === undf) {
+                return undf;
+            }
+
+            current = current[name];
+        }
+
+        if (current) {
+            cache.add(objName, current);
+        }
+
+        return current;
     };
 
-    return Namespace;
+    /**
+     * Register item in namespace and cache. Given <code>root</code> is your
+     * root object, registering <code>register("My.Value", 1)</code> will 
+     * result in <code>root.My.Value === 1</code>.
+     * @method
+     * @param {string} objName Object name to register
+     * @param {*} value
+     * @returns {*} value
+     */
+    var register    = function(objName, value) {
 
-}();
+        var parse   = parseNs(objName),
+            parent  = parse[0],
+            name    = parse[1];
+
+        if (isObject(parent) && parent[name] === undf) {
+            parent[name]        = value;
+            cache.add(parse[2], value);
+        }
+
+        return value;
+    };
+
+    /**
+     * Check if given object name exists in namespace.
+     * @method
+     * @param {string} objName
+     * @returns {boolean}
+     */
+    var exists      = function(objName) {
+        return get(ns, true) !== undf;
+    };
+
+    /**
+     * Add item only to cache. This method will not add anything
+     * to the root object. The <code>get</code> method will still return
+     * value of this object.
+     * @method
+     * @param {string} objName
+     * @param {*} value
+     * @returns {*} value
+     */
+    var add = function(objName, value) {
+        return cache.add(objName, value);
+    };
+
+    /**
+     * Remove item from cache. Leaves namespace object unchanged.
+     * @method
+     * @param {string} objName
+     * @returns {*} removed value
+     */
+    var remove = function(objName) {
+        return cache.remove(objName);
+    };
+
+    /**
+     * Make alias in the cache.
+     * @method
+     * @param {string} from
+     * @param {string} to
+     * @returns {*} value
+     */
+    var makeAlias = function(from, to) {
+
+        var value = cache.get(from);
+
+        if (value !== undf) {
+            cache.add(to, value);
+        }
+
+        return value;
+    };
+
+    /**
+     * Destroy namespace and all classes in it
+     * @method $destroy
+     */
+    var destroy     = function() {
+
+        var self = this,
+            k;
+
+        cache.eachEntry(function(entry){
+            if (entry && entry.$destroy) {
+                entry.$destroy();
+            }
+        });
+
+        cache.$destroy();
+        cache = null;
+
+        for (k in self) {
+            self[k] = null;
+        }
+    };
+
+    self.register   = register;
+    self.exists     = exists;
+    self.get        = get;
+    self.add        = add;
+    self.remove     = remove;
+    self.makeAlias  = makeAlias;
+    self.$destroy    = destroy;
+};
 
 
 
@@ -667,11 +612,10 @@ function intercept(origFn, interceptor, context, origContext, when, replaceValue
 
 
 
-var Class = function(){
+var classManagerFactory = function(){
 
 
     var proto   = "prototype",
-
         constr  = "$constructor",
 
         $constr = function $constr() {
@@ -683,7 +627,9 @@ var Class = function(){
 
         wrapPrototypeMethod = function wrapPrototypeMethod(parent, k, fn) {
 
-            var $super = parent[proto][k] || (k == constr ? parent : emptyFn) || emptyFn;
+            var $super = parent[proto][k] ||
+                        (k === constr ? parent : emptyFn) ||
+                        emptyFn;
 
             return function() {
                 var ret,
@@ -744,16 +690,16 @@ var Class = function(){
             var k;
             for (k in mixin) {
                 if (mixin.hasOwnProperty(k)) {
-                    if (k == "$beforeInit") {
+                    if (k === "$beforeInit") {
                         prototype.$beforeInit.push(mixin[k]);
                     }
-                    else if (k == "$afterInit") {
+                    else if (k === "$afterInit") {
                         prototype.$afterInit.push(mixin[k]);
                     }
-                    else if (k == "$beforeDestroy") {
+                    else if (k === "$beforeDestroy") {
                         prototype.$beforeDestroy.push(mixin[k]);
                     }
-                    else if (k == "$afterDestroy") {
+                    else if (k === "$afterDestroy") {
                         prototype.$afterDestroy.push(mixin[k]);
                     }
                     else if (!prototype[k]) {
@@ -764,7 +710,18 @@ var Class = function(){
         };
 
 
-    var Class = function(ns){
+    /**
+     * Instantiate class system with namespace.
+     * @group api
+     * @function
+     * @param {MetaphorJs.Namespace} ns {
+     *  Provide your own namespace or a new private ns will be 
+     *  constructed automatically. 
+     *  @optional
+     * }
+     * @returns {object} Returns cls() function/object. 
+     */
+    var classManagerFactory = function(ns) {
 
         if (!ns) {
             ns = new Namespace;
@@ -813,14 +770,13 @@ var Class = function(){
 
                         if (isString(plugin)) {
                             plCls = plugin;
-                            plugin = ns.get(plugin, true);
+                            plugin = ns ? ns.get(plugin, true) : null;
                             if (!plugin) {
                                 throw plCls + " not found";
                             }
                         }
-
+ 
                         plugin = new plugin(self, args);
-
                         pmap[plugin.$class] = plugin;
 
                         if (plugin.$beforeHostInit) {
@@ -849,11 +805,11 @@ var Class = function(){
 
 
         /**
+         * All classes defined with <code>cls</code> extend this class.
+         * Basically,<code>cls({});</code> is the same as 
+         * <code>BaseClass.$extend({})</code>.
+         * @group api
          * @class BaseClass
-         * @description All classes defined with MetaphorJs.Class extend this class.
-         * You can access it via <code>cs.BaseClass</code>. Basically,
-         * <code>cs.define({});</code> is the same as <code>cs.BaseClass.$extend({})</code>.
-         * @constructor
          */
         var BaseClass = function() {
 
@@ -861,8 +817,18 @@ var Class = function(){
 
         extend(BaseClass.prototype, {
 
+            /**
+             * Class name
+             * @property {string} 
+             */
             $class: null,
             $extends: null,
+
+            /**
+             * List of plugin names or constructors before class 
+             * is initialised, list of plugin instances after initialisation
+             * @property {array} 
+             */
             $plugins: null,
             $pluginMap: null,
             $mixins: null,
@@ -878,7 +844,7 @@ var Class = function(){
             $afterDestroy: [],
 
             /**
-             * Get class name
+             * Get this instance's class name
              * @method
              * @returns {string}
              */
@@ -887,6 +853,7 @@ var Class = function(){
             },
 
             /**
+             * Is this object instance of <code>cls</code>
              * @param {string} cls
              * @returns {boolean}
              */
@@ -909,19 +876,23 @@ var Class = function(){
              * @param {string} method Intercepted method name
              * @param {function} fn function to call before or after intercepted method
              * @param {object} newContext optional interceptor's "this" object
-             * @param {string} when optional, when to call interceptor before | after | instead; default "before"
-             * @param {bool} replaceValue optional, return interceptor's return value or original method's; default false
+             * @param {string} when optional, when to call interceptor 
+             *                         before | after | instead; default "before"
+             * @param {bool} replaceValue optional, return interceptor's return value 
+             *                  or original method's; default false
              * @returns {function} original method
              */
             $intercept: function(method, fn, newContext, when, replaceValue) {
                 var self = this,
                     orig = self[method];
-                self[method] = intercept(orig || emptyFn, fn, newContext || self, self, when, replaceValue);
+                self[method] = intercept(orig || emptyFn, fn, newContext || self, 
+                                            self, when, replaceValue);
                 return orig || emptyFn;
             },
 
             /**
              * Implement new methods or properties on instance
+             * @method
              * @param {object} methods
              */
             $implement: function(methods) {
@@ -933,44 +904,53 @@ var Class = function(){
 
             /**
              * Does this instance have a plugin
+             * @method
              * @param cls
-             * @returns {bool}
+             * @returns {boolean}
              */
             $hasPlugin: function(cls) {
-                return !!this.$pluginMap[ns.normalize(cls)];
+                return cls ? !!this.$pluginMap[cls] : false;
             },
 
             /**
-             * @param {string} cls
+             * Get plugin instance
+             * @method
+             * @param {string} cls Plugin class name
              * @returns {object|null}
              */
             $getPlugin: function(cls) {
-                return this.$pluginMap[ns.normalize(cls)] || null;
+                return cls ? this.$pluginMap[cls] || null : null;
             },
 
             /**
+             * Get a bound to this object function
+             * @method
              * @param {function} fn
              * @returns {Function}
              */
             $bind: function(fn) {
                 var self = this;
                 return function() {
-                    if (self.$isDestroyed()) {
-                        return;
+                    if (!self.$isDestroyed()) {
+                        return fn.apply(self, arguments);
                     }
-                    return fn.apply(self, arguments);
                 };
             },
 
             /**
-             * @return bool
+             * Is this object destroyed
+             * @method
+             * @return {boolean}
              */
             $isDestroyed: function() {
                 return self.$destroying || self.$destroyed;
             },
 
             /**
-             * Destroy instance
+             * Destroy this instance. Also destroys plugins and
+             * calls all beforeDestroy and afterDestroy handlers.
+             * Also calls onDestroy.<br>
+             * Safe to call multiple times.
              * @method
              */
             $destroy: function() {
@@ -996,9 +976,9 @@ var Class = function(){
                     }
                 }
 
-                res = self.destroy.apply(self, arguments);
+                res = self.onDestroy.apply(self, arguments);
 
-                for (i = -1, l = before.length; ++i < l;
+                for (i = -1, l = after.length; ++i < l;
                      after[i].apply(self, arguments)){}
 
                 for (i = 0, l = plugins.length; i < l; i++) {
@@ -1017,13 +997,17 @@ var Class = function(){
                 self.$destroyed = true;
             },
 
-            destroy: function(){}
+            /**
+             * Overridable method. Put your destructor here
+             * @method
+             */
+            onDestroy: function(){}
         });
 
         BaseClass.$self = BaseClass;
 
         /**
-         * Create an instance of current class. Same as cs.factory(name)
+         * Create an instance of current class. Same as <code>cls.factory(name)</code>
          * @method
          * @static
          * @code var myObj = My.Class.$instantiate(arg1, arg2, ...);
@@ -1070,18 +1054,21 @@ var Class = function(){
         };
 
         /**
-         * Create new class based on current one
+         * Create new class extending current one
+         * @static
+         * @method
          * @param {object} definition
          * @param {object} statics
          * @returns {function}
          */
         BaseClass.$extend = function(definition, statics) {
-            return define(definition, statics, this);
+            return defineClass(definition, statics, this);
         };
 
         /**
-         * Destroy class
+         * Destroy class (not the instance)
          * @method
+         * @static
          */
         BaseClass.$destroy = function() {
             var self = this,
@@ -1091,47 +1078,42 @@ var Class = function(){
                 self[k] = null;
             }
         };
+        /**
+         * @end-class
+         */
+
 
         /**
-         * @class Class
+         * Constructed class system. Also this is a function, same as 
+         * <code>cls.define</code>
+         * @group api
+         * @object cls
          */
 
         /**
-         * @method Class
-         * @constructor
-         * @param {Namespace} ns optional namespace. See metaphorjs-namespace repository
-         */
-
-        /**
-         * @method
-         * @param {object} definition {
-         *  @type {string} $class optional
-         *  @type {string} $extends optional
-         *  @type {array} $mixins optional
-         *  @type {function} $constructor optional
-         *  @type {function} $init optional
-         *  @type {function} $beforeInit if this is a mixin
-         *  @type {function} $afterInit if this is a mixin
-         *  @type {function} $beforeHostInit if this is a plugin
-         *  @type {function} $afterHostInit if this is a plugin
-         *  @type {function} $beforeDestroy if this is a mixin
-         *  @type {function} $afterDestroy if this is a mixin
-         *  @type {function} $beforeHostDestroy if this is a plugin
-         *  @type {function} destroy your own destroy function
+         * @property {function} define {
+         *  @param {object} definition {
+         *      @type {string} $class optional class name
+         *      @type {string} $extends optional parent class
+         *      @type {array} $mixins optional list of mixins
+         *      @type {function} $constructor optional low-level constructor
+         *      @type {function} $init optional constructor
+         *      @type {function} onDestroy your own destroy function
+         *  }
+         *  @param {object} statics any statis properties or methods
          * }
-         * @param {object} statics any statis properties or methods
-         * @param {string|function} $extends this is a private parameter; use definition.$extends
-         * @code var cls = cs.define({$class: "Name"});
+         * @code var Name = cls({$class: "Name"});
          */
-        var define = function(definition, statics, $extends) {
+        var defineClass = function defineClass(definition, statics, $extends) {
 
             definition          = definition || {};
             
             var name            = definition.$class,
                 parentClass     = $extends || definition.$extends,
                 mixins          = definition.$mixins,
+                alias           = definition.$alias,
                 pConstructor,
-                i, l, k, noop, prototype, c, mixin;
+                i, l, k, prototype, c, mixin;
 
             if (parentClass) {
                 if (isString(parentClass)) {
@@ -1151,19 +1133,11 @@ var Class = function(){
                 throw parentClass + " not found";
             }
 
-            if (name) {
-                name = ns.normalize(name);
-            }
-
             definition.$class   = name;
             definition.$extends = parentClass;
             definition.$mixins  = null;
 
-
-            noop                = function(){};
-            noop[proto]         = pConstructor[proto];
-            prototype           = new noop;
-            noop                = null;
+            prototype           = Object.create(pConstructor[proto]);
             definition[constr]  = definition[constr] || $constr;
 
             preparePrototype(prototype, definition, pConstructor);
@@ -1172,6 +1146,9 @@ var Class = function(){
                 for (i = 0, l = mixins.length; i < l; i++) {
                     mixin = mixins[i];
                     if (isString(mixin)) {
+                        if (!ns) {
+                            throw "Mixin " + mixin + " not found";
+                        }
                         mixin = ns.get(mixin, true);
                     }
                     mixinToPrototype(prototype, mixin);
@@ -1180,23 +1157,24 @@ var Class = function(){
 
             c = createConstructor(name);
             prototype.constructor = c;
+            prototype.$self = c;
             c[proto] = prototype;
 
             for (k in BaseClass) {
-                if (k != proto && BaseClass.hasOwnProperty(k)) {
+                if (k !== proto && BaseClass.hasOwnProperty(k)) {
                     c[k] = BaseClass[k];
                 }
             }
 
             for (k in pConstructor) {
-                if (k != proto && pConstructor.hasOwnProperty(k)) {
+                if (k !== proto && pConstructor.hasOwnProperty(k)) {
                     c[k] = pConstructor[k];
                 }
             }
 
             if (statics) {
                 for (k in statics) {
-                    if (k != proto && statics.hasOwnProperty(k)) {
+                    if (k !== proto && statics.hasOwnProperty(k)) {
                         c[k] = statics[k];
                     }
                 }
@@ -1205,8 +1183,13 @@ var Class = function(){
             c.$parent   = pConstructor;
             c.$self     = c;
 
-            if (name) {
-                ns.register(name, c);
+            if (ns) {
+                if (name) {
+                    ns.register(name, c);
+                }
+                if (alias) {
+                    ns.register(alias, c);
+                }
             }
 
             return c;
@@ -1217,14 +1200,15 @@ var Class = function(){
 
         /**
          * Instantiate class. Pass constructor parameters after "name"
-         * @method
-         * @code cs.factory("My.Class.Name", arg1, arg2, ...);
+         * @property {function} factory {
+         * @code cls.factory("My.Class.Name", arg1, arg2, ...);
          * @param {string} name Full name of the class
          * @returns {object} class instance
+         * }
          */
         var factory = function(name) {
 
-            var cls     = ns.get(name),
+            var cls     = ns ? ns.get(name) : null,
                 args    = slice.call(arguments, 1);
 
             if (!cls) {
@@ -1237,16 +1221,17 @@ var Class = function(){
 
 
         /**
-         * Is cmp instance of cls
-         * @method
-         * @code cs.instanceOf(myObj, "My.Class");
-         * @code cs.instanceOf(myObj, My.Class);
+         * Is given object instance of class
+         * @property {function} isInstanceOf {
+         * @code cls.instanceOf(myObj, "My.Class");
+         * @code cls.instanceOf(myObj, My.Class);
          * @param {object} cmp
-         * @param {string|object} cls
+         * @param {string|object} name
          * @returns {boolean}
+         * }
          */
-        var isInstanceOf = function(cmp, cls) {
-            var _cls    = isString(cls) ? ns.get(cls) : cls;
+        var isInstanceOf = function(cmp, name) {
+            var _cls    = isString(name) && ns ? ns.get(name) : name;
             return _cls ? cmp instanceof _cls : false;
         };
 
@@ -1254,33 +1239,32 @@ var Class = function(){
 
         /**
          * Is one class subclass of another class
-         * @method
-         * @code cs.isSubclassOf("My.Subclass", "My.Class");
-         * @code cs.isSubclassOf(myObj, "My.Class");
-         * @code cs.isSubclassOf("My.Subclass", My.Class);
-         * @code cs.isSubclassOf(myObj, My.Class);
+         * @property {function} isSubclassOf {
+         * @code cls.isSubclassOf("My.Subclass", "My.Class");
+         * @code cls.isSubclassOf(myObj, "My.Class");
+         * @code cls.isSubclassOf("My.Subclass", My.Class);
+         * @code cls.isSubclassOf(myObj, My.Class);
          * @param {string|object} childClass
          * @param {string|object} parentClass
-         * @return {bool}
+         * @return {boolean}
+         * }
          */
         var isSubclassOf = function(childClass, parentClass) {
 
             var p   = childClass,
-                g   = ns.get;
+                g   = ns ? ns.get : function(){};
 
             if (!isString(parentClass)) {
                 parentClass  = parentClass.prototype.$class;
             }
-            else {
-                parentClass = ns.normalize(parentClass);
-            }
+
             if (isString(childClass)) {
-                p   = g(ns.normalize(childClass));
+                p   = g(childClass);
             }
 
             while (p && p.prototype) {
 
-                if (p.prototype.$class == parentClass) {
+                if (p.prototype.$class === parentClass) {
                     return true;
                 }
 
@@ -1290,67 +1274,76 @@ var Class = function(){
             return false;
         };
 
-        var self    = this;
-
-        self.factory = factory;
-        self.isSubclassOf = isSubclassOf;
-        self.isInstanceOf = isInstanceOf;
-        self.define = define;
-
-        self.destroy = function(){
-
-            if (self === globalCs) {
-                globalCs = null;
-            }
-
-            BaseClass.$destroy();
-            BaseClass = null;
-
-            ns.destroy();
-            ns = null;
-
-            Class = null;
-
-        };
 
         /**
-         * @type {BaseClass} BaseClass reference to the BaseClass class
+         * Reference to the managerFactory
+         * @property {function} classManagerFactory
          */
-        self.BaseClass = BaseClass;
+        defineClass.classManagerFactory = classManagerFactory;
+        defineClass.factory = factory;
+        defineClass.isSubclassOf = isSubclassOf;
+        defineClass.isInstanceOf = isInstanceOf;
+        defineClass.define = defineClass;
 
+        /**ß
+         * @property {function} Namespace Namespace constructor
+         */
+        defineClass.Namespace = Namespace;
+
+        /**
+         * @property {class} BaseClass
+         */
+        defineClass.BaseClass = BaseClass;
+
+        /**
+         * @property {object} ns Namespace instance
+         */
+        defineClass.ns = ns;
+
+        /**
+         * @property {function} $destroy Destroy class system and namespace
+         */
+        defineClass.$destroy = function() {
+            BaseClass.$destroy();
+            BaseClass = null;
+            if (ns) {
+                ns.$destroy();
+                ns = null;
+            }
+        };
+
+        return defineClass;
     };
 
-    Class.prototype = {
-
-        factory: null,
-        isSubclassOf: null,
-        isInstanceOf: null,
-        define: null,
-        destroy: null
-    };
-
-    var globalCs;
-
-    /**
-     * Get default global class manager
-     * @method
-     * @static
-     * @returns {Class}
-     */
-    Class.global = function() {
-        if (!globalCs) {
-            globalCs = new Class(Namespace.global());
-        }
-        return globalCs;
-    };
-
-    return Class;
-
+    return classManagerFactory;
 }();
 
-var MetaphorJsExports = {};
-MetaphorJsExports['Namespace'] = Namespace;
-MetaphorJsExports['Class'] = Class;
-typeof global != "undefined" ? (global['MetaphorJs'] = MetaphorJsExports) : (window['MetaphorJs'] = MetaphorJsExports);
 
+
+
+/**
+ * Already constructed private namespace 
+ * with <code>MetaphorJs</code> object and its alias <code>mjs</code> 
+ * registered at top level.
+ * @var ns 
+ */
+var ns = (function(){
+    var ns = new Namespace();
+    ns.register("MetaphorJs", MetaphorJs);
+    ns.register("mjs", MetaphorJs);
+    return ns;
 }());
+
+
+
+
+var cls = classManagerFactory(ns);
+
+var __mjsExport = {};
+__mjsExport['classManagerFactory'] = classManagerFactory;
+__mjsExport['Namespace'] = Namespace;
+__mjsExport['cls'] = cls;
+
+typeof global != "undefined" ? (global['MetaphorJs'] = __mjsExport) : (window['MetaphorJs'] = __mjsExport);
+
+}());/* BUNDLE END 003 */

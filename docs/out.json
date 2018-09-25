@@ -1,0 +1,2456 @@
+{
+  "items": [
+    {
+      "isFunction": true,
+      "isApiItem": true,
+      "group": "api",
+      "type": "function",
+      "name": "classManagerFactory",
+      "fullName": "function:classManagerFactory",
+      "file": "src/classManagerFactory.js",
+      "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+      "fileType": "js",
+      "template": "js.item.function",
+      "hasInherited": false,
+      "isInherited": false,
+      "level": 1,
+      "flags": {
+        "returnDescription": [
+          {
+            "contentType": "string",
+            "content": "Returns cls() function/object.",
+            "template": "js.flag.returnDescription"
+          }
+        ],
+        "returns": [
+          {
+            "contentType": "string",
+            "content": "object",
+            "template": "js.flag.returns"
+          }
+        ]
+      },
+      "plainFlags": {
+        "returnDescription": [
+          "Returns cls() function/object."
+        ],
+        "returns": [
+          "object"
+        ]
+      },
+      "booleanFlags": [],
+      "children": [
+        {
+          "isApiGroup": true,
+          "type": "param",
+          "items": [
+            {
+              "isApiItem": true,
+              "group": "param",
+              "type": "param",
+              "name": "ns",
+              "fullName": "function:classManagerFactory/ns",
+              "file": "src/classManagerFactory.js",
+              "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+              "fileType": "js",
+              "template": "js.item.param",
+              "hasInherited": false,
+              "isInherited": false,
+              "level": 2,
+              "flags": {
+                "type": [
+                  {
+                    "contentType": "typeRef",
+                    "content": "MetaphorJs.Namespace",
+                    "template": "js.flag.type",
+                    "ref": "MetaphorJs.Namespace"
+                  }
+                ]
+              },
+              "plainFlags": {
+                "type": [
+                  "MetaphorJs.Namespace"
+                ]
+              },
+              "booleanFlags": [
+                "optional"
+              ],
+              "children": [],
+              "childTypes": [],
+              "line": 121,
+              "description": [
+                {
+                  "contentType": "string",
+                  "content": "Provide your own namespace or a new private ns will be\nconstructed automatically.",
+                  "template": "js.flag.description"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "childTypes": [
+        "param"
+      ],
+      "line": 121,
+      "description": [
+        {
+          "contentType": "string",
+          "content": "Instantiate class system with namespace.",
+          "template": "js.flag.description"
+        }
+      ]
+    },
+    {
+      "isApiItem": true,
+      "group": "api",
+      "type": "class",
+      "name": "BaseClass",
+      "fullName": "class:BaseClass",
+      "file": "src/classManagerFactory.js",
+      "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+      "fileType": "js",
+      "template": "js.item.class",
+      "hasInherited": false,
+      "isInherited": false,
+      "level": 1,
+      "flags": {},
+      "plainFlags": {},
+      "booleanFlags": [],
+      "children": [
+        {
+          "isApiGroup": true,
+          "type": "property",
+          "name": "Property",
+          "groupName": "Properties",
+          "items": [
+            {
+              "isApiItem": true,
+              "group": "property",
+              "type": "property",
+              "name": "$class",
+              "fullName": "class:BaseClass.$class",
+              "file": "src/classManagerFactory.js",
+              "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+              "fileType": "js",
+              "template": "js.item.property",
+              "hasInherited": false,
+              "isInherited": false,
+              "level": 2,
+              "flags": {
+                "type": [
+                  {
+                    "contentType": "string",
+                    "content": "string",
+                    "template": "js.flag.type"
+                  }
+                ]
+              },
+              "plainFlags": {
+                "type": [
+                  "string"
+                ]
+              },
+              "booleanFlags": [],
+              "children": [],
+              "childTypes": [],
+              "line": 221,
+              "description": [
+                {
+                  "contentType": "string",
+                  "content": "Class name",
+                  "template": "js.flag.description"
+                }
+              ]
+            },
+            {
+              "isApiItem": true,
+              "group": "property",
+              "type": "property",
+              "name": "$plugins",
+              "fullName": "class:BaseClass.$plugins",
+              "file": "src/classManagerFactory.js",
+              "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+              "fileType": "js",
+              "template": "js.item.property",
+              "hasInherited": false,
+              "isInherited": false,
+              "level": 2,
+              "flags": {
+                "type": [
+                  {
+                    "contentType": "string",
+                    "content": "array",
+                    "template": "js.flag.type"
+                  }
+                ]
+              },
+              "plainFlags": {
+                "type": [
+                  "array"
+                ]
+              },
+              "booleanFlags": [],
+              "children": [],
+              "childTypes": [],
+              "line": 229,
+              "description": [
+                {
+                  "contentType": "string",
+                  "content": "List of plugin names or constructors before class\nis initialised, list of plugin instances after initialisation",
+                  "template": "js.flag.description"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "isApiGroup": true,
+          "type": "method",
+          "name": "Method",
+          "groupName": "Methods",
+          "items": [
+            {
+              "isFunction": true,
+              "isApiItem": true,
+              "group": "method",
+              "type": "method",
+              "name": "$getClass",
+              "fullName": "class:BaseClass.$getClass",
+              "file": "src/classManagerFactory.js",
+              "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+              "fileType": "js",
+              "template": "js.item.method",
+              "hasInherited": false,
+              "isInherited": false,
+              "level": 2,
+              "flags": {
+                "returns": [
+                  {
+                    "contentType": "string",
+                    "content": "string",
+                    "template": "js.flag.returns"
+                  }
+                ]
+              },
+              "plainFlags": {
+                "returns": [
+                  "string"
+                ]
+              },
+              "booleanFlags": [],
+              "children": [],
+              "childTypes": [],
+              "line": 248,
+              "description": [
+                {
+                  "contentType": "string",
+                  "content": "Get this instance's class name",
+                  "template": "js.flag.description"
+                }
+              ]
+            },
+            {
+              "isFunction": true,
+              "isApiItem": true,
+              "group": "method",
+              "type": "method",
+              "name": "$is",
+              "fullName": "class:BaseClass.$is",
+              "file": "src/classManagerFactory.js",
+              "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+              "fileType": "js",
+              "template": "js.item.method",
+              "hasInherited": false,
+              "isInherited": false,
+              "level": 2,
+              "flags": {
+                "returns": [
+                  {
+                    "contentType": "string",
+                    "content": "boolean",
+                    "template": "js.flag.returns"
+                  }
+                ]
+              },
+              "plainFlags": {
+                "returns": [
+                  "boolean"
+                ]
+              },
+              "booleanFlags": [],
+              "children": [
+                {
+                  "isApiGroup": true,
+                  "type": "param",
+                  "items": [
+                    {
+                      "isApiItem": true,
+                      "group": "param",
+                      "type": "param",
+                      "name": "cls",
+                      "fullName": "class:BaseClass.$is/cls",
+                      "file": "src/classManagerFactory.js",
+                      "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+                      "fileType": "js",
+                      "template": "js.item.param",
+                      "hasInherited": false,
+                      "isInherited": false,
+                      "level": 3,
+                      "flags": {
+                        "type": [
+                          {
+                            "contentType": "string",
+                            "content": "string",
+                            "template": "js.flag.type"
+                          }
+                        ]
+                      },
+                      "plainFlags": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "booleanFlags": [],
+                      "children": [],
+                      "childTypes": [],
+                      "line": 257
+                    }
+                  ]
+                }
+              ],
+              "childTypes": [
+                "param"
+              ],
+              "line": 257,
+              "description": [
+                {
+                  "contentType": "string",
+                  "content": "Is this object instance of <code>cls</code>",
+                  "template": "js.flag.description"
+                }
+              ]
+            },
+            {
+              "isFunction": true,
+              "isApiItem": true,
+              "group": "method",
+              "type": "method",
+              "name": "$getParentClass",
+              "fullName": "class:BaseClass.$getParentClass",
+              "file": "src/classManagerFactory.js",
+              "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+              "fileType": "js",
+              "template": "js.item.method",
+              "hasInherited": false,
+              "isInherited": false,
+              "level": 2,
+              "flags": {
+                "returns": [
+                  {
+                    "contentType": "string",
+                    "content": "string ",
+                    "template": "js.flag.returns"
+                  },
+                  {
+                    "contentType": "string",
+                    "content": " null",
+                    "template": "js.flag.returns"
+                  }
+                ]
+              },
+              "plainFlags": {
+                "returns": [
+                  "string ",
+                  " null"
+                ]
+              },
+              "booleanFlags": [],
+              "children": [],
+              "childTypes": [],
+              "line": 266,
+              "description": [
+                {
+                  "contentType": "string",
+                  "content": "Get parent class name",
+                  "template": "js.flag.description"
+                }
+              ]
+            },
+            {
+              "isFunction": true,
+              "isApiItem": true,
+              "group": "method",
+              "type": "method",
+              "name": "$intercept",
+              "fullName": "class:BaseClass.$intercept",
+              "file": "src/classManagerFactory.js",
+              "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+              "fileType": "js",
+              "template": "js.item.method",
+              "hasInherited": false,
+              "isInherited": false,
+              "level": 2,
+              "flags": {
+                "returnDescription": [
+                  {
+                    "contentType": "string",
+                    "content": "original method",
+                    "template": "js.flag.returnDescription"
+                  }
+                ],
+                "returns": [
+                  {
+                    "contentType": "string",
+                    "content": "function",
+                    "template": "js.flag.returns"
+                  }
+                ]
+              },
+              "plainFlags": {
+                "returnDescription": [
+                  "original method"
+                ],
+                "returns": [
+                  "function"
+                ]
+              },
+              "booleanFlags": [],
+              "children": [
+                {
+                  "isApiGroup": true,
+                  "type": "param",
+                  "items": [
+                    {
+                      "isApiItem": true,
+                      "group": "param",
+                      "type": "param",
+                      "name": "method",
+                      "fullName": "class:BaseClass.$intercept/method",
+                      "file": "src/classManagerFactory.js",
+                      "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+                      "fileType": "js",
+                      "template": "js.item.param",
+                      "hasInherited": false,
+                      "isInherited": false,
+                      "level": 3,
+                      "flags": {
+                        "type": [
+                          {
+                            "contentType": "string",
+                            "content": "string",
+                            "template": "js.flag.type"
+                          }
+                        ]
+                      },
+                      "plainFlags": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "booleanFlags": [],
+                      "children": [],
+                      "childTypes": [],
+                      "line": 282,
+                      "description": [
+                        {
+                          "contentType": "string",
+                          "content": "Intercepted method name",
+                          "template": "js.flag.description"
+                        }
+                      ]
+                    },
+                    {
+                      "isApiItem": true,
+                      "group": "param",
+                      "type": "param",
+                      "name": "fn",
+                      "fullName": "class:BaseClass.$intercept/fn",
+                      "file": "src/classManagerFactory.js",
+                      "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+                      "fileType": "js",
+                      "template": "js.item.param",
+                      "hasInherited": false,
+                      "isInherited": false,
+                      "level": 3,
+                      "flags": {
+                        "type": [
+                          {
+                            "contentType": "string",
+                            "content": "function",
+                            "template": "js.flag.type"
+                          }
+                        ]
+                      },
+                      "plainFlags": {
+                        "type": [
+                          "function"
+                        ]
+                      },
+                      "booleanFlags": [],
+                      "children": [],
+                      "childTypes": [],
+                      "line": 282,
+                      "description": [
+                        {
+                          "contentType": "string",
+                          "content": "function to call before or after intercepted method",
+                          "template": "js.flag.description"
+                        }
+                      ]
+                    },
+                    {
+                      "isApiItem": true,
+                      "group": "param",
+                      "type": "param",
+                      "name": "newContext",
+                      "fullName": "class:BaseClass.$intercept/newContext",
+                      "file": "src/classManagerFactory.js",
+                      "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+                      "fileType": "js",
+                      "template": "js.item.param",
+                      "hasInherited": false,
+                      "isInherited": false,
+                      "level": 3,
+                      "flags": {
+                        "type": [
+                          {
+                            "contentType": "string",
+                            "content": "object",
+                            "template": "js.flag.type"
+                          }
+                        ]
+                      },
+                      "plainFlags": {
+                        "type": [
+                          "object"
+                        ]
+                      },
+                      "booleanFlags": [],
+                      "children": [],
+                      "childTypes": [],
+                      "line": 282,
+                      "description": [
+                        {
+                          "contentType": "string",
+                          "content": "optional interceptor's \"this\" object",
+                          "template": "js.flag.description"
+                        }
+                      ]
+                    },
+                    {
+                      "isApiItem": true,
+                      "group": "param",
+                      "type": "param",
+                      "name": "when",
+                      "fullName": "class:BaseClass.$intercept/when",
+                      "file": "src/classManagerFactory.js",
+                      "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+                      "fileType": "js",
+                      "template": "js.item.param",
+                      "hasInherited": false,
+                      "isInherited": false,
+                      "level": 3,
+                      "flags": {
+                        "type": [
+                          {
+                            "contentType": "string",
+                            "content": "string",
+                            "template": "js.flag.type"
+                          }
+                        ]
+                      },
+                      "plainFlags": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "booleanFlags": [],
+                      "children": [],
+                      "childTypes": [],
+                      "line": 282,
+                      "description": [
+                        {
+                          "contentType": "string",
+                          "content": "optional, when to call interceptor\n                        before | after | instead; default \"before\"",
+                          "template": "js.flag.description"
+                        }
+                      ]
+                    },
+                    {
+                      "isApiItem": true,
+                      "group": "param",
+                      "type": "param",
+                      "name": "replaceValue",
+                      "fullName": "class:BaseClass.$intercept/replaceValue",
+                      "file": "src/classManagerFactory.js",
+                      "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+                      "fileType": "js",
+                      "template": "js.item.param",
+                      "hasInherited": false,
+                      "isInherited": false,
+                      "level": 3,
+                      "flags": {
+                        "type": [
+                          {
+                            "contentType": "string",
+                            "content": "boolean",
+                            "template": "js.flag.type"
+                          }
+                        ]
+                      },
+                      "plainFlags": {
+                        "type": [
+                          "boolean"
+                        ]
+                      },
+                      "booleanFlags": [],
+                      "children": [],
+                      "childTypes": [],
+                      "line": 282,
+                      "description": [
+                        {
+                          "contentType": "string",
+                          "content": "optional, return interceptor's return value\n                 or original method's; default false",
+                          "template": "js.flag.description"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "childTypes": [
+                "param"
+              ],
+              "line": 282,
+              "description": [
+                {
+                  "contentType": "string",
+                  "content": "Intercept method",
+                  "template": "js.flag.description"
+                }
+              ]
+            },
+            {
+              "isFunction": true,
+              "isApiItem": true,
+              "group": "method",
+              "type": "method",
+              "name": "$implement",
+              "fullName": "class:BaseClass.$implement",
+              "file": "src/classManagerFactory.js",
+              "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+              "fileType": "js",
+              "template": "js.item.method",
+              "hasInherited": false,
+              "isInherited": false,
+              "level": 2,
+              "flags": {},
+              "plainFlags": {},
+              "booleanFlags": [],
+              "children": [
+                {
+                  "isApiGroup": true,
+                  "type": "param",
+                  "items": [
+                    {
+                      "isApiItem": true,
+                      "group": "param",
+                      "type": "param",
+                      "name": "methods",
+                      "fullName": "class:BaseClass.$implement/methods",
+                      "file": "src/classManagerFactory.js",
+                      "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+                      "fileType": "js",
+                      "template": "js.item.param",
+                      "hasInherited": false,
+                      "isInherited": false,
+                      "level": 3,
+                      "flags": {
+                        "type": [
+                          {
+                            "contentType": "string",
+                            "content": "object",
+                            "template": "js.flag.type"
+                          }
+                        ]
+                      },
+                      "plainFlags": {
+                        "type": [
+                          "object"
+                        ]
+                      },
+                      "booleanFlags": [],
+                      "children": [],
+                      "childTypes": [],
+                      "line": 295
+                    }
+                  ]
+                }
+              ],
+              "childTypes": [
+                "param"
+              ],
+              "line": 295,
+              "description": [
+                {
+                  "contentType": "string",
+                  "content": "Implement new methods or properties on instance",
+                  "template": "js.flag.description"
+                }
+              ]
+            },
+            {
+              "isFunction": true,
+              "isApiItem": true,
+              "group": "method",
+              "type": "method",
+              "name": "$hasPlugin",
+              "fullName": "class:BaseClass.$hasPlugin",
+              "file": "src/classManagerFactory.js",
+              "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+              "fileType": "js",
+              "template": "js.item.method",
+              "hasInherited": false,
+              "isInherited": false,
+              "level": 2,
+              "flags": {
+                "returns": [
+                  {
+                    "contentType": "string",
+                    "content": "boolean",
+                    "template": "js.flag.returns"
+                  }
+                ]
+              },
+              "plainFlags": {
+                "returns": [
+                  "boolean"
+                ]
+              },
+              "booleanFlags": [],
+              "children": [
+                {
+                  "isApiGroup": true,
+                  "type": "param",
+                  "items": [
+                    {
+                      "isApiItem": true,
+                      "group": "param",
+                      "type": "param",
+                      "name": "$hasPlugin",
+                      "fullName": "class:BaseClass.$hasPlugin/$hasPlugin",
+                      "file": "src/classManagerFactory.js",
+                      "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+                      "fileType": "js",
+                      "template": "js.item.param",
+                      "hasInherited": false,
+                      "isInherited": false,
+                      "level": 3,
+                      "flags": {
+                        "type": [
+                          {
+                            "contentType": "typeRef",
+                            "content": "cls",
+                            "template": "js.flag.type",
+                            "ref": "class:BaseClass.$is/cls"
+                          }
+                        ]
+                      },
+                      "plainFlags": {
+                        "type": [
+                          "cls"
+                        ]
+                      },
+                      "booleanFlags": [],
+                      "children": [],
+                      "childTypes": [],
+                      "line": 308
+                    }
+                  ]
+                }
+              ],
+              "childTypes": [
+                "param"
+              ],
+              "line": 308,
+              "description": [
+                {
+                  "contentType": "string",
+                  "content": "Does this instance have a plugin",
+                  "template": "js.flag.description"
+                }
+              ]
+            },
+            {
+              "isFunction": true,
+              "isApiItem": true,
+              "group": "method",
+              "type": "method",
+              "name": "$getPlugin",
+              "fullName": "class:BaseClass.$getPlugin",
+              "file": "src/classManagerFactory.js",
+              "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+              "fileType": "js",
+              "template": "js.item.method",
+              "hasInherited": false,
+              "isInherited": false,
+              "level": 2,
+              "flags": {
+                "returns": [
+                  {
+                    "contentType": "string",
+                    "content": "object",
+                    "template": "js.flag.returns"
+                  },
+                  {
+                    "contentType": "string",
+                    "content": "null",
+                    "template": "js.flag.returns"
+                  }
+                ]
+              },
+              "plainFlags": {
+                "returns": [
+                  "object",
+                  "null"
+                ]
+              },
+              "booleanFlags": [],
+              "children": [
+                {
+                  "isApiGroup": true,
+                  "type": "param",
+                  "items": [
+                    {
+                      "isApiItem": true,
+                      "group": "param",
+                      "type": "param",
+                      "name": "cls",
+                      "fullName": "class:BaseClass.$getPlugin/cls",
+                      "file": "src/classManagerFactory.js",
+                      "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+                      "fileType": "js",
+                      "template": "js.item.param",
+                      "hasInherited": false,
+                      "isInherited": false,
+                      "level": 3,
+                      "flags": {
+                        "type": [
+                          {
+                            "contentType": "string",
+                            "content": "string",
+                            "template": "js.flag.type"
+                          }
+                        ]
+                      },
+                      "plainFlags": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "booleanFlags": [],
+                      "children": [],
+                      "childTypes": [],
+                      "line": 318,
+                      "description": [
+                        {
+                          "contentType": "string",
+                          "content": "Plugin class name",
+                          "template": "js.flag.description"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "childTypes": [
+                "param"
+              ],
+              "line": 318,
+              "description": [
+                {
+                  "contentType": "string",
+                  "content": "Get plugin instance",
+                  "template": "js.flag.description"
+                }
+              ]
+            },
+            {
+              "isFunction": true,
+              "isApiItem": true,
+              "group": "method",
+              "type": "method",
+              "name": "$bind",
+              "fullName": "class:BaseClass.$bind",
+              "file": "src/classManagerFactory.js",
+              "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+              "fileType": "js",
+              "template": "js.item.method",
+              "hasInherited": false,
+              "isInherited": false,
+              "level": 2,
+              "flags": {
+                "returns": [
+                  {
+                    "contentType": "string",
+                    "content": "function",
+                    "template": "js.flag.returns"
+                  }
+                ]
+              },
+              "plainFlags": {
+                "returns": [
+                  "function"
+                ]
+              },
+              "booleanFlags": [],
+              "children": [
+                {
+                  "isApiGroup": true,
+                  "type": "param",
+                  "items": [
+                    {
+                      "isApiItem": true,
+                      "group": "param",
+                      "type": "param",
+                      "name": "fn",
+                      "fullName": "class:BaseClass.$bind/fn",
+                      "file": "src/classManagerFactory.js",
+                      "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+                      "fileType": "js",
+                      "template": "js.item.param",
+                      "hasInherited": false,
+                      "isInherited": false,
+                      "level": 3,
+                      "flags": {
+                        "type": [
+                          {
+                            "contentType": "string",
+                            "content": "function",
+                            "template": "js.flag.type"
+                          }
+                        ]
+                      },
+                      "plainFlags": {
+                        "type": [
+                          "function"
+                        ]
+                      },
+                      "booleanFlags": [],
+                      "children": [],
+                      "childTypes": [],
+                      "line": 328
+                    }
+                  ]
+                }
+              ],
+              "childTypes": [
+                "param"
+              ],
+              "line": 328,
+              "description": [
+                {
+                  "contentType": "string",
+                  "content": "Get a bound to this object function",
+                  "template": "js.flag.description"
+                }
+              ]
+            },
+            {
+              "isFunction": true,
+              "isApiItem": true,
+              "group": "method",
+              "type": "method",
+              "name": "$isDestroyed",
+              "fullName": "class:BaseClass.$isDestroyed",
+              "file": "src/classManagerFactory.js",
+              "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+              "fileType": "js",
+              "template": "js.item.method",
+              "hasInherited": false,
+              "isInherited": false,
+              "level": 2,
+              "flags": {
+                "returns": [
+                  {
+                    "contentType": "string",
+                    "content": "boolean",
+                    "template": "js.flag.returns"
+                  }
+                ]
+              },
+              "plainFlags": {
+                "returns": [
+                  "boolean"
+                ]
+              },
+              "booleanFlags": [],
+              "children": [],
+              "childTypes": [],
+              "line": 342,
+              "description": [
+                {
+                  "contentType": "string",
+                  "content": "Is this object destroyed",
+                  "template": "js.flag.description"
+                }
+              ]
+            },
+            {
+              "isFunction": true,
+              "isApiItem": true,
+              "group": "method",
+              "type": "method",
+              "name": "$destroy",
+              "fullName": "class:BaseClass.$destroy",
+              "file": "src/classManagerFactory.js",
+              "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+              "fileType": "js",
+              "template": "js.item.method",
+              "hasInherited": false,
+              "isInherited": false,
+              "level": 2,
+              "flags": {},
+              "plainFlags": {},
+              "booleanFlags": [],
+              "children": [],
+              "childTypes": [],
+              "line": 353,
+              "description": [
+                {
+                  "contentType": "string",
+                  "content": "Destroy this instance. Also destroys plugins and\ncalls all beforeDestroy and afterDestroy handlers.\nAlso calls onDestroy.<br>\nSafe to call multiple times.",
+                  "template": "js.flag.description"
+                }
+              ]
+            },
+            {
+              "isFunction": true,
+              "isApiItem": true,
+              "group": "method",
+              "type": "method",
+              "name": "onDestroy",
+              "fullName": "class:BaseClass.onDestroy",
+              "file": "src/classManagerFactory.js",
+              "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+              "fileType": "js",
+              "template": "js.item.method",
+              "hasInherited": false,
+              "isInherited": false,
+              "level": 2,
+              "flags": {},
+              "plainFlags": {},
+              "booleanFlags": [],
+              "children": [],
+              "childTypes": [],
+              "line": 401,
+              "description": [
+                {
+                  "contentType": "string",
+                  "content": "Overridable method. Put your destructor here",
+                  "template": "js.flag.description"
+                }
+              ]
+            },
+            {
+              "isFunction": true,
+              "isApiItem": true,
+              "group": "method",
+              "type": "method",
+              "name": "$instantiate",
+              "fullName": "class:BaseClass.$instantiate",
+              "file": "src/classManagerFactory.js",
+              "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+              "fileType": "js",
+              "template": "js.item.method",
+              "hasInherited": false,
+              "isInherited": false,
+              "level": 2,
+              "flags": {
+                "returnDescription": [
+                  {
+                    "contentType": "string",
+                    "content": "class instance",
+                    "template": "js.flag.returnDescription"
+                  }
+                ],
+                "returns": [
+                  {
+                    "contentType": "string",
+                    "content": "object",
+                    "template": "js.flag.returns"
+                  }
+                ]
+              },
+              "plainFlags": {
+                "returnDescription": [
+                  "class instance"
+                ],
+                "returns": [
+                  "object"
+                ]
+              },
+              "booleanFlags": [
+                "static"
+              ],
+              "children": [],
+              "childTypes": [],
+              "line": 413,
+              "description": [
+                {
+                  "contentType": "string",
+                  "content": "Create an instance of current class. Same as <code>cls.factory(name)</code>",
+                  "template": "js.flag.description"
+                },
+                {
+                  "contentType": "code",
+                  "content": "var myObj = My.Class.$instantiate(arg1, arg2, ...);",
+                  "template": "js.flag.description",
+                  "fileType": "js"
+                }
+              ]
+            },
+            {
+              "isFunction": true,
+              "isApiItem": true,
+              "group": "method",
+              "type": "method",
+              "name": "$override",
+              "fullName": "class:BaseClass.$override",
+              "file": "src/classManagerFactory.js",
+              "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+              "fileType": "js",
+              "template": "js.item.method",
+              "hasInherited": false,
+              "isInherited": false,
+              "level": 2,
+              "flags": {},
+              "plainFlags": {},
+              "booleanFlags": [
+                "static"
+              ],
+              "children": [
+                {
+                  "isApiGroup": true,
+                  "type": "param",
+                  "items": [
+                    {
+                      "isApiItem": true,
+                      "group": "param",
+                      "type": "param",
+                      "name": "methods",
+                      "fullName": "class:BaseClass.$override/methods",
+                      "file": "src/classManagerFactory.js",
+                      "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+                      "fileType": "js",
+                      "template": "js.item.param",
+                      "hasInherited": false,
+                      "isInherited": false,
+                      "level": 3,
+                      "flags": {
+                        "type": [
+                          {
+                            "contentType": "string",
+                            "content": "object",
+                            "template": "js.flag.type"
+                          }
+                        ]
+                      },
+                      "plainFlags": {
+                        "type": [
+                          "object"
+                        ]
+                      },
+                      "booleanFlags": [],
+                      "children": [],
+                      "childTypes": [],
+                      "line": 444
+                    }
+                  ]
+                }
+              ],
+              "childTypes": [
+                "param"
+              ],
+              "line": 444,
+              "description": [
+                {
+                  "contentType": "string",
+                  "content": "Override class methods (on prototype level, not on instance level)",
+                  "template": "js.flag.description"
+                }
+              ]
+            },
+            {
+              "isFunction": true,
+              "isApiItem": true,
+              "group": "method",
+              "type": "method",
+              "name": "$extend",
+              "fullName": "class:BaseClass.$extend",
+              "file": "src/classManagerFactory.js",
+              "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+              "fileType": "js",
+              "template": "js.item.method",
+              "hasInherited": false,
+              "isInherited": false,
+              "level": 2,
+              "flags": {
+                "returns": [
+                  {
+                    "contentType": "string",
+                    "content": "function",
+                    "template": "js.flag.returns"
+                  }
+                ]
+              },
+              "plainFlags": {
+                "returns": [
+                  "function"
+                ]
+              },
+              "booleanFlags": [
+                "static"
+              ],
+              "children": [
+                {
+                  "isApiGroup": true,
+                  "type": "param",
+                  "items": [
+                    {
+                      "isApiItem": true,
+                      "group": "param",
+                      "type": "param",
+                      "name": "definition",
+                      "fullName": "class:BaseClass.$extend/definition",
+                      "file": "src/classManagerFactory.js",
+                      "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+                      "fileType": "js",
+                      "template": "js.item.param",
+                      "hasInherited": false,
+                      "isInherited": false,
+                      "level": 3,
+                      "flags": {
+                        "type": [
+                          {
+                            "contentType": "string",
+                            "content": "object",
+                            "template": "js.flag.type"
+                          }
+                        ]
+                      },
+                      "plainFlags": {
+                        "type": [
+                          "object"
+                        ]
+                      },
+                      "booleanFlags": [],
+                      "children": [],
+                      "childTypes": [],
+                      "line": 461
+                    },
+                    {
+                      "isApiItem": true,
+                      "group": "param",
+                      "type": "param",
+                      "name": "statics",
+                      "fullName": "class:BaseClass.$extend/statics",
+                      "file": "src/classManagerFactory.js",
+                      "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+                      "fileType": "js",
+                      "template": "js.item.param",
+                      "hasInherited": false,
+                      "isInherited": false,
+                      "level": 3,
+                      "flags": {
+                        "type": [
+                          {
+                            "contentType": "string",
+                            "content": "object",
+                            "template": "js.flag.type"
+                          }
+                        ]
+                      },
+                      "plainFlags": {
+                        "type": [
+                          "object"
+                        ]
+                      },
+                      "booleanFlags": [],
+                      "children": [],
+                      "childTypes": [],
+                      "line": 461
+                    }
+                  ]
+                }
+              ],
+              "childTypes": [
+                "param"
+              ],
+              "line": 461,
+              "description": [
+                {
+                  "contentType": "string",
+                  "content": "Create new class extending current one",
+                  "template": "js.flag.description"
+                }
+              ]
+            },
+            {
+              "isFunction": true,
+              "isApiItem": true,
+              "group": "method",
+              "type": "method",
+              "name": "$destroy",
+              "fullName": "class:BaseClass.$destroy",
+              "file": "src/classManagerFactory.js",
+              "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+              "fileType": "js",
+              "template": "js.item.method",
+              "hasInherited": false,
+              "isInherited": false,
+              "level": 2,
+              "flags": {},
+              "plainFlags": {},
+              "booleanFlags": [
+                "static"
+              ],
+              "children": [],
+              "childTypes": [],
+              "line": 470,
+              "description": [
+                {
+                  "contentType": "string",
+                  "content": "Destroy class (not the instance)",
+                  "template": "js.flag.description"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "childTypes": [
+        "property",
+        "method"
+      ],
+      "line": 211,
+      "description": [
+        {
+          "contentType": "string",
+          "content": "All classes defined with <code>cls</code> extend this class.\nBasically,<code>cls({});</code> is the same as\n<code>BaseClass.$extend({})</code>.",
+          "template": "js.flag.description"
+        }
+      ]
+    },
+    {
+      "isApiItem": true,
+      "group": "api",
+      "type": "object",
+      "name": "cls",
+      "fullName": "object:cls",
+      "file": "src/classManagerFactory.js",
+      "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+      "fileType": "js",
+      "template": "js.item.object",
+      "hasInherited": false,
+      "isInherited": false,
+      "level": 1,
+      "flags": {},
+      "plainFlags": {},
+      "booleanFlags": [],
+      "children": [
+        {
+          "isApiGroup": true,
+          "type": "property",
+          "name": "Property",
+          "groupName": "Properties",
+          "items": [
+            {
+              "isApiItem": true,
+              "group": "property",
+              "type": "property",
+              "name": "define",
+              "fullName": "object:cls.define",
+              "file": "src/classManagerFactory.js",
+              "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+              "fileType": "js",
+              "template": "js.item.property",
+              "hasInherited": false,
+              "isInherited": false,
+              "level": 2,
+              "flags": {
+                "type": [
+                  {
+                    "contentType": "string",
+                    "content": "function",
+                    "template": "js.flag.type"
+                  }
+                ]
+              },
+              "plainFlags": {
+                "type": [
+                  "function"
+                ]
+              },
+              "booleanFlags": [],
+              "children": [
+                {
+                  "isApiGroup": true,
+                  "type": "param",
+                  "items": [
+                    {
+                      "isApiItem": true,
+                      "group": "param",
+                      "type": "param",
+                      "name": "definition",
+                      "fullName": "object:cls.define/definition",
+                      "file": "src/classManagerFactory.js",
+                      "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+                      "fileType": "js",
+                      "template": "js.item.param",
+                      "hasInherited": false,
+                      "isInherited": false,
+                      "level": 3,
+                      "flags": {
+                        "type": [
+                          {
+                            "contentType": "string",
+                            "content": "object",
+                            "template": "js.flag.type"
+                          }
+                        ]
+                      },
+                      "plainFlags": {
+                        "type": [
+                          "object"
+                        ]
+                      },
+                      "booleanFlags": [],
+                      "children": [
+                        {
+                          "isApiGroup": true,
+                          "type": "property",
+                          "name": "Property",
+                          "groupName": "Properties",
+                          "items": [
+                            {
+                              "isApiItem": true,
+                              "group": "property",
+                              "type": "property",
+                              "name": "$class",
+                              "fullName": "object:cls.define/definition.$class",
+                              "file": "src/classManagerFactory.js",
+                              "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+                              "fileType": "js",
+                              "template": "js.item.property",
+                              "hasInherited": false,
+                              "isInherited": false,
+                              "level": 4,
+                              "flags": {
+                                "type": [
+                                  {
+                                    "contentType": "string",
+                                    "content": "string",
+                                    "template": "js.flag.type"
+                                  }
+                                ]
+                              },
+                              "plainFlags": {
+                                "type": [
+                                  "string"
+                                ]
+                              },
+                              "booleanFlags": [],
+                              "children": [],
+                              "childTypes": [],
+                              "description": [
+                                {
+                                  "contentType": "string",
+                                  "content": "optional class name",
+                                  "template": "js.flag.description"
+                                }
+                              ]
+                            },
+                            {
+                              "isApiItem": true,
+                              "group": "property",
+                              "type": "property",
+                              "name": "$extends",
+                              "fullName": "object:cls.define/definition.$extends",
+                              "file": "src/classManagerFactory.js",
+                              "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+                              "fileType": "js",
+                              "template": "js.item.property",
+                              "hasInherited": false,
+                              "isInherited": false,
+                              "level": 4,
+                              "flags": {
+                                "type": [
+                                  {
+                                    "contentType": "string",
+                                    "content": "string",
+                                    "template": "js.flag.type"
+                                  }
+                                ]
+                              },
+                              "plainFlags": {
+                                "type": [
+                                  "string"
+                                ]
+                              },
+                              "booleanFlags": [],
+                              "children": [],
+                              "childTypes": [],
+                              "description": [
+                                {
+                                  "contentType": "string",
+                                  "content": "optional parent class",
+                                  "template": "js.flag.description"
+                                }
+                              ]
+                            },
+                            {
+                              "isApiItem": true,
+                              "group": "property",
+                              "type": "property",
+                              "name": "$mixins",
+                              "fullName": "object:cls.define/definition.$mixins",
+                              "file": "src/classManagerFactory.js",
+                              "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+                              "fileType": "js",
+                              "template": "js.item.property",
+                              "hasInherited": false,
+                              "isInherited": false,
+                              "level": 4,
+                              "flags": {
+                                "type": [
+                                  {
+                                    "contentType": "string",
+                                    "content": "array",
+                                    "template": "js.flag.type"
+                                  }
+                                ]
+                              },
+                              "plainFlags": {
+                                "type": [
+                                  "array"
+                                ]
+                              },
+                              "booleanFlags": [],
+                              "children": [],
+                              "childTypes": [],
+                              "description": [
+                                {
+                                  "contentType": "string",
+                                  "content": "optional list of mixins",
+                                  "template": "js.flag.description"
+                                }
+                              ]
+                            },
+                            {
+                              "isApiItem": true,
+                              "group": "property",
+                              "type": "property",
+                              "name": "$constructor",
+                              "fullName": "object:cls.define/definition.$constructor",
+                              "file": "src/classManagerFactory.js",
+                              "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+                              "fileType": "js",
+                              "template": "js.item.property",
+                              "hasInherited": false,
+                              "isInherited": false,
+                              "level": 4,
+                              "flags": {
+                                "type": [
+                                  {
+                                    "contentType": "string",
+                                    "content": "function",
+                                    "template": "js.flag.type"
+                                  }
+                                ]
+                              },
+                              "plainFlags": {
+                                "type": [
+                                  "function"
+                                ]
+                              },
+                              "booleanFlags": [],
+                              "children": [],
+                              "childTypes": [],
+                              "description": [
+                                {
+                                  "contentType": "string",
+                                  "content": "optional low-level constructor",
+                                  "template": "js.flag.description"
+                                }
+                              ]
+                            },
+                            {
+                              "isApiItem": true,
+                              "group": "property",
+                              "type": "property",
+                              "name": "$init",
+                              "fullName": "object:cls.define/definition.$init",
+                              "file": "src/classManagerFactory.js",
+                              "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+                              "fileType": "js",
+                              "template": "js.item.property",
+                              "hasInherited": false,
+                              "isInherited": false,
+                              "level": 4,
+                              "flags": {
+                                "type": [
+                                  {
+                                    "contentType": "string",
+                                    "content": "function",
+                                    "template": "js.flag.type"
+                                  }
+                                ]
+                              },
+                              "plainFlags": {
+                                "type": [
+                                  "function"
+                                ]
+                              },
+                              "booleanFlags": [],
+                              "children": [],
+                              "childTypes": [],
+                              "description": [
+                                {
+                                  "contentType": "string",
+                                  "content": "optional constructor",
+                                  "template": "js.flag.description"
+                                }
+                              ]
+                            },
+                            {
+                              "isApiItem": true,
+                              "group": "property",
+                              "type": "property",
+                              "name": "onDestroy",
+                              "fullName": "object:cls.define/definition.onDestroy",
+                              "file": "src/classManagerFactory.js",
+                              "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+                              "fileType": "js",
+                              "template": "js.item.property",
+                              "hasInherited": false,
+                              "isInherited": false,
+                              "level": 4,
+                              "flags": {
+                                "type": [
+                                  {
+                                    "contentType": "string",
+                                    "content": "function",
+                                    "template": "js.flag.type"
+                                  }
+                                ]
+                              },
+                              "plainFlags": {
+                                "type": [
+                                  "function"
+                                ]
+                              },
+                              "booleanFlags": [],
+                              "children": [],
+                              "childTypes": [],
+                              "description": [
+                                {
+                                  "contentType": "string",
+                                  "content": "your own destroy function",
+                                  "template": "js.flag.description"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ],
+                      "childTypes": [
+                        "property"
+                      ]
+                    },
+                    {
+                      "isApiItem": true,
+                      "group": "param",
+                      "type": "param",
+                      "name": "statics",
+                      "fullName": "object:cls.define/statics",
+                      "file": "src/classManagerFactory.js",
+                      "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+                      "fileType": "js",
+                      "template": "js.item.param",
+                      "hasInherited": false,
+                      "isInherited": false,
+                      "level": 3,
+                      "flags": {
+                        "type": [
+                          {
+                            "contentType": "string",
+                            "content": "object",
+                            "template": "js.flag.type"
+                          }
+                        ]
+                      },
+                      "plainFlags": {
+                        "type": [
+                          "object"
+                        ]
+                      },
+                      "booleanFlags": [],
+                      "children": [],
+                      "childTypes": [],
+                      "description": [
+                        {
+                          "contentType": "string",
+                          "content": "any statis properties or methods",
+                          "template": "js.flag.description"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "childTypes": [
+                "param"
+              ],
+              "line": 504,
+              "description": [
+                {
+                  "contentType": "code",
+                  "content": "var Name = cls({$class: \"Name\"});",
+                  "template": "js.flag.description",
+                  "fileType": "js"
+                }
+              ]
+            },
+            {
+              "isApiItem": true,
+              "group": "property",
+              "type": "property",
+              "name": "factory",
+              "fullName": "object:cls.factory",
+              "file": "src/classManagerFactory.js",
+              "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+              "fileType": "js",
+              "template": "js.item.property",
+              "hasInherited": false,
+              "isInherited": false,
+              "level": 2,
+              "flags": {
+                "type": [
+                  {
+                    "contentType": "string",
+                    "content": "function",
+                    "template": "js.flag.type"
+                  }
+                ],
+                "returnDescription": [
+                  {
+                    "contentType": "string",
+                    "content": "class instance",
+                    "template": "js.flag.returnDescription"
+                  }
+                ],
+                "returns": [
+                  {
+                    "contentType": "string",
+                    "content": "object",
+                    "template": "js.flag.returns"
+                  }
+                ]
+              },
+              "plainFlags": {
+                "type": [
+                  "function"
+                ],
+                "returnDescription": [
+                  "class instance"
+                ],
+                "returns": [
+                  "object"
+                ]
+              },
+              "booleanFlags": [],
+              "children": [
+                {
+                  "isApiGroup": true,
+                  "type": "param",
+                  "items": [
+                    {
+                      "isApiItem": true,
+                      "group": "param",
+                      "type": "param",
+                      "name": "name",
+                      "fullName": "object:cls.factory/name",
+                      "file": "src/classManagerFactory.js",
+                      "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+                      "fileType": "js",
+                      "template": "js.item.param",
+                      "hasInherited": false,
+                      "isInherited": false,
+                      "level": 3,
+                      "flags": {
+                        "type": [
+                          {
+                            "contentType": "string",
+                            "content": "string",
+                            "template": "js.flag.type"
+                          }
+                        ]
+                      },
+                      "plainFlags": {
+                        "type": [
+                          "string"
+                        ]
+                      },
+                      "booleanFlags": [],
+                      "children": [],
+                      "childTypes": [],
+                      "description": [
+                        {
+                          "contentType": "string",
+                          "content": "Full name of the class",
+                          "template": "js.flag.description"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "childTypes": [
+                "param"
+              ],
+              "line": 606,
+              "description": [
+                {
+                  "contentType": "code",
+                  "content": "cls.factory(\"My.Class.Name\", arg1, arg2, ...);",
+                  "template": "js.flag.description",
+                  "fileType": "js"
+                },
+                {
+                  "contentType": "string",
+                  "content": "Instantiate class. Pass constructor parameters after \"name\"",
+                  "template": "js.flag.description"
+                }
+              ]
+            },
+            {
+              "isApiItem": true,
+              "group": "property",
+              "type": "property",
+              "name": "isInstanceOf",
+              "fullName": "object:cls.isInstanceOf",
+              "file": "src/classManagerFactory.js",
+              "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+              "fileType": "js",
+              "template": "js.item.property",
+              "hasInherited": false,
+              "isInherited": false,
+              "level": 2,
+              "flags": {
+                "type": [
+                  {
+                    "contentType": "string",
+                    "content": "function",
+                    "template": "js.flag.type"
+                  }
+                ],
+                "returns": [
+                  {
+                    "contentType": "string",
+                    "content": "boolean",
+                    "template": "js.flag.returns"
+                  }
+                ]
+              },
+              "plainFlags": {
+                "type": [
+                  "function"
+                ],
+                "returns": [
+                  "boolean"
+                ]
+              },
+              "booleanFlags": [],
+              "children": [
+                {
+                  "isApiGroup": true,
+                  "type": "param",
+                  "items": [
+                    {
+                      "isApiItem": true,
+                      "group": "param",
+                      "type": "param",
+                      "name": "cmp",
+                      "fullName": "object:cls.isInstanceOf/cmp",
+                      "file": "src/classManagerFactory.js",
+                      "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+                      "fileType": "js",
+                      "template": "js.item.param",
+                      "hasInherited": false,
+                      "isInherited": false,
+                      "level": 3,
+                      "flags": {
+                        "type": [
+                          {
+                            "contentType": "string",
+                            "content": "object",
+                            "template": "js.flag.type"
+                          }
+                        ]
+                      },
+                      "plainFlags": {
+                        "type": [
+                          "object"
+                        ]
+                      },
+                      "booleanFlags": [],
+                      "children": [],
+                      "childTypes": []
+                    },
+                    {
+                      "isApiItem": true,
+                      "group": "param",
+                      "type": "param",
+                      "name": "name",
+                      "fullName": "object:cls.isInstanceOf/name",
+                      "file": "src/classManagerFactory.js",
+                      "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+                      "fileType": "js",
+                      "template": "js.item.param",
+                      "hasInherited": false,
+                      "isInherited": false,
+                      "level": 3,
+                      "flags": {
+                        "type": [
+                          {
+                            "contentType": "string",
+                            "content": "string",
+                            "template": "js.flag.type"
+                          },
+                          {
+                            "contentType": "string",
+                            "content": "object",
+                            "template": "js.flag.type"
+                          }
+                        ]
+                      },
+                      "plainFlags": {
+                        "type": [
+                          "string",
+                          "object"
+                        ]
+                      },
+                      "booleanFlags": [],
+                      "children": [],
+                      "childTypes": []
+                    }
+                  ]
+                }
+              ],
+              "childTypes": [
+                "param"
+              ],
+              "line": 630,
+              "description": [
+                {
+                  "contentType": "code",
+                  "content": "cls.instanceOf(myObj, \"My.Class\");",
+                  "template": "js.flag.description",
+                  "fileType": "js"
+                },
+                {
+                  "contentType": "code",
+                  "content": "cls.instanceOf(myObj, My.Class);",
+                  "template": "js.flag.description",
+                  "fileType": "js"
+                },
+                {
+                  "contentType": "string",
+                  "content": "Is given object instance of class",
+                  "template": "js.flag.description"
+                }
+              ]
+            },
+            {
+              "isApiItem": true,
+              "group": "property",
+              "type": "property",
+              "name": "isSubclassOf",
+              "fullName": "object:cls.isSubclassOf",
+              "file": "src/classManagerFactory.js",
+              "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+              "fileType": "js",
+              "template": "js.item.property",
+              "hasInherited": false,
+              "isInherited": false,
+              "level": 2,
+              "flags": {
+                "type": [
+                  {
+                    "contentType": "string",
+                    "content": "function",
+                    "template": "js.flag.type"
+                  }
+                ],
+                "returns": [
+                  {
+                    "contentType": "string",
+                    "content": "boolean",
+                    "template": "js.flag.returns"
+                  }
+                ]
+              },
+              "plainFlags": {
+                "type": [
+                  "function"
+                ],
+                "returns": [
+                  "boolean"
+                ]
+              },
+              "booleanFlags": [],
+              "children": [
+                {
+                  "isApiGroup": true,
+                  "type": "param",
+                  "items": [
+                    {
+                      "isApiItem": true,
+                      "group": "param",
+                      "type": "param",
+                      "name": "childClass",
+                      "fullName": "object:cls.isSubclassOf/childClass",
+                      "file": "src/classManagerFactory.js",
+                      "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+                      "fileType": "js",
+                      "template": "js.item.param",
+                      "hasInherited": false,
+                      "isInherited": false,
+                      "level": 3,
+                      "flags": {
+                        "type": [
+                          {
+                            "contentType": "string",
+                            "content": "string",
+                            "template": "js.flag.type"
+                          },
+                          {
+                            "contentType": "string",
+                            "content": "object",
+                            "template": "js.flag.type"
+                          }
+                        ]
+                      },
+                      "plainFlags": {
+                        "type": [
+                          "string",
+                          "object"
+                        ]
+                      },
+                      "booleanFlags": [],
+                      "children": [],
+                      "childTypes": []
+                    },
+                    {
+                      "isApiItem": true,
+                      "group": "param",
+                      "type": "param",
+                      "name": "parentClass",
+                      "fullName": "object:cls.isSubclassOf/parentClass",
+                      "file": "src/classManagerFactory.js",
+                      "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+                      "fileType": "js",
+                      "template": "js.item.param",
+                      "hasInherited": false,
+                      "isInherited": false,
+                      "level": 3,
+                      "flags": {
+                        "type": [
+                          {
+                            "contentType": "string",
+                            "content": "string",
+                            "template": "js.flag.type"
+                          },
+                          {
+                            "contentType": "string",
+                            "content": "object",
+                            "template": "js.flag.type"
+                          }
+                        ]
+                      },
+                      "plainFlags": {
+                        "type": [
+                          "string",
+                          "object"
+                        ]
+                      },
+                      "booleanFlags": [],
+                      "children": [],
+                      "childTypes": []
+                    }
+                  ]
+                }
+              ],
+              "childTypes": [
+                "param"
+              ],
+              "line": 649,
+              "description": [
+                {
+                  "contentType": "code",
+                  "content": "cls.isSubclassOf(\"My.Subclass\", \"My.Class\");",
+                  "template": "js.flag.description",
+                  "fileType": "js"
+                },
+                {
+                  "contentType": "code",
+                  "content": "cls.isSubclassOf(myObj, \"My.Class\");",
+                  "template": "js.flag.description",
+                  "fileType": "js"
+                },
+                {
+                  "contentType": "code",
+                  "content": "cls.isSubclassOf(\"My.Subclass\", My.Class);",
+                  "template": "js.flag.description",
+                  "fileType": "js"
+                },
+                {
+                  "contentType": "code",
+                  "content": "cls.isSubclassOf(myObj, My.Class);",
+                  "template": "js.flag.description",
+                  "fileType": "js"
+                },
+                {
+                  "contentType": "string",
+                  "content": "Is one class subclass of another class",
+                  "template": "js.flag.description"
+                }
+              ]
+            },
+            {
+              "isApiItem": true,
+              "group": "property",
+              "type": "property",
+              "name": "classManagerFactory",
+              "fullName": "object:cls.classManagerFactory",
+              "file": "src/classManagerFactory.js",
+              "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+              "fileType": "js",
+              "template": "js.item.property",
+              "hasInherited": false,
+              "isInherited": false,
+              "level": 2,
+              "flags": {
+                "type": [
+                  {
+                    "contentType": "string",
+                    "content": "function",
+                    "template": "js.flag.type"
+                  }
+                ]
+              },
+              "plainFlags": {
+                "type": [
+                  "function"
+                ]
+              },
+              "booleanFlags": [],
+              "children": [],
+              "childTypes": [],
+              "line": 679,
+              "description": [
+                {
+                  "contentType": "string",
+                  "content": "Reference to the managerFactory",
+                  "template": "js.flag.description"
+                }
+              ]
+            },
+            {
+              "isApiItem": true,
+              "group": "property",
+              "type": "property",
+              "name": "Namespace",
+              "fullName": "object:cls.Namespace",
+              "file": "src/classManagerFactory.js",
+              "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+              "fileType": "js",
+              "template": "js.item.property",
+              "hasInherited": false,
+              "isInherited": false,
+              "level": 2,
+              "flags": {
+                "type": [
+                  {
+                    "contentType": "string",
+                    "content": "function",
+                    "template": "js.flag.type"
+                  }
+                ]
+              },
+              "plainFlags": {
+                "type": [
+                  "function"
+                ]
+              },
+              "booleanFlags": [],
+              "children": [],
+              "childTypes": [],
+              "line": 688,
+              "description": [
+                {
+                  "contentType": "string",
+                  "content": "Namespace constructor",
+                  "template": "js.flag.description"
+                }
+              ]
+            },
+            {
+              "isApiItem": true,
+              "group": "property",
+              "type": "property",
+              "name": "BaseClass",
+              "fullName": "object:cls.BaseClass",
+              "file": "src/classManagerFactory.js",
+              "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+              "fileType": "js",
+              "template": "js.item.property",
+              "hasInherited": false,
+              "isInherited": false,
+              "level": 2,
+              "flags": {
+                "type": [
+                  {
+                    "contentType": "string",
+                    "content": "class",
+                    "template": "js.flag.type"
+                  }
+                ]
+              },
+              "plainFlags": {
+                "type": [
+                  "class"
+                ]
+              },
+              "booleanFlags": [],
+              "children": [],
+              "childTypes": [],
+              "line": 693
+            },
+            {
+              "isApiItem": true,
+              "group": "property",
+              "type": "property",
+              "name": "ns",
+              "fullName": "object:cls.ns",
+              "file": "src/classManagerFactory.js",
+              "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+              "fileType": "js",
+              "template": "js.item.property",
+              "hasInherited": false,
+              "isInherited": false,
+              "level": 2,
+              "flags": {
+                "type": [
+                  {
+                    "contentType": "string",
+                    "content": "object",
+                    "template": "js.flag.type"
+                  }
+                ]
+              },
+              "plainFlags": {
+                "type": [
+                  "object"
+                ]
+              },
+              "booleanFlags": [],
+              "children": [],
+              "childTypes": [],
+              "line": 698,
+              "description": [
+                {
+                  "contentType": "string",
+                  "content": "Namespace instance",
+                  "template": "js.flag.description"
+                }
+              ]
+            },
+            {
+              "isApiItem": true,
+              "group": "property",
+              "type": "property",
+              "name": "$destroy",
+              "fullName": "object:cls.$destroy",
+              "file": "src/classManagerFactory.js",
+              "originalFile": "/Users/kuindji/projects/metaphorjs/metaphorjs-class/src/classManagerFactory.js",
+              "fileType": "js",
+              "template": "js.item.property",
+              "hasInherited": false,
+              "isInherited": false,
+              "level": 2,
+              "flags": {
+                "type": [
+                  {
+                    "contentType": "string",
+                    "content": "function",
+                    "template": "js.flag.type"
+                  }
+                ]
+              },
+              "plainFlags": {
+                "type": [
+                  "function"
+                ]
+              },
+              "booleanFlags": [],
+              "children": [],
+              "childTypes": [],
+              "line": 703,
+              "description": [
+                {
+                  "contentType": "string",
+                  "content": "Destroy class system and namespace",
+                  "template": "js.flag.description"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "childTypes": [
+        "property"
+      ],
+      "line": 489,
+      "description": [
+        {
+          "contentType": "string",
+          "content": "Constructed class system. Also this is a function, same as\n<code>cls.define</code>",
+          "template": "js.flag.description"
+        }
+      ]
+    }
+  ],
+  "content": [
+    {
+      "isContentItem": true,
+      "id": "intro",
+      "name": "Class system",
+      "type": "guide",
+      "template": "html.content.guide",
+      "content": "<h2>Class system</h2>\n<p>If you import a ready-built package, class system will come already initalised \n    in private namespace.<br>\n    You can re-initialise by calling <code>cls.classManagerFactory(ns)</code>\n    using Namespace instance from <code>metaphorjs-namespace</code> package.\n</p>\n<pre><code class=\"language-javascript\" \n        {include-file}=\"src-docs/code/cs.js\"></code></pre>"
+    },
+    {
+      "isContentItem": true,
+      "id": "lifecycle",
+      "name": "Class lifecycle",
+      "type": "guide",
+      "template": "html.content.guide",
+      "content": "<h2>Class lifecycle</h2>\n<p>Initialization cycle</p>\n<ol>\n    <li><code>$constructor()</code> \n        (call parent constructor with <code>this.$super()</code>).\n        You don't usually use this unless you want to \n        add instance plugins, re-implement or override methods or\n        mess with the instance in any other way.</li>\n    <li>mixin's <code>$beforeInit()</code> \n        (mixins are not classes, they don't have <code>$super()</code>;\n        '$beforeInit's are called in order mixins are specified)</li>\n    <li>plugin's <code>$beforeHostInit()</code> (plugins are classes,\n        they have their own <code>$super()</code>)</li>\n    <li><code>$init()</code> \n        (call parent $init with <code>this.$super()</code>).\n        This is a constructor you should normally use. It will receive\n        the same arguments as $constructor.</li>\n    <li>mixin's <code>$afterInit()</code></li>\n    <li>plugin's <code>$afterHostInit()</code></li>\n</ol>\n<p>Destroy cycle (<code>instance.$destroy()</code>)</p>\n<ol>\n    <li>mixin's <code>$beforeDestroy()</code> method</li>\n    <li>plugin's <code>$beforeHostDestroy()</code> method</li>\n    <li>instance's <code>onDestroy()</code> method</li>\n    <li>mixin's <code>$afterDestroy</code> method</li>\n    <li>plugin's <code>$destroy()</code> method (with its own destroy cycle)</li>\n</ol>\n<p>the $destroy method will nullify all instance properties and methods.\n    If you want to prevent this, return <code>false</code> from your onDestroy() method.</p>"
+    },
+    {
+      "isContentItem": true,
+      "id": "define",
+      "name": "Define class",
+      "type": "guide",
+      "template": "html.content.guide",
+      "content": "<h2>Define, instantiate and extend classes</h2>\n<pre><code class=\"language-javascript\" \n        {include-file}=\"src-docs/code/define.js\"></code></pre>"
+    },
+    {
+      "isContentItem": true,
+      "id": "mixins",
+      "name": "Mixins",
+      "type": "guide",
+      "template": "html.content.guide",
+      "content": "<h2>Mixins</h2>\n<pre><code class=\"language-javascript\" \n        {include-file}=\"src-docs/code/mixins.js\"></code></pre>"
+    },
+    {
+      "isContentItem": true,
+      "id": "plugins",
+      "name": "Plugins",
+      "type": "guide",
+      "template": "html.content.guide",
+      "content": "<h2>Plugins</h2>\n<pre><code class=\"language-javascript\" \n        {include-file}=\"src-docs/code/plugins.js\"></code></pre>"
+    },
+    {
+      "isContentItem": true,
+      "id": "misc",
+      "name": "Misc",
+      "type": "guide",
+      "template": "html.content.guide",
+      "content": "<h2>Extending native prototypes</h2>\n<pre><code class=\"language-javascript\" \n        {include-file}=\"src-docs/code/prototypes.js\"></code></pre>"
+    }
+  ],
+  "structure": {
+    "guide": {
+      "type": "guide",
+      "groupName": "Guides",
+      "where": "top-menu",
+      "children": [
+        {
+          "id": "lifecycle",
+          "name": "Class lifecycle",
+          "pathPrefix": "content",
+          "isItem": true
+        },
+        {
+          "id": "intro",
+          "name": "Class system",
+          "pathPrefix": "content",
+          "isItem": true
+        },
+        {
+          "id": "define",
+          "name": "Define class",
+          "pathPrefix": "content",
+          "isItem": true
+        },
+        {
+          "id": "misc",
+          "name": "Misc",
+          "pathPrefix": "content",
+          "isItem": true
+        },
+        {
+          "id": "mixins",
+          "name": "Mixins",
+          "pathPrefix": "content",
+          "isItem": true
+        },
+        {
+          "id": "plugins",
+          "name": "Plugins",
+          "pathPrefix": "content",
+          "isItem": true
+        }
+      ]
+    },
+    "api": {
+      "type": "api",
+      "groupName": "API",
+      "where": "top-menu",
+      "children": [
+        {
+          "id": "class:BaseClass",
+          "name": "BaseClass",
+          "pathPrefix": "item",
+          "isItem": true
+        },
+        {
+          "id": "function:classManagerFactory",
+          "name": "classManagerFactory",
+          "pathPrefix": "item",
+          "isItem": true
+        },
+        {
+          "id": "object:cls",
+          "name": "cls",
+          "pathPrefix": "item",
+          "isItem": true
+        }
+      ]
+    }
+  }
+}

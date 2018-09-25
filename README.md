@@ -1,42 +1,38 @@
-#MetaphorJs.lib.Class
+#MetaphorJs.Class
 
 ```js
 // require class system and namespace
-var Class = require("metaphorjs-class"),
-    Namespace = require("metaphorjs-namespace");
+var cls = require("metaphorjs-class");
 
-// global classes
-var cs = new Class;
-
-cs.define("My.Class", {
+cls({
+    $class: "My.Class",
     someProperty: null,
     someMethod: function(){}
 });
 
-cs.define("My.Another", "My.Class", {
-
+var MyAnother = cls({
+    $class: "My.Another",
+    $extends: "My.Class",
     someMethod: function(){
-        this.supr(); // call parent someMethod()
+        this.$super(); // call parent someMethod()
     }
-
 });
 
-var instance1 = new My.Class;
-var instance2 = cs.factory("My.Class");
+var instance1 = cls.factory("My.Class");
+var instance2 = new MyAnother();
 
-// private namespace
-
+// Your own private namespace
 var localNs = {},
-    ns = new Namespace(localNs, "localNs"),
-    cs = new Class(ns);
+    ns = new cls.Namespace(localNs),
+    cls = cls.classManagerFactory(ns);
 
-cs.define("My.Class", {}); // localNs.My.Class
+cls({
+    $class: "My.Class"
+}); // localNs.My.Class
 
 var i1 = new localNs.My.Class;
-var i2 = cs.factory("My.Class");
+var i2 = cls.factory("My.Class");
 var constr = ns.get("My.Class");
 var i3 = new constr;
-
-
 
 ```
