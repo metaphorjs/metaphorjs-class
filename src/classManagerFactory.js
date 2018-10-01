@@ -1,13 +1,13 @@
 
-var isFunction  = require("metaphorjs/src/func/isFunction.js"),
-    isString    = require("metaphorjs/src/func/isString.js"),
-    isArray     = require("metaphorjs/src/func/isArray.js"),
-    Namespace   = require("metaphorjs-namespace/src/lib/Namespace.js"),
-    slice       = require("metaphorjs/src/func/array/slice.js"),
-    extend      = require("metaphorjs/src/func/extend.js"),
-    emptyFn     = require("metaphorjs/src/func/emptyFn.js"),
-    instantiate = require("metaphorjs/src/func/instantiate.js"),
-    intercept   = require("metaphorjs/src/func/intercept.js");
+var isFunction  = require("metaphorjs-shared/src/func/isFunction.js"),
+    isString    = require("metaphorjs-shared/src/func/isString.js"),
+    isArray     = require("metaphorjs-shared/src/func/isArray.js"),
+    lib_Namespace   = require("metaphorjs-namespace/src/lib/Namespace.js"),
+    toArray     = require("metaphorjs-shared/src/func/toArray.js"),
+    extend      = require("metaphorjs-shared/src/func/extend.js"),
+    emptyFn     = require("metaphorjs-shared/src/func/emptyFn.js"),
+    instantiate = require("metaphorjs-shared/src/func/instantiate.js"),
+    intercept   = require("metaphorjs-shared/src/func/intercept.js");
 
 module.exports = function(){
 
@@ -111,7 +111,7 @@ module.exports = function(){
      * Instantiate class system with namespace.
      * @group api
      * @function
-     * @param {MetaphorJs.Namespace} ns {
+     * @param {MetaphorJs.lib.Namespace} ns {
      *  Provide your own namespace or a new private ns will be 
      *  constructed automatically. 
      *  @optional
@@ -121,7 +121,7 @@ module.exports = function(){
     var classManagerFactory = function(ns) {
 
         if (!ns) {
-            ns = new Namespace;
+            ns = new lib_Namespace;
         }
 
         var createConstructor = function(className) {
@@ -139,7 +139,7 @@ module.exports = function(){
                     plCls;
 
                 if (!self) {
-                    throw "Must instantiate via new: " + className;
+                    throw new Error("Must instantiate via new: " + className);
                 }
 
                 self.$plugins   = [];
@@ -544,7 +544,7 @@ module.exports = function(){
                     mixin = mixins[i];
                     if (isString(mixin)) {
                         if (!ns) {
-                            throw "Mixin " + mixin + " not found";
+                            throw new Error("Mixin " + mixin + " not found");
                         }
                         mixin = ns.get(mixin, true);
                     }
@@ -606,7 +606,7 @@ module.exports = function(){
         var factory = function(name) {
 
             var cls     = ns ? ns.get(name) : null,
-                args    = slice.call(arguments, 1);
+                args    = toArray(arguments).slice(1);
 
             if (!cls) {
                 throw name + " not found";
@@ -682,10 +682,10 @@ module.exports = function(){
         defineClass.isInstanceOf = isInstanceOf;
         defineClass.define = defineClass;
 
-        /**ß
+        /**
          * @property {function} Namespace Namespace constructor
          */
-        defineClass.Namespace = Namespace;
+        defineClass.Namespace = lib_Namespace;
 
         /**
          * @property {class} BaseClass

@@ -43,8 +43,6 @@
                 "wrap": true,
                 "global": true,
                 "expose": [
-                    "classManagerFactory",
-                    "Namespace",
                     "cls"
                 ]
             }

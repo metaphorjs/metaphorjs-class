@@ -1,4 +1,4 @@
 
-var cls = require("./cls");
+var cls = require("./cls.js");
 
 module.exports = cls.BaseClass;

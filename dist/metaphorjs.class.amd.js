@@ -1,15 +1,33 @@
 define("metaphorjs-class", function() {
-/* BUNDLE START 1FU */
+/* BUNDLE START 1GI */
 "use strict";
 
+/**
+ * Check if given value is a function
+ * @function isFunction
+ * @param {*} value 
+ * @returns {boolean}
+ */
 function isFunction(value) {
     return typeof value == 'function';
 };
 
+/**
+ * Check if given value is a string
+ * @function isString
+ * @param {*} value 
+ * @returns {boolean}
+ */
 function isString(value) {
     return typeof value === "string" || value === ""+value;
 };
 
+/**
+ * Convert anything to string
+ * @function toString
+ * @param {*} value
+ * @returns {string}
+ */
 var toString = Object.prototype.toString;
 
 var undf = undefined;
@@ -17,7 +35,7 @@ var undf = undefined;
 
 
 
-var varType = function(){
+var _varType = function(){
 
     var types = {
         '[object String]': 0,
@@ -50,7 +68,7 @@ var varType = function(){
 
 
 
-    return function varType(val) {
+    return function _varType(val) {
 
         if (!val) {
             if (val === null) {
@@ -79,43 +97,38 @@ var varType = function(){
 
 
 /**
+ * Check if given value is array (not just array-like)
+ * @function isArray
  * @param {*} value
  * @returns {boolean}
  */
 function isArray(value) {
-    return typeof value === "object" && varType(value) === 5;
+    return typeof value === "object" && _varType(value) === 5;
 };
-
-
-
-function isObject(value) {
-    if (value === null || typeof value != "object") {
-        return false;
-    }
-    var vt = varType(value);
-    return vt > 2 || vt == -1;
-};
-
-
-var MetaphorJs = {
-    plugin: {},
-    mixin: {}
-};
-
 
 var strUndef = "undefined";
 
 
+var MetaphorJs = {
+    plugin: {},
+    mixin: {},
+    lib: {}
+};
 
-var Cache = function(){
+
+
+
+
+var lib_Cache = MetaphorJs.lib.Cache = (function(){
 
     var globalCache;
 
     /**
-     * @class Cache
+     * @class MetaphorJs.lib.Cache
      */
 
     /**
+     * @method
      * @constructor
      * @param {bool} cacheRewritable
      */
@@ -132,15 +145,26 @@ var Cache = function(){
         return {
 
             /**
-             * @param {function} fn
+             * Add finder function. If cache doesn't have an entry
+             * with given name, it calls finder functions with this
+             * name as a parameter. If one of the functions
+             * returns anything else except undefined, it will
+             * store this value and return every time given name
+             * is requested.
+             * @param {function} fn {
+             *  @param {string} name
+             *  @param {Cache} cache
+             *  @returns {* | undefined}
+             * }
              * @param {object} context
-             * @param {bool} prepend
+             * @param {bool} prepend Put in front of other finders
              */
             addFinder: function(fn, context, prepend) {
                 finders[prepend? "unshift" : "push"]({fn: fn, context: context});
             },
 
             /**
+             * Add cache entry
              * @method
              * @param {string} name
              * @param {*} value
@@ -162,11 +186,15 @@ var Cache = function(){
             },
 
             /**
+             * Get cache entry
              * @method
              * @param {string} name
-             * @returns {*}
+             * @param {*} defaultValue {
+             *  If value is not found, put this default value it its place
+             * }
+             * @returns {* | undefined}
              */
-            get: function(name) {
+            get: function(name, defaultValue) {
 
                 if (!storage[name]) {
                     if (finders.length) {
@@ -184,13 +212,18 @@ var Cache = function(){
                         }
                     }
 
-                    return undf;
+                    if (defaultValue !== undf) {
+                        return this.add(name, defaultValue);
+                    }
+
+                    return undf; 
                 }
 
                 return storage[name].value;
             },
 
             /**
+             * Remove cache entry
              * @method
              * @param {string} name
              * @returns {*}
@@ -204,6 +237,7 @@ var Cache = function(){
             },
 
             /**
+             * Check if cache entry exists
              * @method
              * @param {string} name
              * @returns {boolean}
@@ -213,7 +247,12 @@ var Cache = function(){
             },
 
             /**
-             * @param {function} fn
+             * Walk cache entries
+             * @method
+             * @param {function} fn {
+             *  @param {*} value
+             *  @param {string} key
+             * }
              * @param {object} context
              */
             eachEntry: function(fn, context) {
@@ -224,6 +263,15 @@ var Cache = function(){
             },
 
             /**
+             * Clear cache
+             * @method
+             */
+            clear: function() {
+                storage = {};
+            },
+
+            /**
+             * Clear and destroy cache
              * @method
              */
             $destroy: function() {
@@ -247,6 +295,7 @@ var Cache = function(){
     };
 
     /**
+     * Get global cache
      * @method
      * @static
      * @returns {Cache}
@@ -261,13 +310,31 @@ var Cache = function(){
     };
 
     return Cache;
+    
+}());
 
-}();
+
 
 
 
 /**
- * @class Namespace
+ * Check if given value is an object (non-scalar)
+ * @function isObject
+ * @param {*} value 
+ * @returns {boolean}
+ */
+function isObject(value) {
+    if (value === null || typeof value != "object") {
+        return false;
+    }
+    var vt = _varType(value);
+    return vt > 2 || vt == -1;
+};
+
+
+
+/**
+ * @class MetaphorJs.lib.Namespace
  * @code src-docs/examples/main.js
  */
 
@@ -282,12 +349,12 @@ var Cache = function(){
  *  @optional
  * }
  */
-var Namespace = MetaphorJs.Namespace = function(root) {
+var lib_Namespace = MetaphorJs.lib.Namespace = function(root) {
 
     root        = root || {};
 
     var self    = this,
-        cache   = new Cache(false);
+        cache   = new lib_Cache(false);
 
     var parseNs     = function(ns) {
 
@@ -467,100 +534,135 @@ var Namespace = MetaphorJs.Namespace = function(root) {
 
 
 
-var slice = Array.prototype.slice;
+
+/**
+ * Transform anything into array
+ * @function toArray
+ * @param {*} list
+ * @returns {array}
+ */
+function toArray(list) {
+    if (list && !list.length != undf && list !== ""+list) {
+        for(var a = [], i =- 1, l = list.length>>>0; ++i !== l; a[i] = list[i]){}
+        return a;
+    }
+    else if (list) {
+        return [list];
+    }
+    else {
+        return [];
+    }
+};
 
 
 
+/**
+ * Check if given value is plain object
+ * @function isPlainObject
+ * @param {*} value 
+ * @returns {boolean}
+ */
 function isPlainObject(value) {
     // IE < 9 returns [object Object] from toString(htmlElement)
     return typeof value == "object" &&
-           varType(value) === 3 &&
+           _varType(value) === 3 &&
             !value.nodeType &&
             value.constructor === Object;
-
 };
 
+/**
+ * Check if given value is a boolean value
+ * @function isBool
+ * @param {*} value 
+ * @returns {boolean}
+ */
 function isBool(value) {
     return value === true || value === false;
 };
 
 
+/**
+ * Copy properties from one object to another
+ * @function extend
+ * @param {Object} dst
+ * @param {Object} src
+ * @param {Object} src2 ... srcN
+ * @param {boolean} override {
+ *  Override already existing keys 
+ *  @default false
+ * }
+ * @param {boolean} deep {
+ *  Do not copy objects by link, deep copy by value
+ *  @default false
+ * }
+ * @returns {object}
+ */
+function extend() {
 
+    var override    = false,
+        deep        = false,
+        args        = toArray(arguments),
+        dst         = args.shift(),
+        src,
+        k,
+        value;
 
-var extend = function(){
+    if (isBool(args[args.length - 1])) {
+        override    = args.pop();
+    }
+    if (isBool(args[args.length - 1])) {
+        deep        = override;
+        override    = args.pop();
+    }
 
-    /**
-     * @param {Object} dst
-     * @param {Object} src
-     * @param {Object} src2 ... srcN
-     * @param {boolean} override = false
-     * @param {boolean} deep = false
-     * @returns {object}
-     */
-    var extend = function extend() {
+    while (src = args.shift()) {
+        for (k in src) {
 
+            if (src.hasOwnProperty(k) && (value = src[k]) !== undf) {
 
-        var override    = false,
-            deep        = false,
-            args        = slice.call(arguments),
-            dst         = args.shift(),
-            src,
-            k,
-            value;
-
-        if (isBool(args[args.length - 1])) {
-            override    = args.pop();
-        }
-        if (isBool(args[args.length - 1])) {
-            deep        = override;
-            override    = args.pop();
-        }
-
-        while (args.length) {
-            // IE < 9 fix: check for hasOwnProperty presence
-            if ((src = args.shift()) && src.hasOwnProperty) {
-                for (k in src) {
-
-                    if (src.hasOwnProperty(k) && (value = src[k]) !== undf) {
-
-                        if (deep) {
-                            if (dst[k] && isPlainObject(dst[k]) && isPlainObject(value)) {
-                                extend(dst[k], value, override, deep);
+                if (deep) {
+                    if (dst[k] && isPlainObject(dst[k]) && isPlainObject(value)) {
+                        extend(dst[k], value, override, deep);
+                    }
+                    else {
+                        if (override === true || dst[k] == undf) { // == checks for null and undefined
+                            if (isPlainObject(value)) {
+                                dst[k] = {};
+                                extend(dst[k], value, override, true);
                             }
                             else {
-                                if (override === true || dst[k] == undf) { // == checks for null and undefined
-                                    if (isPlainObject(value)) {
-                                        dst[k] = {};
-                                        extend(dst[k], value, override, true);
-                                    }
-                                    else {
-                                        dst[k] = value;
-                                    }
-                                }
-                            }
-                        }
-                        else {
-                            if (override === true || dst[k] == undf) {
                                 dst[k] = value;
                             }
                         }
                     }
                 }
+                else {
+                    if (override === true || dst[k] == undf) {
+                        dst[k] = value;
+                    }
+                }
             }
         }
+    }
 
-        return dst;
-    };
+    return dst;
+};
 
-    return extend;
-}();
 
 
 function emptyFn(){};
 
 
 
-var instantiate = function(fn, args) {
+/**
+ * Instantite class when you have a list of arguments
+ * and you can't just use .apply()
+ * @function instantiate
+ * @param {function} fn Class constructor
+ * @param {array} args Constructor arguments
+ * @returns {object}
+ */
+function instantiate(fn, args) {
 
     var Temp = function(){},
         inst, ret;
@@ -573,16 +675,21 @@ var instantiate = function(fn, args) {
     // return the original instance.
     // (consistent with behaviour of the new operator)
     return isObject(ret) || ret === false ? ret : inst;
-
 };
+
 /**
  * Function interceptor
- * @param {function} origFn
- * @param {function} interceptor
- * @param {object|null} context
- * @param {object|null} origContext
- * @param {string} when
- * @param {bool} replaceValue
+ * @function intercept
+ * @param {function} origFn Original function
+ * @param {function} interceptor Function that should execute instead(ish)
+ * @param {object|null} context Function's context
+ * @param {object|null} origContext Original function's context
+ * @param {string} when {
+ *  before | after | instead
+ *  @default before
+ * }
+ * @param {bool} replaceValue true to return interceptor's return value
+ * instead of original
  * @returns {Function}
  */
 function intercept(origFn, interceptor, context, origContext, when, replaceValue) {
@@ -714,7 +821,7 @@ var classManagerFactory = function(){
      * Instantiate class system with namespace.
      * @group api
      * @function
-     * @param {MetaphorJs.Namespace} ns {
+     * @param {MetaphorJs.lib.Namespace} ns {
      *  Provide your own namespace or a new private ns will be 
      *  constructed automatically. 
      *  @optional
@@ -724,7 +831,7 @@ var classManagerFactory = function(){
     var classManagerFactory = function(ns) {
 
         if (!ns) {
-            ns = new Namespace;
+            ns = new lib_Namespace;
         }
 
         var createConstructor = function(className) {
@@ -742,7 +849,7 @@ var classManagerFactory = function(){
                     plCls;
 
                 if (!self) {
-                    throw "Must instantiate via new: " + className;
+                    throw new Error("Must instantiate via new: " + className);
                 }
 
                 self.$plugins   = [];
@@ -1147,7 +1254,7 @@ var classManagerFactory = function(){
                     mixin = mixins[i];
                     if (isString(mixin)) {
                         if (!ns) {
-                            throw "Mixin " + mixin + " not found";
+                            throw new Error("Mixin " + mixin + " not found");
                         }
                         mixin = ns.get(mixin, true);
                     }
@@ -1209,7 +1316,7 @@ var classManagerFactory = function(){
         var factory = function(name) {
 
             var cls     = ns ? ns.get(name) : null,
-                args    = slice.call(arguments, 1);
+                args    = toArray(arguments).slice(1);
 
             if (!cls) {
                 throw name + " not found";
@@ -1285,10 +1392,10 @@ var classManagerFactory = function(){
         defineClass.isInstanceOf = isInstanceOf;
         defineClass.define = defineClass;
 
-        /**ß
+        /**
          * @property {function} Namespace Namespace constructor
          */
-        defineClass.Namespace = Namespace;
+        defineClass.Namespace = lib_Namespace;
 
         /**
          * @property {class} BaseClass
@@ -1328,7 +1435,7 @@ var classManagerFactory = function(){
  * @var ns 
  */
 var ns = (function(){
-    var ns = new Namespace();
+    var ns = new lib_Namespace();
     ns.register("MetaphorJs", MetaphorJs);
     ns.register("mjs", MetaphorJs);
     return ns;
@@ -1342,4 +1449,4 @@ var cls = classManagerFactory(ns);
 return cls;
 });
 
-/* BUNDLE END 1FU */
+/* BUNDLE END 1GI */
