@@ -2,111 +2,9 @@
 /* BUNDLE START 003 */
 "use strict";
 
-/**
- * Check if given value is a function
- * @function isFunction
- * @param {*} value 
- * @returns {boolean}
- */
-function isFunction(value) {
-    return typeof value == 'function';
-};
-
-/**
- * Check if given value is a string
- * @function isString
- * @param {*} value 
- * @returns {boolean}
- */
-function isString(value) {
-    return typeof value === "string" || value === ""+value;
-};
-
-/**
- * Convert anything to string
- * @function toString
- * @param {*} value
- * @returns {string}
- */
-var toString = Object.prototype.toString;
+var strUndef = "undefined";
 
 var undf = undefined;
-
-
-
-
-var _varType = function(){
-
-    var types = {
-        '[object String]': 0,
-        '[object Number]': 1,
-        '[object Boolean]': 2,
-        '[object Object]': 3,
-        '[object Function]': 4,
-        '[object Array]': 5,
-        '[object RegExp]': 9,
-        '[object Date]': 10
-    };
-
-
-    /*
-     * 'string': 0,
-     * 'number': 1,
-     * 'boolean': 2,
-     * 'object': 3,
-     * 'function': 4,
-     * 'array': 5,
-     * 'null': 6,
-     * 'undefined': 7,
-     * 'NaN': 8,
-     * 'regexp': 9,
-     * 'date': 10,
-     * unknown: -1
-     * @param {*} value
-     * @returns {number}
-     */
-
-
-
-    return function _varType(val) {
-
-        if (!val) {
-            if (val === null) {
-                return 6;
-            }
-            if (val === undf) {
-                return 7;
-            }
-        }
-
-        var num = types[toString.call(val)];
-
-        if (num === undf) {
-            return -1;
-        }
-
-        if (num === 1 && isNaN(val)) {
-            return 8;
-        }
-
-        return num;
-    };
-
-}();
-
-
-
-/**
- * Check if given value is array (not just array-like)
- * @function isArray
- * @param {*} value
- * @returns {boolean}
- */
-function isArray(value) {
-    return typeof value === "object" && _varType(value) === 5;
-};
-
-var strUndef = "undefined";
 
 
 var MetaphorJs = {
@@ -315,6 +213,76 @@ var lib_Cache = MetaphorJs.lib.Cache = (function(){
 
 
 
+/**
+ * Convert anything to string
+ * @function toString
+ * @param {*} value
+ * @returns {string}
+ */
+var toString = Object.prototype.toString;
+
+
+
+
+var _varType = function(){
+
+    var types = {
+        '[object String]': 0,
+        '[object Number]': 1,
+        '[object Boolean]': 2,
+        '[object Object]': 3,
+        '[object Function]': 4,
+        '[object Array]': 5,
+        '[object RegExp]': 9,
+        '[object Date]': 10
+    };
+
+
+    /*
+     * 'string': 0,
+     * 'number': 1,
+     * 'boolean': 2,
+     * 'object': 3,
+     * 'function': 4,
+     * 'array': 5,
+     * 'null': 6,
+     * 'undefined': 7,
+     * 'NaN': 8,
+     * 'regexp': 9,
+     * 'date': 10,
+     * unknown: -1
+     * @param {*} value
+     * @returns {number}
+     */
+
+
+
+    return function _varType(val) {
+
+        if (!val) {
+            if (val === null) {
+                return 6;
+            }
+            if (val === undf) {
+                return 7;
+            }
+        }
+
+        var num = types[toString.call(val)];
+
+        if (num === undf) {
+            return -1;
+        }
+
+        if (num === 1 && isNaN(val)) {
+            return 8;
+        }
+
+        return num;
+    };
+
+}();
+
 
 
 /**
@@ -330,6 +298,7 @@ function isObject(value) {
     var vt = _varType(value);
     return vt > 2 || vt == -1;
 };
+
 
 
 
@@ -533,6 +502,38 @@ var lib_Namespace = MetaphorJs.lib.Namespace = function(root) {
 };
 
 
+/**
+ * Check if given value is a function
+ * @function isFunction
+ * @param {*} value 
+ * @returns {boolean}
+ */
+function isFunction(value) {
+    return typeof value == 'function';
+};
+
+/**
+ * Check if given value is a string
+ * @function isString
+ * @param {*} value 
+ * @returns {boolean}
+ */
+function isString(value) {
+    return typeof value === "string" || value === ""+value;
+};
+
+
+
+/**
+ * Check if given value is array (not just array-like)
+ * @function isArray
+ * @param {*} value
+ * @returns {boolean}
+ */
+function isArray(value) {
+    return typeof value === "object" && _varType(value) === 5;
+};
+
 
 
 /**
@@ -719,6 +720,7 @@ function intercept(origFn, interceptor, context, origContext, when, replaceValue
 
 
 
+
 var classManagerFactory = function(){
 
 
@@ -821,7 +823,7 @@ var classManagerFactory = function(){
      * Instantiate class system with namespace.
      * @group api
      * @function
-     * @param {MetaphorJs.lib.Namespace} ns {
+     * @param {lib_Namespace} ns {
      *  Provide your own namespace or a new private ns will be 
      *  constructed automatically. 
      *  @optional
@@ -1435,7 +1437,7 @@ var classManagerFactory = function(){
  * @var ns 
  */
 var ns = (function(){
-    var ns = new lib_Namespace();
+    var ns = new lib_Namespace;
     ns.register("MetaphorJs", MetaphorJs);
     ns.register("mjs", MetaphorJs);
     return ns;

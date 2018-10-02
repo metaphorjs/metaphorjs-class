@@ -1,13 +1,14 @@
+require("metaphorjs-namespace/src/lib/Namespace.js");
 
 var isFunction  = require("metaphorjs-shared/src/func/isFunction.js"),
     isString    = require("metaphorjs-shared/src/func/isString.js"),
     isArray     = require("metaphorjs-shared/src/func/isArray.js"),
-    lib_Namespace   = require("metaphorjs-namespace/src/lib/Namespace.js"),
     toArray     = require("metaphorjs-shared/src/func/toArray.js"),
     extend      = require("metaphorjs-shared/src/func/extend.js"),
     emptyFn     = require("metaphorjs-shared/src/func/emptyFn.js"),
     instantiate = require("metaphorjs-shared/src/func/instantiate.js"),
-    intercept   = require("metaphorjs-shared/src/func/intercept.js");
+    intercept   = require("metaphorjs-shared/src/func/intercept.js"),
+    MetaphorJs = require("metaphorjs-shared/src/MetaphorJs.js");
 
 module.exports = function(){
 
@@ -121,7 +122,7 @@ module.exports = function(){
     var classManagerFactory = function(ns) {
 
         if (!ns) {
-            ns = new lib_Namespace;
+            ns = new MetaphorJs.lib.Namespace;
         }
 
         var createConstructor = function(className) {
@@ -685,7 +686,7 @@ module.exports = function(){
         /**
          * @property {function} Namespace Namespace constructor
          */
-        defineClass.Namespace = lib_Namespace;
+        defineClass.Namespace = MetaphorJs.lib.Namespace;
 
         /**
          * @property {class} BaseClass
