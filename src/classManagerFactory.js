@@ -207,7 +207,7 @@ module.exports = function(){
          * Basically,<code>cls({});</code> is the same as 
          * <code>BaseClass.$extend({})</code>.
          * @group api
-         * @class BaseClass
+         * @class MetaphorJs.cls.BaseClass
          */
         var BaseClass = function() {
 
