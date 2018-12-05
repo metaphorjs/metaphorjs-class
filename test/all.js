@@ -348,6 +348,39 @@ describe("Class", function(){
             assert.equal(1, res);
         });
 
+        it("should call the right $super", function(){
+
+            var resA = 0,
+                resB = 0,
+                resC = 0;
+
+            var A = cls({
+                someMethod: function() {
+                    resA++;
+                }
+            });
+            var B = A.$extend({
+                someMethod: function() {
+                    resB++;
+                    this.$super();
+                }
+            });
+            var C = B.$extend({
+                someMethod: function() {
+                    resC++;
+                    this.$super();
+                }
+            });
+
+            var c = new C;
+            c.someMethod();
+
+            assert.equal(1, resA);
+            assert.equal(1, resB);
+            assert.equal(1, resC);
+            
+        });
+
 
     });
 
