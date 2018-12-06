@@ -23,6 +23,18 @@ module.exports = function(){
             }
         },
 
+        collectMixinEvents = function(events, pConstr) {
+            var pp;
+            while (pConstr) {
+                pp = pConstr[proto];
+                if (pp.$mixinEvents) {
+                    events = events.concat(pp.$mixinEvents);
+                }
+                pConstr = pConstr.$parent;
+            }
+            return events;
+        },
+
         wrapPrototypeMethod = function wrapPrototypeMethod(parent, k, fn) {
 
             var $super = parent[proto][k] ||
@@ -47,8 +59,9 @@ module.exports = function(){
             };
         },
 
-        preparePrototype = function preparePrototype(prototype, cls, parent, onlyWrap) {
-            var k, ck, pk, pp = parent[proto];
+        preparePrototype = function preparePrototype(prototype, cls, parent, onlyWrap, mixEvents) {
+            var k, ck, pk, pp = parent[proto],
+                i, l, name;
 
             for (k in cls) {
                 if (cls.hasOwnProperty(k)) {
@@ -69,36 +82,32 @@ module.exports = function(){
             prototype.$plugins      = null;
             prototype.$pluginMap    = null;
 
-            if (pp.$beforeInit) {
-                prototype.$beforeInit = pp.$beforeInit.slice();
-                prototype.$afterInit = pp.$afterInit.slice();
-                prototype.$beforeDestroy = pp.$beforeDestroy.slice();
-                prototype.$afterDestroy = pp.$afterDestroy.slice();
-            }
-            else {
-                prototype.$beforeInit = [];
-                prototype.$afterInit = [];
-                prototype.$beforeDestroy = [];
-                prototype.$afterDestroy = [];
+            if (mixEvents) {
+                for (i = 0, l = mixEvents.length; i < l; i++) {
+                    name = mixEvents[i];
+                    if (pp[name]) {
+                        if (typeof pp[name] === 'function') {
+                            throw new Error("Cannot override method " + 
+                                            name + 
+                                            " with mixin event");
+                        }
+                        prototype[name] = pp[name].slice();
+                    }
+                    else {
+                        prototype[name] = [];
+                    }
+                }
             }
         },
         
-        mixinToPrototype = function(prototype, mixin) {
+        mixinToPrototype = function(prototype, mixin, events) {
             
             var k;
+
             for (k in mixin) {
                 if (mixin.hasOwnProperty(k)) {
-                    if (k === "$beforeInit") {
-                        prototype.$beforeInit.push(mixin[k]);
-                    }
-                    else if (k === "$afterInit") {
-                        prototype.$afterInit.push(mixin[k]);
-                    }
-                    else if (k === "$beforeDestroy") {
-                        prototype.$beforeDestroy.push(mixin[k]);
-                    }
-                    else if (k === "$afterDestroy") {
-                        prototype.$afterDestroy.push(mixin[k]);
+                    if (events.indexOf(k) !== -1) {
+                        prototype[k].push(mixin[k]);
                     }
                     else if (!prototype[k]) {
                         prototype[k] = mixin[k];
@@ -154,11 +163,13 @@ module.exports = function(){
                 plugins = self.$plugins;
                 pmap    = self.$pluginMap = {};
 
-                for (i = -1, l = self.$beforeInit.length; ++i < l;
-                     before.push([self.$beforeInit[i], self])) {}
+                if (self.$beforeInit) 
+                    for (i = -1, l = self.$beforeInit.length; ++i < l;
+                         before.push([self.$beforeInit[i], self])) {}
 
-                for (i = -1, l = self.$afterInit.length; ++i < l;
-                     after.push([self.$afterInit[i], self])) {}
+                if (self.$afterInit)
+                    for (i = -1, l = self.$afterInit.length; ++i < l;
+                         after.push([self.$afterInit[i], self])) {}
 
                 if (plugins && plugins.length) {
 
@@ -230,6 +241,8 @@ module.exports = function(){
             $plugins: null,
             $pluginMap: null,
             $mixins: null,
+            $mixinEvents: ["$beforeInit", "$afterInit",
+                            "$beforeDestroy", "$afterDestroy"],
 
             $destroyed: false,
             $destroying: false,
@@ -240,6 +253,23 @@ module.exports = function(){
             $afterInit: [],
             $beforeDestroy: [],
             $afterDestroy: [],
+
+            /**
+             * Call mixins for a specified mixin event
+             * @param {string} eventName 
+             */
+            $callMixins: function(eventName) {
+                var self = this,
+                    fns = self[eventName],
+                    i, l,
+                    args = toArray(arguments);
+
+                args.shift();
+
+                for (i = 0, l = fns.length; i < l; i++) {
+                    fns[i].apply(self, args);
+                }
+            },
 
             /**
              * Get this instance's class name
@@ -509,8 +539,10 @@ module.exports = function(){
             var name            = definition.$class,
                 parentClass     = $extends || definition.$extends,
                 mixins          = definition.$mixins,
+                mixEvents       = definition.$mixinEvents || [],
                 alias           = definition.$alias,
                 pConstructor,
+                allMixEvents,
                 i, l, k, prototype, c, mixin;
 
             if (parentClass) {
@@ -533,12 +565,14 @@ module.exports = function(){
 
             definition.$class   = name;
             definition.$extends = parentClass;
-            definition.$mixins  = null;
+            delete definition.$mixins;
+            delete definition.$mixinEvents;
 
+            allMixEvents        = collectMixinEvents(mixEvents, pConstructor);
             prototype           = Object.create(pConstructor[proto]);
             definition[constr]  = definition[constr] || $constr;
 
-            preparePrototype(prototype, definition, pConstructor);
+            preparePrototype(prototype, definition, pConstructor, false, allMixEvents);
 
             if (mixins) {
                 for (i = 0, l = mixins.length; i < l; i++) {
@@ -549,13 +583,14 @@ module.exports = function(){
                         }
                         mixin = ns.get(mixin, true);
                     }
-                    mixinToPrototype(prototype, mixin);
+                    mixinToPrototype(prototype, mixin, allMixEvents);
                 }
             }
 
             c = createConstructor(name);
             prototype.constructor = c;
             prototype.$self = c;
+            prototype.$mixinEvents = mixEvents;
             c[proto] = prototype;
 
             for (k in BaseClass) {

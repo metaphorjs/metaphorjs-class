@@ -1,6 +1,8 @@
 
+require("../../metaphorjs/dev/env.js");
+
 var assert = require("assert"),
-    cls = require("../dist/metaphorjs.class.npm.js");
+    cls = require("../src/cls.js");
 
 describe("Class", function(){
 
@@ -103,13 +105,13 @@ describe("Class", function(){
             };
 
             cs.define({
-                $class: "My.ThrirdClass",
+                $class: "My.ThirdClass",
                 $extends: SomeNativeClass
             });
 
-            var inst = cs.factory("My.ThrirdClass");
+            var inst = cs.factory("My.ThirdClass");
 
-            assert.equal(true, inst instanceof local.My.ThrirdClass);
+            assert.equal(true, inst instanceof local.My.ThirdClass);
             assert.equal(true, inst instanceof SomeNativeClass);
         });
 
@@ -378,10 +380,49 @@ describe("Class", function(){
             assert.equal(1, resA);
             assert.equal(1, resB);
             assert.equal(1, resC);
-            
         });
 
+        it("should call mixin methods based on mixin events", function() {
 
+            var resBeforeInit = 0,
+                resAfterInit = 0,
+                resA = 0,
+                resB = 0,
+                resC = 0;
+
+            var mixin = {
+                $beforeInit: function() {resBeforeInit++},
+                $afterInit: function() {resAfterInit++},
+                $a: function() {resA++},
+                $b: function() {resB++}
+            };
+
+            var mixin2 = {
+                $c: function() {resC++}
+            };
+
+            var A = cls({
+                $mixins: [mixin],
+                $mixinEvents: ["$a", "$b"]
+            });
+
+            var B = A.$extend({
+                $mixins: [mixin, mixin2],
+                $mixinEvents: ['$c'],
+                $init: function() {
+                    this.$callMixins("$a");
+                    this.$callMixins("$b");
+                    this.$callMixins("$c");
+                }
+            });
+
+            new B;
+
+            assert.equal(2, resBeforeInit);
+            assert.equal(2, resAfterInit);
+            assert.equal(2, resA);
+            assert.equal(2, resB);
+            assert.equal(1, resC);
+        });
     });
-
 });
