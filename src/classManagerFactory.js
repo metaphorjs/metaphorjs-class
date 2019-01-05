@@ -179,7 +179,7 @@ module.exports = function(){
 
                         if (isString(plugin)) {
                             plCls = plugin;
-                            plugin = ns ? ns.get(plugin, true) : null;
+                            plugin = ns ? ns.get(plugin) : null;
                             if (!plugin) {
                                 throw plCls + " not found";
                             }
