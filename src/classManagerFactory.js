@@ -191,9 +191,6 @@ module.exports = function(){
                         if (plugin.$beforeHostInit) {
                             before.push([plugin.$beforeHostInit, plugin]);
                         }
-                        if (plugin.$afterHostInit) {
-                            after.push([plugin.$afterHostInit, plugin]);
-                        }
 
                         plugins[i] = plugin;
                     }
@@ -206,9 +203,20 @@ module.exports = function(){
                     self.$init.apply(self, args);
                 }
 
+                // we look for $afterHostInit in a separate loop
+                // for plugins can be added inside $beforeHostInit
+                // or in $init
+                if (plugins && plugins.length) {
+                    for (i = 0, l = plugins.length; i < l; i++) {
+                        plugin = plugins[i];
+                        if (plugin.$afterHostInit) {
+                            after.push([plugin.$afterHostInit, plugin]);
+                        }
+                    }
+                }
+
                 for (i = -1, l = after.length; ++i < l;
                      after[i][0].apply(after[i][1], args)){}
-
             };
         };
 
@@ -328,6 +336,36 @@ module.exports = function(){
                 if ($self && $self.$parent) {
                     preparePrototype(this, methods, $self.$parent, true);
                 }
+            },
+
+            /**
+             * Add a plugin to class instance
+             * @param {string|function} plugin 
+             */
+            $addPlugin: function(plugin) {
+
+                var plCls, 
+                    self = this,
+                    pmap = self.$pluginMap;
+
+                if (isString(plugin)) {
+                    plCls = plugin;
+                    plugin = ns ? ns.get(plugin) : null;
+                    if (!plugin) {
+                        throw plCls + " not found";
+                    }
+                }
+                else {
+                    plCls = plugin.$class;
+                }
+
+                if (pmap[plCls]) {
+                    throw plCls + " already initialized on this instance";
+                }
+
+                plugin = new plugin(self);
+                pmap[plCls] = plugin;
+                self.$plugins.push(plugin);
             },
 
             /**
