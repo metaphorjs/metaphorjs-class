@@ -409,7 +409,7 @@ module.exports = function(){
              * @return {boolean}
              */
             $isDestroyed: function() {
-                return self.$destroying || self.$destroyed;
+                return this.$destroying || this.$destroyed;
             },
 
             /**
