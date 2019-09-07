@@ -1,15 +1,16 @@
 
+require("../../metaphorjs/dev/env.js");
+
 var assert = require("assert"),
-    Class = require("../src/lib/Class.js"),
-    Namespace = require("metaphorjs-namespace/src/lib/Namespace.js");
+    cls = require("../src/cls.js");
 
 describe("Class", function(){
 
     describe("definition", function(){
 
         var local   = {},
-            ns = new Namespace(local, "local"),
-            cs = new Class(ns);
+            ns = new cls.Namespace(local),
+            cs = cls.classManagerFactory(ns);
 
         it("should define class", function(){
 
@@ -40,7 +41,6 @@ describe("Class", function(){
 
             assert.equal(true, !!inst);
             assert.equal(true, cs.isInstanceOf(inst, local.My.Class));
-            assert.equal(true, cs.isInstanceOf(inst, "local.My.Class"));
             assert.equal(true, cs.isInstanceOf(inst, "My.Class"));
             assert.equal(true, inst instanceof local.My.Class);
         });
@@ -78,11 +78,11 @@ describe("Class", function(){
             var inst = cs.factory("ChildClass");
 
             assert.equal(true, cs.isInstanceOf(inst, local.ChildClass));
-            assert.equal(true, cs.isInstanceOf(inst, "local.ChildClass"));
+            assert.equal(true, cs.isInstanceOf(inst, "ChildClass"));
             assert.equal(true, cs.isInstanceOf(inst, "ParentClass"));
 
             assert.equal(true, cs.isSubclassOf(local.ChildClass, local.ParentClass));
-            assert.equal(true, cs.isSubclassOf("local.ChildClass", "local.ParentClass"));
+            assert.equal(true, cs.isSubclassOf("ChildClass", "ParentClass"));
             assert.equal(true, cs.isSubclassOf("ChildClass", "ParentClass"));
 
             assert.equal(true, inst instanceof local.ChildClass);
@@ -105,13 +105,13 @@ describe("Class", function(){
             };
 
             cs.define({
-                $class: "My.ThrirdClass",
+                $class: "My.ThirdClass",
                 $extends: SomeNativeClass
             });
 
-            var inst = cs.factory("My.ThrirdClass");
+            var inst = cs.factory("My.ThirdClass");
 
-            assert.equal(true, inst instanceof local.My.ThrirdClass);
+            assert.equal(true, inst instanceof local.My.ThirdClass);
             assert.equal(true, inst instanceof SomeNativeClass);
         });
 
@@ -350,7 +350,79 @@ describe("Class", function(){
             assert.equal(1, res);
         });
 
+        it("should call the right $super", function(){
 
+            var resA = 0,
+                resB = 0,
+                resC = 0;
+
+            var A = cls({
+                someMethod: function() {
+                    resA++;
+                }
+            });
+            var B = A.$extend({
+                someMethod: function() {
+                    resB++;
+                    this.$super();
+                }
+            });
+            var C = B.$extend({
+                someMethod: function() {
+                    resC++;
+                    this.$super();
+                }
+            });
+
+            var c = new C;
+            c.someMethod();
+
+            assert.equal(1, resA);
+            assert.equal(1, resB);
+            assert.equal(1, resC);
+        });
+
+        it("should call mixin methods based on mixin events", function() {
+
+            var resBeforeInit = 0,
+                resAfterInit = 0,
+                resA = 0,
+                resB = 0,
+                resC = 0;
+
+            var mixin = {
+                $beforeInit: function() {resBeforeInit++},
+                $afterInit: function() {resAfterInit++},
+                $a: function() {resA++},
+                $b: function() {resB++}
+            };
+
+            var mixin2 = {
+                $c: function() {resC++}
+            };
+
+            var A = cls({
+                $mixins: [mixin],
+                $mixinEvents: ["$a", "$b"]
+            });
+
+            var B = A.$extend({
+                $mixins: [mixin, mixin2],
+                $mixinEvents: ['$c'],
+                $init: function() {
+                    this.$callMixins("$a");
+                    this.$callMixins("$b");
+                    this.$callMixins("$c");
+                }
+            });
+
+            new B;
+
+            assert.equal(2, resBeforeInit);
+            assert.equal(2, resAfterInit);
+            assert.equal(2, resA);
+            assert.equal(2, resB);
+            assert.equal(1, resC);
+        });
     });
-
 });

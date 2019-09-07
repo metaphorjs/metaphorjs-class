@@ -1,84 +1,87 @@
 {
-    "version": "1.0.10",
+    "version": "1.1.0",
     "description": "MetaphorJs class system",
 
-    "push": [
-        "github"
-    ],
     "test": {
         "cmd": "mocha"
     },
 
-
     "docs": {
-        "": {
-            "out": "docs",
-            "renderer": "default",
-            "hooks": "hooks",
-            "src": [
-                "src/**"
-            ],
-            "includeExternal": false,
+        "out": "docs",
+        "renderer": {
+            "type": "default",
             "data": {
-                "title": "MetaphorJs.Class",
-                "version": "v@{version}",
-                "topRightMenu": [
-                    {
-                        "name": "Github",
-                        "href": "https://github.com/metaphorjs/metaphorjs-class"
-                    }
-                ]
+                "title": "MetaphorJs class system",
+                "version": "1.1.0"
             }
-        }
+        },
+        "export": {
+            "sortGroups": [
+                {
+                    "type": "exact",
+                    "order": ["guide", "api"]
+                }
+            ]
+        },
+        "hooks": [
+            "src-docs/hooks"
+        ],
+        "src": [
+            "src/**"
+        ],
+        "includeExternal": false
     },
 
     "build": {
+        
         "standalone": {
-            "wrap": true,
-            "global": true,
             "target": "dist/metaphorjs.class.js",
             "files": [
-                "metaphorjs/src/MetaphorJs.js",
-                ["src/lib/Class.js", {"as": "Class"}]
+                ["src/cls.js", {"as": "*"}]
             ],
-            "expose": [
-                "Namespace",
-                "Class"
-            ]
-        },
-        "npm": {
-            "target": "dist/metaphorjs.class.npm.js",
-            "compile": false,
-            "files": [
-                [
-                    "src/lib/Class.js",
-                    {
-                        "keepExports": true
-                    }
+            "options": {
+                "wrap": true,
+                "global": true,
+                "expose": [
+                    "cls"
                 ]
-            ],
-            "omit": [
-                "metaphorjs-namespace/src/lib/Namespace.js"
-            ],
-            "require": {
-                "metaphorjs-namespace": "Namespace"
             }
         },
+
+        "standalone-min": {
+            "extend": "standalone",
+            "target": "dist/metaphorjs.class.min.js",
+            "pipe": ["build", "compile", "write"]
+        },
+
+        "npm": {
+            "target": "dist/metaphorjs.class.npm.js",
+            "files": [
+                ["src/cls.js", {"as": "*"}]
+            ],
+            "options": {
+                "exports": "cls"
+            }
+        },
+
+
         "amd": {
             "target": "dist/metaphorjs.class.amd.js",
             "files": [
-                ["src/lib/Class.js", {"as": "Class"}]
+                ["src/cls.js", {"as": "*"}]
             ],
-            "omit": [
-                "metaphorjs-namespace/src/lib/Namespace.js"
-            ],
-            "define": {
-                "name": "metaphorjs-class",
-                "deps": {
-                    "metaphorjs-namespace": "Namespace"
-                },
-                "return": "Class"
+            "options": {
+                "amd": {
+                    "name": "metaphorjs-class",
+                    "return": "cls"
+                }
             }
-        }
+        },
+
+        "amd-min": {
+            "extend": "amd",
+            "target": "dist/metaphorjs.class.amd.min.js",
+            "pipe": ["build", "compile", "write"]
+        }   
     }
 }
