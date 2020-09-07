@@ -1,6 +1,6 @@
 require("metaphorjs-namespace/src/lib/Namespace.js");
 
-var isFunction  = require("metaphorjs-shared/src/func/isFunction.js"),
+const isFunction  = require("metaphorjs-shared/src/func/isFunction.js"),
     isString    = require("metaphorjs-shared/src/func/isString.js"),
     isArray     = require("metaphorjs-shared/src/func/isArray.js"),
     toArray     = require("metaphorjs-shared/src/func/toArray.js"),
