@@ -10,5 +10,6 @@
         "url": "https://github.com/metaphorjs/metaphorjs-class.git"
     },
     "author": "Ivan Kuindzhi",
-    "license": "MIT"
+    "license": "MIT",
+    "dependencies": {}
 }
